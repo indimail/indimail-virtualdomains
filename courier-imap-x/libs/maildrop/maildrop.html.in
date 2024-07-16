@@ -47,7 +47,7 @@ in the default mailbox.</p><p>
 files; it
 also knows how to deliver to maildirs. A <code class="literal">maildir</code> is a
 directory-based mail format used by the
-<a class="ulink" href="http://www.courier-mta.org" target="_top" shape="rect"><span class="application">Courier</span></a>
+<a class="ulink" href="https://www.courier-mta.org" target="_top" shape="rect"><span class="application">Courier</span></a>
 and
 <span class="application">Qmail</span>
 mail servers.
@@ -80,7 +80,7 @@ home directory, then reads <code class="filename">@withetcdir@/maildroprc</code>
 then <code class="filename">$HOME/.mailfilter</code>.</p></dd><dt><span class="term">Embedded mode</span></dt><dd><p>
 <span class="command"><strong>maildrop</strong></span> functions as a part of another application.
 The embedded mode is used by the
-<a class="ulink" href="http://www.courier-mta.org" target="_top" shape="rect"><span class="application">Courier</span></a>
+<a class="ulink" href="https://www.courier-mta.org" target="_top" shape="rect"><span class="application">Courier</span></a>
 mail server to integrate mail filtering directly
 into the process of receiving mail from a remote mail relay, thus rejecting
 unwanted mail before it is even accepted for local mail delivery.
@@ -88,7 +88,7 @@ Embedded mode is used when either the -m, or the -M, option is specified,
 and is described below.
 See below for a more extensive description of the embedded mode.</p></dd></dl></div></div><div class="refsect1"><a id="security" shape="rect"> </a><h2>SECURITY</h2><p>
 It is safe to install <span class="command"><strong>maildrop</strong></span> as a root setuid program.
-<a class="ulink" href="http://www.courier-mta.org" target="_top" shape="rect">The <span class="application">Courier</span> mail server</a>
+<a class="ulink" href="https://www.courier-mta.org" target="_top" shape="rect">The <span class="application">Courier</span> mail server</a>
 installs <span class="command"><strong>maildrop</strong></span> as a root setuid program by default,
 in order to be able to use <span class="command"><strong>maildrop</strong></span> in embedded mode.
 If root runs <span class="command"><strong>maildrop</strong></span> (or it is setuided to root)
@@ -263,7 +263,7 @@ Note that <span class="command"><strong>maildrop</strong></span> looks for -defa
 <code class="option">-M</code> is used.</p></dd><dt><span class="term">-D <em class="replaceable"><code>uuu/ggg</code></em></span></dt><dd><p>
 This option is reserved for use by the version of
 <span class="command"><strong>maildrop</strong></span> that comes integrated with the
-<a class="ulink" href="http://www.courier-mta.org" target="_top" shape="rect"><span class="application">Courier</span> mail server</a>.</p></dd><dt><span class="term">-V <em class="replaceable"><code>level</code></em></span></dt><dd><p>
+<a class="ulink" href="https://www.courier-mta.org" target="_top" shape="rect"><span class="application">Courier</span> mail server</a>.</p></dd><dt><span class="term">-V <em class="replaceable"><code>level</code></em></span></dt><dd><p>
 Initialize the <code class="varname">VERBOSE</code> variable to
 <em class="replaceable"><code>level</code></em>.
 Because <span class="command"><strong>maildrop</strong></span> parses the

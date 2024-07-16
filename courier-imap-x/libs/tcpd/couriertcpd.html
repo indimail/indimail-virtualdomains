@@ -50,8 +50,8 @@ that <code class="literal">-address=127.0.0.1</code> accepts connections only fr
 local system. When multiple port numbers are specified, it is also
 possible to selectively bind different network addresses to each port
 number when <em class="replaceable"><code>list</code></em> specifies more than one port
-number. See "<a class="ulink" href="#list" target="_top" shape="rect">Multiple port list</a>" below for more
-information.</p></dd><dt><span class="term">-block=<em class="replaceable"><code>zone</code></em>[=<em class="replaceable"><code>display_zone</code></em>][,<em class="replaceable"><code>var</code></em>[/<em class="replaceable"><code>n.n.n.n</code></em>][,<em class="replaceable"><code>msg</code></em>]]
+number. See <a class="xref" href="#couriertcpd_multiple_port_list" title="MULTIPLE PORT LIST" shape="rect">the section called “MULTIPLE PORT LIST”</a>
+below for information.</p></dd><dt><span class="term">-block=<em class="replaceable"><code>zone</code></em>[=<em class="replaceable"><code>display_zone</code></em>][,<em class="replaceable"><code>var</code></em>[/<em class="replaceable"><code>n.n.n.n</code></em>][,<em class="replaceable"><code>msg</code></em>]]
 	  or
 	-allow=<em class="replaceable"><code>zone</code></em>[=<em class="replaceable"><code>display_zone</code></em>][,<em class="replaceable"><code>var</code></em>[/<em class="replaceable"><code>n.n.n.n</code></em>[,]]]</span></dt><dd><p>
 Initialize the environment variable <em class="replaceable"><code>var</code></em> if both of
@@ -107,8 +107,7 @@ POP3 server at the same time.</p><p>
 	    The <code class="option">-maxperip</code> option can be overridden for
 	    a given IP address by setting the
 	    <code class="envar">MAXCPERIP</code> environment
-	    variable, see <span class="quote">“<span class="quote"><a class="link" href="#envar" title="Setting environment variables" shape="rect">Setting environment
-	    variables</a></span>”</span> for more information.
+	    variable, see <a class="xref" href="#envar" title="Setting environment variables" shape="rect">the section called “Setting environment variables”</a> for more information.
 	  </p></dd><dt><span class="term">-maxprocs=<em class="replaceable"><code>n</code></em></span></dt><dd><p>
 Maximum number of connection slots,
 or the maximum number of processes started. This effectively specifies
@@ -126,10 +125,11 @@ reaches the maximum.</p></dd><dt><span class="term">-nodnslookup</span></dt><dd>
 Do not look up the hostname associated with connecting IP address and the
 local addres, do not initialize the
 <code class="envar">TCPREMOTEHOST</code> or <code class="envar">TCPLOCALHOST</code> environment
-variables (see below).</p></dd><dt><span class="term">-noidentlookup</span></dt><dd><p>
-Do not perform an <span class="emphasis"><em>ident</em></span>
-lookup, and do not initialize the <code class="envar">TCPREMOTEINFO</code> environment
-variable.</p></dd><dt><span class="term">-pid=<em class="replaceable"><code>filename</code></em></span></dt><dd><p>
+variables (see below).</p></dd><dt><span class="term">-haproxy<em class="replaceable"><code>=options</code></em></span></dt><dd><p>
+	    Enable the <span class="application">HAProxy</span>
+	    protocol. See <a class="xref" href="#couriertcpd_haproxy" title="Enabling HAProxy" shape="rect">the section called “Enabling <span class="application">HAProxy</span>”</a>
+	    for more information.
+	  </p></dd><dt><span class="term">-pid=<em class="replaceable"><code>filename</code></em></span></dt><dd><p>
 If given, <span class="command"><strong>couriertcpd</strong></span> puts itself into the background
 and saves its process ID in this file, usually
 somewhere in <code class="filename">/var/run</code>.</p><p>This option must also be present when using the <code class="option">-restart</code>
@@ -166,12 +166,13 @@ SIGTERM signal.</p></dd><dt><span class="term">-user=<em class="replaceable"><co
 Set <span class="command"><strong>couriertcpd</strong></span>'s user
 ID. Also, the group ID is set to the user's group ID. Using both
 <code class="option">-group</code> and <code class="option">-user</code> is not necessary. Only the
-superuser can specify <code class="option">-user</code>.</p></dd></dl></div></div><div class="refsect1"><a id="couriertcpd_multiple_port_list" shape="rect"> </a><h2>MULTIPLE PORT LIST</h2><a id="list" shape="rect"> </a><p>
-The <em class="replaceable"><code>list</code></em> argument can be a comma-separated list of
-multiple port
-numbers. <span class="command"><strong>couriertcpd</strong></span> will create network connections on any
-listed port. Each port number can be optionally specified as "address.port",
-for example:</p><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+superuser can specify <code class="option">-user</code>.</p></dd></dl></div></div><div class="refsect1"><a id="couriertcpd_multiple_port_list" shape="rect"> </a><h2>MULTIPLE PORT LIST</h2><p>
+      The <em class="replaceable"><code>list</code></em> argument can be a comma-separated
+      list of multiple port numbers.
+      <span class="command"><strong>couriertcpd</strong></span> listens for network connections on every
+      listed port. Each port number is optionally specified as
+      <span class="quote">“<span class="quote">address.port</span>”</span>,
+      for example:</p><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 couriertcpd -pid=/var/run/smtp.pid 127.0.0.1.25,999 <em class="replaceable"><code>program</code></em>
 </pre></div><p>
 This instance accepts network connections to either port 25 or port 999,
@@ -202,9 +203,8 @@ accept or reject connections from. An access file is optional. Without an
 access file <span class="command"><strong>couriertcpd</strong></span> accepts a connection from any IP
 address.</p><p>
 Both IPv4 and IPv6 addresses can be specified, if IPv6 support is
-available. A non-standard syntax is currently used to specify IPv6 addresses.
-This is subject to change in the near future. IPv6 support is currently
-considered to be experimental.</p><p>
+available. A slightly non-standard syntax is used to specify IPv6
+addresses.</p><p>
 The access file is a binary database file that's usually created by a
 script, such as
 <a class="ulink" href="makesmtpaccess.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">makesmtpaccess</span>(8)</span></a>, or
@@ -216,34 +216,31 @@ The following line instructs <span class="command"><strong>couriertcpd</strong><
 connections from an IP address range:</p><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 netblock&lt;tab&gt;deny
 </pre></div><p><em class="replaceable"><code>netblock</code></em> is an IP address, such as
-<code class="literal">192.68.0.2</code>. <span class="token">&lt;tab&gt;</span>
+<code class="literal">192.168.0.2</code>. <span class="token">&lt;tab&gt;</span>
 is the ASCII tab character. There MUST be exactly one tab character after the
 IP address and the word "deny".</p><p>
 You can also block connections from an entire network C block:</p><div class="informalexample"><pre class="programlisting" xml:space="preserve">
-192.68.0&lt;tab&gt;deny
+192.168.0&lt;tab&gt;deny
 </pre></div><p>
-This blocks connections from IP addresses <code class="literal">192.68.0.0</code>
-through <code class="literal">192.68.0.255</code>.
+This blocks connections from IP addresses <code class="literal">192.168.0.0</code>
+through <code class="literal">192.168.0.255</code>.
 Blocking connections from an entire B or A network block works the same
 way.</p><p>
 Use the word "<code class="literal">allow</code>" instead of "<code class="literal">deny</code>"
 to explicitly allow connections
 from that IP address or netblock. For example:</p><div class="informalexample"><pre class="programlisting" xml:space="preserve">
-192.68.0&lt;tab&gt;deny
-192.68.0.10&lt;tab&gt;allow
+192.168.0&lt;tab&gt;deny
+192.168.0.10&lt;tab&gt;allow
 </pre></div><p>
-This blocks all connections from <code class="literal">192.68.0.0</code> to
-<code class="literal">192.68.0.255</code> except for <code class="literal">192.68.0.10</code>.
+This blocks all connections from <code class="literal">192.168.0.0</code> to
+<code class="literal">192.168.0.255</code> except for <code class="literal">192.168.0.10</code>.
 These two lines can occur in any order. <span class="command"><strong>couriertcpd</strong></span>
 always uses the line with the most specific IP address.</p><p>
 If the IP address of the connection is not found in the access file the
 connection is accepted by default. The following line causes unlisted
 connections to be rejected:</p><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 *&lt;tab&gt;deny
-</pre></div></div><div class="refsect2"><a id="couriertcpd_ipv6_addresses" shape="rect"> </a><h3>IPv6 addresses</h3><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>
-IPv6 support in the access file is experimental, and is subject to
-change in a future release.  The following syntax is subject to change at any
-time.</p></div><p>
+</pre></div></div><div class="refsect2"><a id="couriertcpd_ipv6_addresses" shape="rect"> </a><h3>IPv6 addresses</h3><p>
 The access file can also specify IPv6 addresses, if IPv6 support is
 available.  The existing IPv4 address format is used for IPv6-mapped IPv4
 addresses, and no changes are required.  For all other IPv6 addresses use the
@@ -273,19 +270,19 @@ variable
 assignments, separated by commas. The environment variables are set before
 executing <span class="command"><strong>program</strong></span> or checking
 access lists (see below). For example:</p><div class="informalexample"><pre class="programlisting" xml:space="preserve">
-192.68.0&lt;tab&gt;allow,RELAYCLIENT
-192.68.0.10&lt;tab&gt;allow,RELAYCLIENT,SIZELIMIT=1000000
+192.168.0&lt;tab&gt;allow,RELAYCLIENT
+192.168.0.10&lt;tab&gt;allow,RELAYCLIENT,SIZELIMIT=1000000
 </pre></div><p>
 This sets <code class="envar">RELAYCLIENT</code> environment variable for connections
-from the <code class="literal">192.68.0</code> block. In addition to that, the <code class="envar">SIZELIMIT</code>
+from the <code class="literal">192.168.0</code> block. In addition to that, the <code class="envar">SIZELIMIT</code>
 environment variable is set to <code class="literal">1000000</code> if the connection comes from the IP
-address <code class="literal">192.68.0.10</code>.</p><p>
+address <code class="literal">192.168.0.10</code>.</p><p>
 Note that <code class="envar">RELAYCLIENT</code> must be explicitly specified for the IP
-address <code class="literal">192.68.0.10</code>. The first line is NOT used for
+address <code class="literal">192.168.0.10</code>. The first line is NOT used for
 connections from this IP
 address. <span class="command"><strong>couriertcpd</strong></span> only reads one entry from the access
 file, the entry for the most specific IP address.</p><div class="informalexample"><pre class="programlisting" xml:space="preserve">
-192.68.0.10&lt;tab&gt;allow,MAXCPERIP=100
+192.168.0.10&lt;tab&gt;allow,MAXCPERIP=100
 </pre></div><p>
 	<span class="command"><strong>couriertcpd</strong></span> itself implements the
 	<code class="envar">MAXCPERIP</code> environment variable setting
@@ -454,7 +451,109 @@ file, the entry for the most specific IP address.</p><div class="informalexample
 	See
 	<a class="ulink" href="courier.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">courier</span>(8)</span>
 	</a>.
-      </p></div></div><div class="refsect1"><a id="couriertcpd_environment_variables" shape="rect"> </a><h2>ENVIRONMENT VARIABLES</h2><p>
+      </p></div><div class="refsect2"><a id="couriertcpd_cidr" shape="rect"> </a><h3>Using CIDR notation for IPv4 and IPv6 addresses</h3><p>
+	<a class="ulink" href="makesmtpaccess.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">makesmtpaccess</span>(8)</span></a> and
+	<a class="ulink" href="makeimapaccess.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">makeimapaccess</span>(8)</span></a>
+	scripts check if the Perl <code class="literal">Net::CIDR</code> module is
+	installed. This allows netblocks in the access files to
+	use the CIDR notation:
+      </p><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+192.168.0.0/22&lt;tab&gt;allow,RELAYCLIENT
+</pre></div><p>
+	The scripts internally duplicate this access file entry for
+	<span class="quote">“<span class="quote">192.168.0</span>”</span>,
+	<span class="quote">“<span class="quote">192.168.1</span>”</span>,
+	<span class="quote">“<span class="quote">192.168.2</span>”</span>, and
+	<span class="quote">“<span class="quote">192.168.3</span>”</span>.
+      </p></div></div><div class="refsect1"><a id="couriertcpd_haproxy" shape="rect"> </a><h2>Enabling <span class="application">HAProxy</span></h2><p>
+      The <code class="option">-haproxy</code> option enables support for
+      <span class="application">HAProxy</span> version 1.
+    </p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">-haproxy</pre></div></blockquote></div><p>
+      The default value of this option makes
+      all connections, on all ports (see
+      <a class="xref" href="#couriertcpd_multiple_port_list" title="MULTIPLE PORT LIST" shape="rect">the section called “MULTIPLE PORT LIST”</a>) use the
+      <a class="ulink" href="https://www.haproxy.org" target="_top" shape="rect"><span class="application">HAProxy</span> protocol</a>
+      (see below on additional settings for controlling this).
+
+      The <code class="option">-haproxy</code> option has the following requirements:
+    </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+	  A firewall is required to blocks all connections
+	  except the ones from <span class="application">HAProxy</span> server's
+	  IP address (to ports that use
+	  the <span class="application">HAProxy</span> protocol), this is
+	  something that must be done separately. Do not use
+	  <code class="option">-haproxy</code> without a firewall that blocks
+	  all other connections (to the listening port).
+	</p></li><li class="listitem"><p>
+	  The network connection between the
+	  <span class="application">HAProxy</span> server and
+	  <span class="command"><strong>couriertcpd</strong></span> must be a high availability,
+	  and a high quality connection.
+	  After accepting each client connection
+	  <span class="command"><strong>couriertcpd</strong></span> waits to read the
+	  <span class="application">HAProxy</span>
+	  protocol header
+	  <span class="emphasis"><em>before accepting any more connections</em></span>.
+	</p></li></ul></div><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">-haproxy=5</pre></div></blockquote></div><p>
+      An optional <code class="option">-haproxy</code> value
+      sets a failsafe timeout in seconds (defaults to 15
+      seconds). <span class="command"><strong>couriertcpd</strong></span> closes the socket
+      if the <span class="application">HAProxy</span> protocol header is not
+      received in the set
+      timeout.
+    </p><p>
+      The default 15 second timeout setting should be sufficiently
+      conservative. Additionally:
+    </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">With a high quality, reliable network, and</li><li class="listitem">A robust <span class="application">HAProxy</span> server
+	  that sends the protocol header instantly, without delay:</li></ul></div><p>
+      It should not be a problem to use a short timeout of
+      four or five seconds in order to minimize the impact of rare,
+      momentary, network hiccups.
+    </p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>
+	Enabling TCP Fast Open (TFO)
+	with <span class="application">HAProxy</span>
+	effectively guarantees an immediate receipt of the protocol header
+	for most connections. It is recommended that TFO is enabled on the
+	the <span class="application">HAProxy</span> (the TFO client) and
+	<span class="command"><strong>couriertcpd</strong></span> (the TFO server).
+      </p></div><p>
+      Additional settings follow the timeout value, each setting is prefixed
+      with a <span class="quote">“<span class="quote">/</span>”</span>:
+    </p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">-haproxy=5/port=143
+
+-haproxy=/port=143</pre></div></blockquote></div><p>
+      The <span class="quote">“<span class="quote">/</span>”</span> is still required when
+      the default timeout value is ommited. One setting is available:
+    </p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="literal">/port=<em class="replaceable"><code>n</code></em></code></span></dt><dd><p>
+	    Enable <span class="application">HAProxy</span> support only for
+	    connections to this port (this is when
+	    when <span class="command"><strong>couriertcpd</strong></span> accepts connections on
+	    multiple ports, see
+	    <a class="xref" href="#couriertcpd_multiple_port_list" title="MULTIPLE PORT LIST" shape="rect">the section called “MULTIPLE PORT LIST”</a>).
+	    <em class="replaceable"><code>n</code></em> is one of the ports that
+	    <span class="command"><strong>couriertcpd</strong></span> listens for connection
+	    (no error is reported if <em class="replaceable"><code>n</code></em> is not,
+	    and this gets ignored). Connections to any other port, that
+	    <span class="command"><strong>couriertcpd</strong></span> listens on, will not have
+	    <span class="application">HAProxy</span> support enabled.
+	  </p></dd><dt><span class="term"><code class="literal">/port=<em class="replaceable"><code>ip</code></em>.<em class="replaceable"><code>n</code></em></code></span></dt><dd><p>
+	    A port number is optionally specified as
+	    <span class="quote">“<span class="quote">address.port</span>”</span>,
+	    for example:</p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">-haproxy=/port=192.168.0.1.8000</pre></div></blockquote></div><p>
+	    This enables <span class="application">HAProxy</span> for connections
+	    to port 8000 with IP address 192.168.0.1 (presumably this
+	    machine's IP address). Connections to port 8000 via the loopback
+	    interface (<code class="literal">localhost</code>)
+	    will not use <span class="application">HAProxy</span>.
+	  </p></dd></dl></div><p>
+      <code class="option">-haproxy</code> option's value is actually a comma-separated
+      list:
+    </p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">-haproxy=/port=25,/port=587</pre></div></blockquote></div><p>
+      This is logically equivalent to using two <code class="option">-haproxy</code>
+      options, one for each value (but only one <code class="option">-haproxy</code>
+      option is allowed as a command-line argument, so this is the only way
+      to specify multiple proxy endpoints).
+    </p></div><div class="refsect1"><a id="couriertcpd_environment_variables" shape="rect"> </a><h2>ENVIRONMENT VARIABLES</h2><p>
 <span class="command"><strong>couriertcpd</strong></span> also initializes the following environment
 variables prior to running <span class="command"><strong>program</strong></span>:</p><div class="variablelist"><dl class="variablelist"><dt><span class="term">TCPLOCALHOST</span></dt><dd><p>
 The name of the host on the local end of
@@ -468,14 +567,35 @@ error
 with it), or if the reverse and forward DNS lookups do not match.
 <code class="envar">TCPLOCALHOST</code> will not be set if the reverse DNS lookup fails
 completely.</p></dd><dt><span class="term">TCPLOCALIP</span></dt><dd><p>
-The IP address of the local end of the network connection.</p></dd><dt><span class="term">TCPLOCALPORT</span></dt><dd><p>
-Rhe number of the port of the local end of the network connection.</p></dd><dt><span class="term">TCPREMOTEHOST</span></dt><dd><p>
+	    The IP address of the local end of the network connection.
+	  </p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>
+	      With the <code class="option">-haproxy</code> option this is the local
+	      end of the connection on the <span class="application">HAProxy</span>
+	      server.
+	    </p></div></dd><dt><span class="term">TCPLOCALPORT</span></dt><dd><p>
+	    The number of the port of the local end of the network
+	    connection.
+	  </p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>
+	      With the <code class="option">-haproxy</code> option this is the local
+	      end of the connection on the <span class="application">HAProxy</span>
+	      server.
+	    </p></div></dd><dt><span class="term">TCPREMOTEHOST</span></dt><dd><p>
 The hostname of the connecting host. Like
-<code class="envar">TCPLOCALHOST</code>, but for the connecting IP address.</p></dd><dt><span class="term">TCPREMOTEIP</span></dt><dd><p>
-Connecting IP address.</p></dd><dt><span class="term">TCPREMOTEINFO</span></dt><dd><p>
-Identification string received from the
-IDENT server on the remote IP address. Not set if the IDENT server
-returned an error, or if the <code class="option">-noidentlookup</code> option was
-specified.</p></dd><dt><span class="term">TCPREMOTEPORT</span></dt><dd><p>
-TCP port of the remote end of the network connection.</p></dd></dl></div></div><div class="refsect1"><a id="couriertcpd_see_also" shape="rect"> </a><h2>SEE ALSO</h2><p>
+<code class="envar">TCPLOCALHOST</code>, but for the connecting IP address.</p></dd><dt><span class="term">TCPREMOTEINFO</span></dt><dd><p>
+	    This is set only when the <code class="option">-haproxy</code> option is used,
+	    and contains brief text that repeats the contents of
+	    <code class="envar">TCPLOCALIP</code> and <code class="envar">TCPLOCALPORT</code>.
+	    <span class="application">Courier</span> adds this text to the
+	    <code class="literal">Received:</code> header.
+	  </p></dd><dt><span class="term">TCPREMOTEIP</span></dt><dd><p>
+Connecting IP address.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>
+	      With the <code class="option">-haproxy</code> option this is the remote
+	      end of the connection on the <span class="application">HAProxy</span>
+	      server.
+	    </p></div></dd><dt><span class="term">TCPREMOTEPORT</span></dt><dd><p>
+TCP port of the remote end of the network connection.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>
+	      With the <code class="option">-haproxy</code> option this is the remote
+	      end of the connection on the <span class="application">HAProxy</span>
+	      server.
+	    </p></div></dd></dl></div></div><div class="refsect1"><a id="couriertcpd_see_also" shape="rect"> </a><h2>SEE ALSO</h2><p>
 <a class="ulink" href="courier.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">courier</span>(8)</span></a>.</p></div></div></body></html>

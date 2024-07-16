@@ -37,6 +37,8 @@ int	is8bitte;
 				hasnon7bit=1;
 			if (c->has8bitchars)
 				p->has8bitchars=1;
+			if (c->hasraw8bitchars)
+				p->hasraw8bitchars=1;
 		}
 
 	if (RFC2045_ISMIME1DEF(p->mime_version) && !p->content_type)
@@ -60,9 +62,8 @@ int	is8bitte;
 		if (p->mime_version
 
 			&& p->firstpart == 0 /* sam - don't trigger rewrites on changes to multipart headers */
-		    && !p->firstpart /* sam - don't trigger rewrites on changes to multipart headers */
-		    )
 
+			)
 		{
 			flag=1;
 		}
@@ -77,7 +78,7 @@ int	is8bitte;
 		if (p->mime_version
 
 		    && !p->firstpart /* sam - don't trigger rewrites on changes to multipart headers */
-			)
+		    )
 		{
 			flag=1;
 		}

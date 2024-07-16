@@ -1,15 +1,15 @@
 '\" t
-.\"<!-- Copyright 2000-2020 Double Precision, Inc.  See COPYING for -->
+.\"<!-- Copyright 2000-2024 Double Precision, Inc.  See COPYING for -->
 .\"<!-- distribution information. -->
 .\"     Title: couriertcpd
 .\"    Author: Sam Varshavchik
 .\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
-.\"      Date: 11/04/2020
+.\"      Date: 07/14/2024
 .\"    Manual: Double Precision, Inc.
 .\"    Source: Courier Mail Server
 .\"  Language: English
 .\"
-.TH "COURIERTCPD" "1" "11/04/2020" "Courier Mail Server" "Double Precision, Inc."
+.TH "COURIERTCPD" "1" "07/14/2024" "Courier Mail Server" "Double Precision, Inc."
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -88,7 +88,9 @@ accept connections only to one specific IP address\&. Most systems have multiple
 \-address=127\&.0\&.0\&.1
 accepts connections only from the local system\&. When multiple port numbers are specified, it is also possible to selectively bind different network addresses to each port number when
 \fIlist\fR
-specifies more than one port number\&. See "\m[blue]\fBMultiple port list\fR\m[]\&\s-2\u[1]\d\s+2" below for more information\&.
+specifies more than one port number\&. See
+the section called \(lqMULTIPLE PORT LIST\(rq
+below for information\&.
 .RE
 .PP
 \-block=\fIzone\fR[=\fIdisplay_zone\fR][,\fIvar\fR[/\fIn\&.n\&.n\&.n\fR][,\fImsg\fR]] or \-allow=\fIzone\fR[=\fIdisplay_zone\fR][,\fIvar\fR[/\fIn\&.n\&.n\&.n\fR[,]]]
@@ -169,7 +171,7 @@ The
 option can be overridden for a given IP address by setting the
 \fBMAXCPERIP\fR
 environment variable, see
-\(lqSetting environment variables\(rq
+the section called \(lqSetting environment variables\(rq
 for more information\&.
 .RE
 .PP
@@ -202,13 +204,13 @@ or
 environment variables (see below)\&.
 .RE
 .PP
-\-noidentlookup
+\-haproxy\fI=options\fR
 .RS 4
-Do not perform an
-\fIident\fR
-lookup, and do not initialize the
-\fBTCPREMOTEINFO\fR
-environment variable\&.
+Enable the
+HAProxy
+protocol\&. See
+the section called \(lqENABLING HAPROXY\(rq
+for more information\&.
 .RE
 .PP
 \-pid=\fIfilename\fR
@@ -308,7 +310,8 @@ The
 \fIlist\fR
 argument can be a comma\-separated list of multiple port numbers\&.
 \fBcouriertcpd\fR
-will create network connections on any listed port\&. Each port number can be optionally specified as "address\&.port", for example:
+listens for network connections on every listed port\&. Each port number is optionally specified as
+\(lqaddress\&.port\(rq, for example:
 .sp
 .if n \{\
 .RS 4
@@ -363,11 +366,11 @@ will accept or reject connections from\&. An access file is optional\&. Without 
 \fBcouriertcpd\fR
 accepts a connection from any IP address\&.
 .PP
-Both IPv4 and IPv6 addresses can be specified, if IPv6 support is available\&. A non\-standard syntax is currently used to specify IPv6 addresses\&. This is subject to change in the near future\&. IPv6 support is currently considered to be experimental\&.
+Both IPv4 and IPv6 addresses can be specified, if IPv6 support is available\&. A slightly non\-standard syntax is used to specify IPv6 addresses\&.
 .PP
 The access file is a binary database file that\*(Aqs usually created by a script, such as
-\m[blue]\fB\fBmakesmtpaccess\fR(8)\fR\m[]\&\s-2\u[2]\d\s+2, or
-\m[blue]\fB\fBmakeimapaccess\fR(8)\fR\m[]\&\s-2\u[3]\d\s+2, from one or more plain text files\&. Blank lines in the text file are ignored\&. Lines that start with the # character are also ignored\&.
+\m[blue]\fB\fBmakesmtpaccess\fR(8)\fR\m[]\&\s-2\u[1]\d\s+2, or
+\m[blue]\fB\fBmakeimapaccess\fR(8)\fR\m[]\&\s-2\u[2]\d\s+2, from one or more plain text files\&. Blank lines in the text file are ignored\&. Lines that start with the # character are also ignored\&.
 .SS "Rejecting and accepting connections by IP address"
 .PP
 The following line instructs
@@ -386,7 +389,7 @@ netblock<tab>deny
 .PP
 \fInetblock\fR
 is an IP address, such as
-192\&.68\&.0\&.2\&.
+192\&.168\&.0\&.2\&.
 <tab>
 is the ASCII tab character\&. There MUST be exactly one tab character after the IP address and the word "deny"\&.
 .PP
@@ -396,16 +399,16 @@ You can also block connections from an entire network C block:
 .RS 4
 .\}
 .nf
-192\&.68\&.0<tab>deny
+192\&.168\&.0<tab>deny
 .fi
 .if n \{\
 .RE
 .\}
 .PP
 This blocks connections from IP addresses
-192\&.68\&.0\&.0
+192\&.168\&.0\&.0
 through
-192\&.68\&.0\&.255\&. Blocking connections from an entire B or A network block works the same way\&.
+192\&.168\&.0\&.255\&. Blocking connections from an entire B or A network block works the same way\&.
 .PP
 Use the word "allow" instead of "deny" to explicitly allow connections from that IP address or netblock\&. For example:
 .sp
@@ -413,19 +416,19 @@ Use the word "allow" instead of "deny" to explicitly allow connections from that
 .RS 4
 .\}
 .nf
-192\&.68\&.0<tab>deny
-192\&.68\&.0\&.10<tab>allow
+192\&.168\&.0<tab>deny
+192\&.168\&.0\&.10<tab>allow
 .fi
 .if n \{\
 .RE
 .\}
 .PP
 This blocks all connections from
-192\&.68\&.0\&.0
+192\&.168\&.0\&.0
 to
-192\&.68\&.0\&.255
+192\&.168\&.0\&.255
 except for
-192\&.68\&.0\&.10\&. These two lines can occur in any order\&.
+192\&.168\&.0\&.10\&. These two lines can occur in any order\&.
 \fBcouriertcpd\fR
 always uses the line with the most specific IP address\&.
 .PP
@@ -441,22 +444,6 @@ If the IP address of the connection is not found in the access file the connecti
 .RE
 .\}
 .SS "IPv6 addresses"
-.if n \{\
-.sp
-.\}
-.RS 4
-.it 1 an-trap
-.nr an-no-space-flag 1
-.nr an-break-flag 1
-.br
-.ps +1
-\fBNote\fR
-.ps -1
-.br
-.PP
-IPv6 support in the access file is experimental, and is subject to change in a future release\&. The following syntax is subject to change at any time\&.
-.sp .5v
-.RE
 .PP
 The access file can also specify IPv6 addresses, if IPv6 support is available\&. The existing IPv4 address format is used for IPv6\-mapped IPv4 addresses, and no changes are required\&. For all other IPv6 addresses use the following format:
 .sp
@@ -519,8 +506,8 @@ or checking access lists (see below)\&. For example:
 .RS 4
 .\}
 .nf
-192\&.68\&.0<tab>allow,RELAYCLIENT
-192\&.68\&.0\&.10<tab>allow,RELAYCLIENT,SIZELIMIT=1000000
+192\&.168\&.0<tab>allow,RELAYCLIENT
+192\&.168\&.0\&.10<tab>allow,RELAYCLIENT,SIZELIMIT=1000000
 .fi
 .if n \{\
 .RE
@@ -529,18 +516,18 @@ or checking access lists (see below)\&. For example:
 This sets
 \fBRELAYCLIENT\fR
 environment variable for connections from the
-192\&.68\&.0
+192\&.168\&.0
 block\&. In addition to that, the
 \fBSIZELIMIT\fR
 environment variable is set to
 1000000
 if the connection comes from the IP address
-192\&.68\&.0\&.10\&.
+192\&.168\&.0\&.10\&.
 .PP
 Note that
 \fBRELAYCLIENT\fR
 must be explicitly specified for the IP address
-192\&.68\&.0\&.10\&. The first line is NOT used for connections from this IP address\&.
+192\&.168\&.0\&.10\&. The first line is NOT used for connections from this IP address\&.
 \fBcouriertcpd\fR
 only reads one entry from the access file, the entry for the most specific IP address\&.
 .sp
@@ -548,7 +535,7 @@ only reads one entry from the access file, the entry for the most specific IP ad
 .RS 4
 .\}
 .nf
-192\&.68\&.0\&.10<tab>allow,MAXCPERIP=100
+192\&.168\&.0\&.10<tab>allow,MAXCPERIP=100
 .fi
 .if n \{\
 .RE
@@ -846,7 +833,238 @@ Including
 \(lqallowok\(rq
 keyword in an SPF setting automatically passes the SPF check for senders whose IP address is found in an
 \fB\-allow\fR\-ed access list\&. See
-\m[blue]\fB\fBcourier\fR(8)\fR\m[]\&\s-2\u[4]\d\s+2\&.
+\m[blue]\fB\fBcourier\fR(8)\fR\m[]\&\s-2\u[3]\d\s+2\&.
+.SS "Using CIDR notation for IPv4 and IPv6 addresses"
+.PP
+\m[blue]\fB\fBmakesmtpaccess\fR(8)\fR\m[]\&\s-2\u[1]\d\s+2
+and
+\m[blue]\fB\fBmakeimapaccess\fR(8)\fR\m[]\&\s-2\u[2]\d\s+2
+scripts check if the Perl
+Net::CIDR
+module is installed\&. This allows netblocks in the access files to use the CIDR notation:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+192\&.168\&.0\&.0/22<tab>allow,RELAYCLIENT
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The scripts internally duplicate this access file entry for
+\(lq192\&.168\&.0\(rq,
+\(lq192\&.168\&.1\(rq,
+\(lq192\&.168\&.2\(rq, and
+\(lq192\&.168\&.3\(rq\&.
+.SH "ENABLING HAPROXY"
+.PP
+The
+\fB\-haproxy\fR
+option enables support for
+HAProxy
+version 1\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+\-haproxy
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The default value of this option makes all connections, on all ports (see
+the section called \(lqMULTIPLE PORT LIST\(rq) use the
+\m[blue]\fBHAProxy protocol\fR\m[]\&\s-2\u[4]\d\s+2
+(see below on additional settings for controlling this)\&. The
+\fB\-haproxy\fR
+option has the following requirements:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+A firewall is required to blocks all connections except the ones from
+HAProxy
+server\*(Aqs IP address (to ports that use the
+HAProxy
+protocol), this is something that must be done separately\&. Do not use
+\fB\-haproxy\fR
+without a firewall that blocks all other connections (to the listening port)\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+The network connection between the
+HAProxy
+server and
+\fBcouriertcpd\fR
+must be a high availability, and a high quality connection\&. After accepting each client connection
+\fBcouriertcpd\fR
+waits to read the
+HAProxy
+protocol header
+\fIbefore accepting any more connections\fR\&.
+.RE
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+\-haproxy=5
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+An optional
+\fB\-haproxy\fR
+value sets a failsafe timeout in seconds (defaults to 15 seconds)\&.
+\fBcouriertcpd\fR
+closes the socket if the
+HAProxy
+protocol header is not received in the set timeout\&.
+.PP
+The default 15 second timeout setting should be sufficiently conservative\&. Additionally:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+With a high quality, reliable network, and
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+A robust
+HAProxy
+server that sends the protocol header instantly, without delay:
+.RE
+.PP
+It should not be a problem to use a short timeout of four or five seconds in order to minimize the impact of rare, momentary, network hiccups\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+Enabling TCP Fast Open (TFO) with
+HAProxy
+effectively guarantees an immediate receipt of the protocol header for most connections\&. It is recommended that TFO is enabled on the the
+HAProxy
+(the TFO client) and
+\fBcouriertcpd\fR
+(the TFO server)\&.
+.sp .5v
+.RE
+.PP
+Additional settings follow the timeout value, each setting is prefixed with a
+\(lq/\(rq:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+\-haproxy=5/port=143
+
+\-haproxy=/port=143
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The
+\(lq/\(rq
+is still required when the default timeout value is ommited\&. One setting is available:
+.PP
+/port=\fIn\fR
+.RS 4
+Enable
+HAProxy
+support only for connections to this port (this is when when
+\fBcouriertcpd\fR
+accepts connections on multiple ports, see
+the section called \(lqMULTIPLE PORT LIST\(rq)\&.
+\fIn\fR
+is one of the ports that
+\fBcouriertcpd\fR
+listens for connection (no error is reported if
+\fIn\fR
+is not, and this gets ignored)\&. Connections to any other port, that
+\fBcouriertcpd\fR
+listens on, will not have
+HAProxy
+support enabled\&.
+.RE
+.PP
+/port=\fIip\fR\&.\fIn\fR
+.RS 4
+A port number is optionally specified as
+\(lqaddress\&.port\(rq, for example:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+\-haproxy=/port=192\&.168\&.0\&.1\&.8000
+.fi
+.if n \{\
+.RE
+.\}
+This enables
+HAProxy
+for connections to port 8000 with IP address 192\&.168\&.0\&.1 (presumably this machine\*(Aqs IP address)\&. Connections to port 8000 via the loopback interface (localhost) will not use
+HAProxy\&.
+.RE
+.PP
+\fB\-haproxy\fR
+option\*(Aqs value is actually a comma\-separated list:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+\-haproxy=/port=25,/port=587
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+This is logically equivalent to using two
+\fB\-haproxy\fR
+options, one for each value (but only one
+\fB\-haproxy\fR
+option is allowed as a command\-line argument, so this is the only way to specify multiple proxy endpoints)\&.
 .SH "ENVIRONMENT VARIABLES"
 .PP
 \fBcouriertcpd\fR
@@ -871,11 +1089,49 @@ will not be set if the reverse DNS lookup fails completely\&.
 TCPLOCALIP
 .RS 4
 The IP address of the local end of the network connection\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+With the
+\fB\-haproxy\fR
+option this is the local end of the connection on the
+HAProxy
+server\&.
+.sp .5v
+.RE
 .RE
 .PP
 TCPLOCALPORT
 .RS 4
-Rhe number of the port of the local end of the network connection\&.
+The number of the port of the local end of the network connection\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+With the
+\fB\-haproxy\fR
+option this is the local end of the connection on the
+HAProxy
+server\&.
+.sp .5v
+.RE
 .RE
 .PP
 TCPREMOTEHOST
@@ -884,25 +1140,70 @@ The hostname of the connecting host\&. Like
 \fBTCPLOCALHOST\fR, but for the connecting IP address\&.
 .RE
 .PP
+TCPREMOTEINFO
+.RS 4
+This is set only when the
+\fB\-haproxy\fR
+option is used, and contains brief text that repeats the contents of
+\fBTCPLOCALIP\fR
+and
+\fBTCPLOCALPORT\fR\&.
+Courier
+adds this text to the
+Received:
+header\&.
+.RE
+.PP
 TCPREMOTEIP
 .RS 4
 Connecting IP address\&.
-.RE
-.PP
-TCPREMOTEINFO
+.if n \{\
+.sp
+.\}
 .RS 4
-Identification string received from the IDENT server on the remote IP address\&. Not set if the IDENT server returned an error, or if the
-\fB\-noidentlookup\fR
-option was specified\&.
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+With the
+\fB\-haproxy\fR
+option this is the remote end of the connection on the
+HAProxy
+server\&.
+.sp .5v
+.RE
 .RE
 .PP
 TCPREMOTEPORT
 .RS 4
 TCP port of the remote end of the network connection\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+With the
+\fB\-haproxy\fR
+option this is the remote end of the connection on the
+HAProxy
+server\&.
+.sp .5v
+.RE
 .RE
 .SH "SEE ALSO"
 .PP
-\m[blue]\fB\fBcourier\fR(8)\fR\m[]\&\s-2\u[4]\d\s+2\&.
+\m[blue]\fB\fBcourier\fR(8)\fR\m[]\&\s-2\u[3]\d\s+2\&.
 .SH "AUTHOR"
 .PP
 \fBSam Varshavchik\fR
@@ -911,23 +1212,23 @@ Author
 .RE
 .SH "NOTES"
 .IP " 1." 4
-Multiple port list
-.RS 4
-\%http://www.courier-mta.org/#list
-.RE
-.IP " 2." 4
 \fBmakesmtpaccess\fR(8)
 .RS 4
 \%http://www.courier-mta.org/makesmtpaccess.html
 .RE
-.IP " 3." 4
+.IP " 2." 4
 \fBmakeimapaccess\fR(8)
 .RS 4
 \%http://www.courier-mta.org/makeimapaccess.html
 .RE
-.IP " 4." 4
+.IP " 3." 4
 \fBcourier\fR(8)
 	
 .RS 4
 \%http://www.courier-mta.org/courier.html
+.RE
+.IP " 4." 4
+HAProxy protocol
+.RS 4
+\%https://www.haproxy.org
 .RE

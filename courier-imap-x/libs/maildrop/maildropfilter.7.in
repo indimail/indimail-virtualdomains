@@ -4,12 +4,12 @@
 .\"     Title: maildropfilter
 .\"    Author: Sam Varshavchik
 .\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
-.\"      Date: 04/02/2023
+.\"      Date: 07/13/2024
 .\"    Manual: Double Precision, Inc.
 .\"    Source: Courier Mail Server
 .\"  Language: English
 .\"
-.TH "MAILDROPFILTER" "7" "04/02/2023" "Courier Mail Server" "Double Precision, Inc\&."
+.TH "MAILDROPFILTER" "7" "07/13/2024" "Courier Mail Server" "Double Precision, Inc\&."
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -2646,7 +2646,7 @@ Author
 .IP " 1." 4
 Courier mail server
 .RS 4
-\%http://www.courier-mta.org/
+\%https://www.courier-mta.org/
 .RE
 .IP " 2." 4
 \fBdot-courier\fR(5)

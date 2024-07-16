@@ -234,3 +234,10 @@ testsuite-imap:
 
 testsuite-smap:
 	@LC_ALL=C; export LC_ALL; test "@smap@" = "yes" || exit 0; @SHELL@ $(srcdir)/smaptestsuite | ./testsuitefix.pl | sort
+
+testsuite-pop3:
+	@LC_ALL=C @SHELL@ pop3testsuite | sed 's/^--=_.*/--mimeboundary/;s/ENOMEM.*/ENOMEM/;s/boundary=.*/boundary=/'
+
+check-version:
+	test "$(VERSION)" = "$(TOPLEVEL_VERSION)" && exit 0; \
+		echo "Makefile.am version mismatch"; exit 1

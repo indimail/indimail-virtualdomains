@@ -4,12 +4,12 @@
 .\"     Title: maildrop
 .\"    Author: Sam Varshavchik
 .\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
-.\"      Date: 09/24/2019
+.\"      Date: 07/13/2024
 .\"    Manual: Double Precision, Inc.
 .\"    Source: Courier Mail Server
 .\"  Language: English
 .\"
-.TH "MAILDROP" "1" "09/24/2019" "Courier Mail Server" "Double Precision, Inc\&."
+.TH "MAILDROP" "1" "07/13/2024" "Courier Mail Server" "Double Precision, Inc\&."
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -382,18 +382,8 @@ option is
 \fImailfilter\-lists\-maildrop\fR,
 \fBmaildrop\fR
 will try to open the following files, in order:
-.IP \[bu] 2
-$HOME/\&.mailfilters/mailfilter\-lists\-maildrop
-.IP \[bu]
-$HOME/\&.mailfilters/mailfilter\-lists\-maildrop\-default
-.IP \[bu]
-$HOME/\&.mailfilters/mailfilter\-lists\-default
-.IP \[bu]
-$HOME/\&.mailfilters/mailfilter\-default
-.IP \[bu]
-$HOME/\&.mailfilters/default
+.sp .if n \{\ .RS 4 .\} .nf $HOME/\&.mailfilters/mailfilter\-lists\-maildrop $HOME/\&.mailfilters/mailfilter\-lists\-maildrop\-default $HOME/\&.mailfilters/mailfilter\-lists\-default $HOME/\&.mailfilters/mailfilter\-default $HOME/\&.mailfilters/default .fi .if n \{\ .RE .\}
 .sp
-.RS 0
 Note that
 \fBmaildrop\fR
 looks for \-default files ONLY if
@@ -711,7 +701,7 @@ Author
 .IP " 1." 4
 Courier
 .RS 4
-\%http://www.courier-mta.org
+\%https://www.courier-mta.org
 .RE
 .IP " 2." 4
 "Environment"

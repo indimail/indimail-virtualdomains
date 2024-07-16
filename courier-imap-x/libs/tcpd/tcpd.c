@@ -1,5 +1,5 @@
 /*
-** Copyright 1998 - 2020 Double Precision, Inc.
+** Copyright 1998 - 2024 Double Precision, Inc.
 ** See COPYING for distribution information.
 */
 
@@ -30,6 +30,7 @@
 #include	<stdio.h>
 #include	<errno.h>
 #include	<signal.h>
+#include	<poll.h>
 #if	HAVE_SYS_STAT_H
 #include	<sys/stat.h>
 #endif
@@ -46,7 +47,6 @@
 #include	"rfc1035/rfc1035.h"
 #include	"liblock/config.h"
 #include	"liblock/liblock.h"
-#include	"tcpremoteinfo.h"
 #include	"numlib/numlib.h"
 #include	"argparse.h"
 
@@ -66,7 +66,7 @@ static const char *maxperiparg=0;
 static const char *maxpercarg=0;
 static const char *droparg=0;
 static const char *nodnslookup=0;
-static const char *noidentlookup=0;
+static const char *haproxy=0;
 static const char *stderrarg=0;
 static const char *stderrloggerarg=0;
 static const char *pidarg=0;
@@ -95,7 +95,7 @@ static struct args arginfo[]={
 	{"maxprocs", &maxprocsarg},
 	{"warn", &warnarg},
 	{"nodnslookup", &nodnslookup},
-	{"noidentlookup", &noidentlookup},
+	{"haproxy", &haproxy},
 	{"pid", &pidarg},
 	{"restart", &restartarg},
 	{"stderr", &stderrarg},
@@ -116,6 +116,16 @@ static struct portinfo {
 
 	int fd1, fd2;		/* BSD may need both IPv4 and IPv6 sockets */
 } *fdlist=0;
+
+/* Local ports for haproxy */
+
+static struct haproxyinfo {
+	struct haproxyinfo *next;
+	RFC1035_ADDR addr;
+	int port;
+	time_t timeout;
+} *haproxylist=0;
+
 static int maxfd;
 
 static int nprocs, maxperc, maxperip, nwarn;
@@ -280,6 +290,92 @@ static struct portinfo *createport(const char *a, const char *s)
 	return (p);
 }
 
+/*
+** Parse the -haproxy parameter.
+*/
+
+static void parsehaproxy1(char *p)
+{
+	for ( ; (p=strtok(p, ",")) != 0; p=0)
+	{
+		struct haproxyinfo *info;
+
+		char *q;
+		int timeout=0;
+		RFC1035_ADDR addr;
+		int port=0;
+
+		memset(&addr, 0, sizeof(addr));
+		while ((q=strrchr(p, '/')) != 0)
+		{
+			*q++=0;
+
+			if (strncmp(q, "port=", 5) == 0)
+			{
+				char *r;
+
+				q += 5;
+
+				r=strrchr(q, '.');
+
+				if (r)
+				{
+					*r++=0;
+
+					if (rfc1035_aton(q, &addr) < 0)
+					{
+						fprintf(stderr,
+							"Invalid IP address:"
+							" %s\n", q);
+						exit(1);
+					}
+				}
+				else
+					r=q;
+
+				port=atoi(r);
+			}
+		}
+
+		if (*p)
+			timeout=atoi(p);
+
+		if (timeout <= 0)
+			timeout=15;
+
+		if ((info=malloc(sizeof(struct haproxyinfo))) == 0)
+		{
+			perror("malloc");
+			exit(1);
+		}
+
+		memset(info, 0, sizeof(*info));
+
+		info->next=haproxylist;
+
+		haproxylist=info;
+
+		info->addr=addr;
+		info->port=port;
+		info->timeout=timeout;
+	}
+}
+
+static void parsehaproxy()
+{
+	char *p;
+
+	if (!haproxy)
+		return;
+
+	p=strdup(haproxy);
+	if (!p)
+		return;
+
+	parsehaproxy1(p);
+	free(p);
+}
+
 static int parseaddr(const char *p)
 {
 	char *buf=strdup(p);
@@ -438,10 +534,17 @@ static int mksocket(const char *ipaddrarg,	/* Host/IP address */
 	{
 		int dummy=1;
 
+#ifdef IP_FREEBIND
+		if (setsockopt(fd, IPPROTO_IP, IP_FREEBIND,
+			       (const char *)&dummy, sizeof(dummy)) < 0)
+		{
+			perror("setsockopt(IP_FREEBIND)");
+		}
+#endif
 		if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR,
 		       (const char *)&dummy, sizeof(dummy)) < 0)
 		{
-			perror("setsockopt");
+			perror("setsockopt(SO_REUSEADDR)");
 		}
 	}
 
@@ -637,6 +740,8 @@ int	lockfd=-1;
 		close(lockfd);
 		return (-1);
 	}
+
+	parsehaproxy();
 
 	if (mksockets())
 	{
@@ -871,7 +976,10 @@ int	lockfd=-1;
 	return (argn);
 }
 
-static void run(int, const RFC1035_ADDR *, int, const char *, char **);
+static void run(int, const RFC1035_ADDR *, int,
+		RFC1035_NETADDR *lsin,
+		socklen_t lsinl,
+		const char *, char **, int);
 
 static void doreap(pid_t p, int wait_stat)
 {
@@ -1177,10 +1285,223 @@ static void denied(int sockfd)
 	_exit(0);
 }
 
+static int get_haproxy(int sockfd, RFC1035_NETADDR *sin, int *sinl,
+		       RFC1035_NETADDR *lsin,
+		       socklen_t *lsinl,
+		       int *using_haproxy)
+{
+	char buf[256];
+	char *bufptr=buf;
+	size_t bufl=sizeof(buf)-1;
+	const char *proxy_str;
+	const char *family_str;
+	const char *remoteip_str;
+	const char *localip_str;
+	const char *remoteport_str;
+	const char *localport_str;
+	struct haproxyinfo *info;
+	time_t  timeout;
+	int	addrport;
+
+	RFC1035_ADDR defaultaddr, socketaddr;
+
+	*using_haproxy=0;
+	memset(&defaultaddr, 0, sizeof(defaultaddr));
+
+	if (rfc1035_sockaddrport(lsin, *lsinl, &addrport))
+	{
+		fprintf(stderr, "haproxy: cannot get local port number\n");
+		return -1;
+	}
+
+	if (rfc1035_sockaddrip(lsin, *lsinl, &socketaddr))
+	{
+		fprintf(stderr, "haproxy: cannot get local address\n");
+		return -1;
+	}
+
+	addrport=ntohs(addrport);
+	for (info=haproxylist; info; info=info->next)
+	{
+		if ((info->port == 0 || info->port == addrport) &&
+		    (memcmp(&info->addr, &defaultaddr, sizeof(defaultaddr)) == 0
+		     ||
+		     memcmp(&info->addr, &socketaddr, sizeof(socketaddr)) == 0))
+			break;
+	}
+	if (!info)
+		return 0;
+
+	time(&timeout);
+
+	timeout += info->timeout;
+
+	while (1)
+	{
+		ssize_t i, l;
+		time_t now;
+		struct pollfd pfd;
+
+		time(&now);
+
+		if (now >= timeout)
+		{
+			fprintf(stderr, "haproxy: timeout\n");
+			return -1;
+		}
+
+		if (bufl == 0)
+		{
+			fprintf(stderr, "haproxy: response too long\n");
+			return -1;
+		}
+
+		pfd.fd=sockfd;
+		pfd.events=POLLIN|POLLHUP;
+		pfd.revents=0;
+
+		if (poll(&pfd, 1, (timeout-now)*1000) < 0 ||
+		    !(pfd.revents & POLLIN))
+		{
+			fprintf(stderr, "haproxy: timeout\n");
+			return -1;
+		}
+		l=recv(sockfd, bufptr, bufl, MSG_PEEK);
+
+		if (l < 0)
+		{
+			perror("recv");
+			return -1;
+		}
+
+		if (l == 0)
+		{
+			if (bufptr != buf)
+				fprintf(stderr, "haproxy: connection closed\n");
+			return -1;
+		}
+
+		for (i=0; i<l; ++i)
+			if (bufptr[i] == '\n')
+			{
+				++i;
+				break;
+			}
+		if (recv(sockfd, bufptr, i, 0) != i)
+		{
+			fprintf(stderr,
+				"haproxy: unexpected return from recv()\n");
+			return -1;
+		}
+		if (bufptr[i-1] == '\n')
+		{
+			bufptr[i-1]=0;
+			break;
+		}
+		bufptr += i;
+		bufl -= i;
+	}
+
+	if ((proxy_str=strtok(buf, " \r\n")) == NULL ||
+	    strcmp(proxy_str, "PROXY"))
+	{
+		fprintf(stderr, "haproxy: missing PROXY statement\n");
+		return -1;
+	}
+
+	if ((family_str=strtok(NULL, " \r\n")) == NULL ||
+	    (remoteip_str=strtok(NULL, " \r\n")) == NULL ||
+	    (localip_str=strtok(NULL, " \r\n")) == NULL ||
+	    (remoteport_str=strtok(NULL, " \r\n")) == NULL ||
+	    (localport_str=strtok(NULL, " \r\n")) == NULL)
+	{
+		fprintf(stderr, "haproxy: malformed PROXY statement\n");
+		return -1;
+	}
+
+	if (strcmp(family_str, "TCP4") == 0)
+	{
+		struct sockaddr_in	sin4;
+
+		memset(&sin4, 0, sizeof(sin4));
+		sin4.sin_family=AF_INET;
+
+		if (inet_pton(AF_INET, remoteip_str, &sin4.sin_addr) <= 0)
+		{
+			fprintf(stderr, "haproxy: cannot parse TCP4 address\n");
+			return -1;
+		}
+		sin4.sin_port=htons(atoi(remoteport_str));
+
+		memcpy(sin, &sin4, sizeof(sin4));
+		*sinl=sizeof(sin4);
+
+
+		memset(&sin4, 0, sizeof(sin4));
+		sin4.sin_family=AF_INET;
+
+		if (inet_pton(AF_INET, localip_str, &sin4.sin_addr) <= 0)
+		{
+			fprintf(stderr, "haproxy: cannot parse TCP4 address\n");
+			return -1;
+		}
+		sin4.sin_port=htons(atoi(localport_str));
+
+		memcpy(lsin, &sin4, sizeof(sin4));
+		*lsinl=sizeof(sin4);
+
+	}
+	else if (strcmp(family_str, "TCP6") == 0)
+	{
+#if	RFC1035_IPV6
+		struct sockaddr_in6	sin6;
+
+		memset(&sin6, 0, sizeof(sin6));
+		sin6.sin6_family=AF_INET6;
+
+		if (inet_pton(AF_INET6, remoteip_str, &sin6.sin6_addr) <= 0)
+		{
+			fprintf(stderr, "haproxy: cannot parse TCP6 address\n");
+			return -1;
+		}
+		sin6.sin6_port=htons(atoi(remoteport_str));
+
+		memcpy(sin, &sin6, sizeof(sin6));
+		*sinl=sizeof(sin6);
+
+		memset(&sin6, 0, sizeof(sin6));
+		sin6.sin6_family=AF_INET6;
+
+		if (inet_pton(AF_INET6, localip_str, &sin6.sin6_addr) <= 0)
+		{
+			fprintf(stderr, "haproxy: cannot parse TCP6 address\n");
+			return -1;
+		}
+		sin6.sin6_port=htons(atoi(localport_str));
+
+		memcpy(lsin, &sin6, sizeof(sin6));
+		*lsinl=sizeof(sin6);
+#else
+		fprintf(stderr, "haproxy: TCP6 support is not enabled\n");
+		return -1;
+#endif
+	}
+	else
+	{
+		fprintf(stderr, "haproxy: unknown protocol: %s\n",
+			family_str);
+		return -1;
+	}
+	*using_haproxy=1;
+	return 0;
+}
+
 static void accepted(int n, int sockfd, RFC1035_NETADDR *sin, int sinl,
 		     const char *prog,
 		     char **args)
 {
+	RFC1035_NETADDR lsin;
+	socklen_t lsinl;
 	RFC1035_ADDR addr;
 	int	addrport;
 #ifdef	SO_LINGER
@@ -1189,6 +1510,41 @@ static void accepted(int n, int sockfd, RFC1035_NETADDR *sin, int sinl,
 #endif
 	pid_t	p;
 	int cnt;
+	int using_haproxy;
+
+#ifdef	SO_KEEPALIVE
+	dummy=1;
+	if (setsockopt(sockfd, SOL_SOCKET, SO_KEEPALIVE,
+		       (const char *)&dummy, sizeof(dummy)) < 0)
+	{
+		perror("setsockopt");
+	}
+#endif
+
+#ifdef	SO_LINGER
+	l.l_onoff=0;
+	l.l_linger=0;
+
+	if (setsockopt(sockfd, SOL_SOCKET, SO_LINGER,
+		       (const char *)&l, sizeof(l)) < 0)
+	{
+		perror("setsockopt");
+	}
+#endif
+
+	lsinl=sizeof(lsin);
+	if (sox_getsockname(sockfd, (struct sockaddr *)&lsin, &lsinl))
+	{
+		fprintf(stderr, "getsockname failed.\n");
+		sox_close(sockfd);
+		return;
+	}
+
+	if (get_haproxy(sockfd, sin, &sinl, &lsin, &lsinl, &using_haproxy))
+	{
+		sox_close(sockfd);
+		return;
+	}
 
 	if (rfc1035_sockaddrip(sin, sinl, &addr)
 	    || rfc1035_sockaddrport(sin, sinl, &addrport))
@@ -1224,25 +1580,6 @@ static void accepted(int n, int sockfd, RFC1035_NETADDR *sin, int sinl,
 		}
 	}
 
-#ifdef	SO_KEEPALIVE
-	dummy=1;
-	if (setsockopt(sockfd, SOL_SOCKET, SO_KEEPALIVE,
-		       (const char *)&dummy, sizeof(dummy)) < 0)
-	{
-		perror("setsockopt");
-	}
-#endif
-
-#ifdef	SO_LINGER
-	l.l_onoff=0;
-	l.l_linger=0;
-
-	if (setsockopt(sockfd, SOL_SOCKET, SO_LINGER,
-		       (const char *)&l, sizeof(l)) < 0)
-	{
-		perror("setsockopt");
-	}
-#endif
 	wait_block();
 	if ((p=fork()) == -1)
 	{
@@ -1277,7 +1614,8 @@ static void accepted(int n, int sockfd, RFC1035_NETADDR *sin, int sinl,
 			denied(sockfd);
 		}
 
-		run(sockfd, &addr, addrport, prog, args);
+		run(sockfd, &addr, addrport, &lsin, lsinl, prog, args,
+		    using_haproxy);
 	}
 	pids[n]=p;
 
@@ -1318,14 +1656,7 @@ static void accepted(int n, int sockfd, RFC1035_NETADDR *sin, int sinl,
 
 static void mysetenv(const char *name, const char *val)
 {
-char	*p=malloc(strlen(name)+strlen(val)+2);
-
-	if (!p)
-	{
-		perror("malloc");
-		_exit(1);
-	}
-	putenv(strcat(strcat(strcpy(p, name), "="), val));
+	setenv(name, val, 1);
 }
 
 /*
@@ -1832,42 +2163,24 @@ static void check_drop(int sockfd)
 static void proxy();
 
 static void run(int fd, const RFC1035_ADDR *addr, int addrport,
-	const char *prog, char **argv)
+		RFC1035_NETADDR *lsin,
+		socklen_t i,
+		const char *prog, char **argv,
+		int using_haproxy)
 {
-RFC1035_NETADDR lsin;
-RFC1035_ADDR laddr;
-int	lport;
+	RFC1035_ADDR laddr;
+	int	lport;
 
-socklen_t	i;
-int	ipcnt, ccnt;
-char	buf[RFC1035_MAXNAMESIZE+128];
-struct blocklist_s *bl;
-const char *remoteinfo;
-const char *p;
+	int	ipcnt, ccnt;
+	char	buf[RFC1035_MAXNAMESIZE+128];
+	struct blocklist_s *bl;
+	const char *p;
 
-	i=sizeof(lsin);
-	if (sox_getsockname(fd, (struct sockaddr *)&lsin, &i) ||
-		rfc1035_sockaddrip(&lsin, i, &laddr) ||
-		rfc1035_sockaddrport(&lsin, i, &lport))
+	if (rfc1035_sockaddrip(lsin, i, &laddr) ||
+	    rfc1035_sockaddrport(lsin, i, &lport))
 	{
 		fprintf(stderr, "getsockname failed.\n");
 		exit(1);
-	}
-
-	if (!noidentlookup && (remoteinfo=tcpremoteinfo(
-		&laddr, lport,
-		addr, addrport, 0)) != 0)
-	{
-	char	*q=malloc(sizeof("TCPREMOTEINFO=")+strlen(remoteinfo));
-
-		if (!q)
-		{
-			perror("malloc");
-			_exit(1);
-		}
-
-		strcat(strcpy(q, "TCPREMOTEINFO="), remoteinfo);
-		putenv(q);
 	}
 
 /* check if it's an exception to the global ip limit */
@@ -1917,6 +2230,17 @@ const char *p;
 	sprintf(buf, "%d", ntohs(lport));
 	mysetenv("TCPLOCALPORT", buf);
 	ip2host(&laddr, "TCPLOCALHOST");
+
+	if (using_haproxy)
+	{
+		char tcpremoteinfo_buf[256];
+
+		snprintf(tcpremoteinfo_buf, sizeof(tcpremoteinfo_buf),
+			 "proxy via %s, port %s",
+			 getenv("TCPLOCALIP"),
+			 getenv("TCPLOCALPORT"));
+		mysetenv("TCPREMOTEINFO", tcpremoteinfo_buf);
+	}
 
 	for (bl=blocklist; bl; bl=bl->next)
 		check_blocklist(bl, addr);

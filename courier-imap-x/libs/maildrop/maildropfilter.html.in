@@ -70,7 +70,7 @@ to $FILE
 	<code class="varname">SENDMAIL</code> and <code class="varname">LOGNAME</code>.</p><p>
 	There's one exception to this rule which applies to the version of
 	<span class="command"><strong>maildrop</strong></span> that comes with the
-	<a class="ulink" href="http://www.courier-mta.org/" target="_top" shape="rect"><span class="application">Courier</span> mail server</a>.  The following
+	<a class="ulink" href="https://www.courier-mta.org/" target="_top" shape="rect"><span class="application">Courier</span> mail server</a>.  The following
 	does not apply to the standalone version of <span class="command"><strong>maildrop</strong></span>:
 	when running in
 	delivery mode, if the <code class="option">-d</code> flag was not used, or if it specifies
@@ -286,7 +286,7 @@ MAILBOX="${HOME-WORD}/Mailbox"
 	      The <code class="varname">KEYWORDS</code> variable is used only when delivering a
 	      message to a maildir, and implements the optional IMAP keyword extension
 	      as implemented in the
-	      <a class="ulink" href="http://www.courier-mta.org/" target="_top" shape="rect"><span class="application">Courier</span> IMAP server</a>.
+	      <a class="ulink" href="https://www.courier-mta.org/" target="_top" shape="rect"><span class="application">Courier</span> IMAP server</a>.
 	      It may be optionally initialized to contain a comma-separate list of keywords.
 	      The <a class="link" href="#to" shape="rect"><span class="command"><strong>to</strong></span></a>, or the
 	      <a class="link" href="#cc" shape="rect"><span class="command"><strong>cc</strong></span></a> command, delivers the message

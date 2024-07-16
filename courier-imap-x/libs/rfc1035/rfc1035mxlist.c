@@ -82,7 +82,6 @@ static int harvest_records(struct rfc1035_res *res,
 	int q_type, int *found, int autoquery, int port);
 
 #define	HARVEST_AUTOQUERY	1
-#define	HARVEST_NODUPE		2
 
 static int add_arecords(struct rfc1035_res *res, struct rfc1035_mxlist **list,
 			struct rfc1035_reply *mxreply,
@@ -133,36 +132,47 @@ records weren't found.
 		second_a=RFC1035_TYPE_A;
 	}
 
+	/* Read cached records, for the less-preferred address type */
+
 	if (mxreply && !(opts & RFC1035_MX_QUERYALL))
 	{
 		rc2=harvest_records(res, list, mxreply, mxpreference,
-				    mxname, second_a, &found, HARVEST_NODUPE,
+				    mxname, second_a, &found, 0,
 				    port);
 
 		if (rc2 != RFC1035_MX_OK && rc2 != RFC1035_MX_SOFTERR)
 			return rc2;
+	}
 
+	/* If there's nothing cached make an explicit query */
+
+	rc2=harvest_records(res, list, mxreply, mxpreference, mxname,
+			    second_a, &found, HARVEST_AUTOQUERY,
+			    port);
+
+	if (rc2 != RFC1035_MX_OK && rc2 != RFC1035_MX_SOFTERR)
+		return rc2;
+
+	/* Read cached records, for the preferred address type */
+
+	if (mxreply && !(opts & RFC1035_MX_QUERYALL))
+	{
 		rc=harvest_records(res, list, mxreply, mxpreference,
-				   mxname, first_a, &found, 0, port);
+				   mxname, first_a, &found, 0,
+				   port);
 
 		if (rc != RFC1035_MX_OK && rc != RFC1035_MX_SOFTERR)
 			return (rc);
 
 		if (rc == RFC1035_MX_SOFTERR && rc2 == RFC1035_MX_SOFTERR)
 			return rc;
-
-		if (found)	return (RFC1035_MX_OK);
 	}
 
-	rc2=harvest_records(res, list, mxreply, mxpreference, mxname,
-			    second_a, &found, HARVEST_AUTOQUERY|HARVEST_NODUPE,
-			    port);
-
-	if (rc2 != RFC1035_MX_OK && rc2 != RFC1035_MX_SOFTERR)
-		return rc2;
+	/* If there's nothing cached make an explicit query */
 
 	rc=harvest_records(res, list, mxreply, mxpreference, mxname,
-			   first_a, &found, HARVEST_AUTOQUERY, port);
+			   first_a, &found, HARVEST_AUTOQUERY,
+			   port);
 
 	if (rc != RFC1035_MX_OK && rc != RFC1035_MX_SOFTERR)
 		return (rc);
@@ -264,12 +274,19 @@ static int harvest_records(struct rfc1035_res *res,
 #if RFC1035_IPV6
 		if (q_type == RFC1035_TYPE_A)
 		{
-		struct rfc1035_mxlist *q;
-
 			/* Map it to an IPv4 address */
 
 			rfc1035_ipv4to6(&in,
 				&mxreply->allrrs[index]->rr.inaddr);
+
+		}
+		else
+		{
+			in=mxreply->allrrs[index]->rr.in6addr;
+		}
+
+		{
+			struct rfc1035_mxlist *q;
 
 			/* See if it's already here */
 
@@ -282,13 +299,12 @@ static int harvest_records(struct rfc1035_res *res,
 				memcpy(&sin6, &q->address, sizeof(sin6));
 
 				if (memcmp(&sin6.sin6_addr, &in, sizeof(in))
-					== 0 && q->priority == mxpreference)
+					== 0 && q->priority == mxpreference &&
+				    strcmp(q->hostname, mxname) == 0)
 					break;
 			}
-			if ((flags & HARVEST_NODUPE) && q)	continue;
+			if (q)	continue;
 		}
-		else
-			in=mxreply->allrrs[index]->rr.in6addr;
 #else
 		in.s_addr=mxreply->allrrs[index]->rr.inaddr.s_addr;
 #endif
