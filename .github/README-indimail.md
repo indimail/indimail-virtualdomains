@@ -97,7 +97,7 @@ Table of Contents
    * [Using /usr/sbin/alternatives](#using-usrsbinalternatives)
    * [Post Handle Scripts](#post-handle-scripts)
    * [Authenticated SMTP Mechanisms](#authenticated-smtp-mechanisms)
-      * [LOGIN and PLAIN authentication mechanism](#login-and-plain-authentication-mechanism)
+      * [LOGIN, PLAIN and XOAUTH2 authentication mechanism](#login,-plain-and-xouth2-authentication-mechanism)
       * [Challenge Response Authentication Mechanisms](#challenge-response-authentication-mechanisms)
       * [Salted Challenge Response Authentication Mechanism](#salted-challenge-response-authentication-mechanism)
       * [Authentication SMTP mechanism in qmail-smtpd](#authentication-smtp-mechanism-in-qmail-smtpd)
@@ -2778,7 +2778,7 @@ Trying to connect to 192.168.2.100/366...connected.
 Dec 03 21:00:49 fetchmail: SMTP< 220 argos.indimail.org (NO UCE) ESMTP IndiMail 1.313 Sun, 3 Dec 2023 21:00:22 +0530
 Dec 03 21:00:49 fetchmail: SMTP> EHLO argos.indimail.org
 Dec 03 21:00:49 fetchmail: SMTP< 250-argos.indimail.org
-Dec 03 21:00:49 fetchmail: SMTP< 250-AUTH LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRA
+Dec 03 21:00:49 fetchmail: SMTP< 250-AUTH LOGIN PLAIN XOAUTH2 CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRA
 M-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256
 Dec 03 21:00:49 fetchmail: SMTP< 250-ATRN
 Dec 03 21:00:49 fetchmail: SMTP< 250-STARTTLS
@@ -2801,7 +2801,7 @@ Trying to connect to 192.168.2.100/366...connected.
 Dec 03 21:06:12 fetchmail: SMTP< 220 argos.indimail.org (NO UCE) ESMTP IndiMail 1.313 Sun, 3 Dec 2023 21:05:45 +0530
 Dec 03 21:06:12 fetchmail: SMTP> EHLO argos.indimail.org
 Dec 03 21:06:12 fetchmail: SMTP< 250-argos.indimail.org
-Dec 03 21:06:12 fetchmail: SMTP< 250-AUTH LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRA
+Dec 03 21:06:12 fetchmail: SMTP< 250-AUTH LOGIN PLAIN XOAUTH2 CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRA
 M-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256
 Dec 03 21:06:12 fetchmail: SMTP< 250-ATRN
 Dec 03 21:06:12 fetchmail: SMTP< 250-STARTTLS
@@ -4045,13 +4045,12 @@ exit 0
 
 # Authenticated SMTP Mechanisms
 
-IndiMail provides you authenticated SMTP providing **AUTH PLAIN**, **AUTH LOGIN**, **AUTH CRAM-MD5**, **CRAM-SHA1**, **CRAM-SHA224**, **CRAM-SHA256**, **CRAM-SHA384**, **CRAM-SHA512**, **CRAM-RIPEMD**, **DIGEST_MD5**, **SCRAM-SHA-1**, **SCRAM-SHA-256**, **SCRAM-SHA-1-PLUS**, **SCRAM-SHA-256-PLUS** methods.
+IndiMail provides you authenticated SMTP providing **AUTH PLAIN**, **AUTH LOGIN**, **AUTH XOAUTH2**, **AUTH CRAM-MD5**, **CRAM-SHA1**, **CRAM-SHA224**, **CRAM-SHA256**, **CRAM-SHA384**, **CRAM-SHA512**, **CRAM-RIPEMD**, **DIGEST_MD5**, **SCRAM-SHA-1**, **SCRAM-SHA-256**, **SCRAM-SHA-1-PLUS**, **SCRAM-SHA-256-PLUS** methods.
 
-## LOGIN and PLAIN authentication mechanism
+## LOGIN, PLAIN and XOAUTH2 authentication mechanism
 
 The most common practice to offer authentication is where the passwords are one-way hash and stored in a database. The UNIX <b>passwd</b> program is one such program that encrypts the user supplied password and stores it in the system's database (e.g. <u>/etc/shadow</u>). The <b>passwd</b> uses the <b>crypt</b> library function to encrypt passwords and it is the same function that IndiMail uses. IndiMail has the programs [vpasswd(1)](https://github.com/indimail/indimail-mta/wiki/vpasswd.1) and [vmoduser(1)](https://github.com/indimail/indimail-mta/wiki/vmoduser.1) that sets the encrypted password for a user in IndiMail's MySQL database. The [vadduser(1)](https://github.com/indimail/indimail-mta/wiki/vadduser.1) program too sets encrypted password using crypt(3). The original clear text passwords are not stored. If this database is stolen, the thief has possession of encrypted passwords which cannot be used for authentication.
 Authentication of a password is verified by encrypting the password and matching it with the value stored in the database. But this method requires the client to exchange the clear text password with the server. The **LOGIN** and **PLAIN** authentication methods require clients to exchange clear text passwords. The server receives the clear text password and then encrypts it to see if it matches with what is stored in the local database. This exchange of clear text passwords can be a concern on an un-encrypted connections. If you encrypt the session using TLS, this concern can be addressed. You can enable <b>SECURE\_AUTH</b> in [qmail-smtpd(8)](https://github.com/indimail/indimail-mta/wiki/qmail-smtpd.8) and [qmail-remote(8)](https://github.com/indimail/indimail-mta/wiki/qmail-remote.8) to disallow **LOGIN** and **PLAIN** authentication when using un-encrypted connections. For example, you can do this for the SMTP submission port as below
-
 
 ```
 $ sudo sh -c "echo 1 > /service/qmail-smtpd.587/variables/SECURE_AUTH"
@@ -4100,6 +4099,8 @@ The other thing to notice in the password field is that it starts with `$5$`. Th
 
 In my opinion, using this scheme with TLS enabled connection is the most secure way to setup authentication. Your database is safe and by using TLS, you are safeguarded from [MITM](https://en.wikipedia.org/wiki/Man-in-the-middle_attack) and credentials getting leaked by [sniffing attacks](https://en.wikipedia.org/wiki/Sniffing_attack).
 
+**XOAUTH2** is similar to LOGIN and PLAIN authentication. The idea behind XOAUTH2 is like this. You create your own private database and store tokens for your users. Since this database is private, these tokens do not give you wide access to resources. Hence risk gets limited in case the token is compromised. indimail-mta has qmail-smtpd and qmail-remote supporting XOAUTH2. At the moment, XOAUTH2 support in qmail-smtpd uses the system passwd database for authentication. In future, a small checkpassword compatible program to authenticate against a private database will be developed. When client issues XOAUTH2 authentication, the private database will be checked instead of the system passwd database. With XOAUTH2 you will be exchanging tokens in the clear text, just like the PLAIN and LOGIN methods.
+
 The other method is to store passwords in clear text in the local database and setup any of the CRAM authentication methods explained later. When you setup CRAM, clear text passords are no long exchanged between the client and the server. Instead a server geneates a challenge. The client then responds with a response which can be correct only when the client has the knowledge of the user's password. So instead of exchanging clear text passwords, the client and the server exchange a challenge and a response to the challenge. This avoids the risk of sniffing the clear text password on the network. But this opens a huge risk of having each and every user's original password in the database. Someone steals the database, every user on the system gets compromised. My advice would be to stay away from all CRAM methods that require you to store the original password in the local database. The next chapter discusses this dangerous mechanism.
 
 ## Challenge Response Authentication Mechanisms
@@ -4107,7 +4108,7 @@ The other method is to store passwords in clear text in the local database and s
 [qmail-smtpd(8)](https://github.com/indimail/indimail-mta/wiki/qmail-smtpd.8) and [qmail-remote(8)](https://github.com/indimail/indimail-mta/wiki/qmail-remote.8) also support various challange response (also known as CRAM) authenticaiton mechanisms. These methods have one side (the server) issue a challenge and the other side (client) respond with an answer. What is exchanged between the client and the server are the challenge and response. Passwords are not exchanged on the network, thus safeguarding you against sniffing and eavesdropping attacks. Though this method makes authentication safe even in a un-encrypted channel, the downside is that the both server and client need to know the clear text passwords. So for the CRAM authentication to work, the server requires the clear text passwords to be stored in the database. The huge security risk of using CRAM is safeguarding your database containing user's passwords. If the database is stolen, the thief walks away with all the passwords. If you are still ok after reading this, there are two ways you can setup CRAM authentication.
 
 1. Use the -e argument to [vpasswd(1)](https://github.com/indimail/indimail-mta/wiki/vpasswd.1), [vmoduser(1)](https://github.com/indimail/indimail-mta/wiki/vmoduser.1) when changing password, or use the -e argument to [vadddomain(1)](https://github.com/indimail/indimail-mta/wiki/vadddomain.1), [vadduser(1)](https://github.com/indimail/indimail-mta/wiki/vadduser.1) when adding the postmaster user or any user and setting the environment variable **ENABLE_CRAM**. If you store the clear text password in the pw_passwd field, LOGIN and PLAIN methods cannot be used.
-2. Use the -C and -m arguments to [vpasswd(1)](https://github.com/indimail/indimail-mta/wiki/vpasswd.1), [vmoduser(1)](https://github.com/indimail/indimail-mta/wiki/vmoduser.1) when changing password, or use the -C and -m arguments to [vadddomain(1)](https://github.com/indimail/indimail-mta/wiki/vadddomain.1), [vadduser(1)](https://github.com/indimail/indimail-mta/wiki/vadduser.1) when adding the postmaster user or any user. This method allows LOGIN, PLAIN methods to work along with the CRAM authentication methods. Setting **ENABLE_CRAM** is not required.
+2. Use the -C and -m arguments to [vpasswd(1)](https://github.com/indimail/indimail-mta/wiki/vpasswd.1), [vmoduser(1)](https://github.com/indimail/indimail-mta/wiki/vmoduser.1) when changing password, or use the -C and -m arguments to [vadddomain(1)](https://github.com/indimail/indimail-mta/wiki/vadddomain.1), [vadduser(1)](https://github.com/indimail/indimail-mta/wiki/vadduser.1) when adding the postmaster user or any user. This method allows LOGIN, PLAIN, XOAUTH2 methods to work along with the CRAM authentication methods. Setting **ENABLE_CRAM** is not required.
 
     ```
     Method 1
@@ -4175,7 +4176,7 @@ The other method is to store passwords in clear text in the local database and s
 
 There are many authentication methods in the CRAM family. IndiMail supports [CRAM-MD5](https://en.wikipedia.org/wiki/CRAM-MD5), CRAM-SHA1, CRAM-SHA224, CRAM-SHA256, CRAM-SHA384, CRAM-SHA512, [CRAM-RIPEMD](https://en.wikipedia.org/wiki/RIPEMD), [DIGEST-MD5](https://www.rfc-editor.org/rfc/rfc2831). CRAM-Md5 uses HMAC-MD5 hash based message authentication code. CRAM-SHA1 uses HMAC-SHA1. CRAM-SHA224 uses HMAC-SHA224. See [this](https://en.wikipedia.org/wiki/HMAC) for more details.
 
-Apart from the security issue of having the plain text passwords in the database, **LOGIN** and **PLAIN** authentication will not work with clear text passwords in the database. A workaround for this issue is to store encrypted passwords in the database and set the environment variable **ENABLE_CRAM** and have the clients supply the encrypted password to the server as the password. But if you enable this and your database with encrypted passwords gets stolen, the attacker can use the encrypted password to successfully authenticate using the **CRAM** authentication methods.
+Apart from the security issue of having the plain text passwords in the database, **LOGIN**, **PLAIN**, **XOAUTH2** authentication will not work with clear text passwords in the database. A workaround for this issue is to store encrypted passwords in the database and set the environment variable **ENABLE_CRAM** and have the clients supply the encrypted password to the server as the password. But if you enable this and your database with encrypted passwords gets stolen, the attacker can use the encrypted password to successfully authenticate using the **CRAM** authentication methods.
 
 Please think twice about setting **ENABLE_CRAM** environment variable or enabling clear text passwords using the -e option to [vpasswd(1)](https://github.com/indimail/indimail-mta/wiki/vpasswd.1) program. I prefer using the **LOGIN** or **PLAIN** methods over an encrypted channel and disabling the CRAM authentication methods. Another option is to use the Salted Challenge Response Authentication Mechanisms explained below.
 
@@ -4196,7 +4197,7 @@ The authentication information stored in the authentication database is not suff
 
 The SCRAM method also allows the server to advertise channel binding. Channel Binding allows the server to enforce TLS and safeguard the connection from main-in-the-middle-attack. IndiMail supports the [tls-unique](https://www.rfc-editor.org/rfc/rfc5929.html) channel binding for TLS1.2 and [tls-exporter](https://www.rfc-editor.org/rfc/rfc9266.html) channel binding for TLS1.3 and above. When the server supports channel binding, it advertises 
 
-IndiMail supports **SCRAM-SHA-1** and **SCRAM-SHA-256** SCRAM authentication methods. [qmail-smtpd(8)](https://github.com/indimail/indimail-mta/wiki/qmail-smtpd.8) advertises these methods to an EHLO response. [qmail-remote(8)](https://github.com/indimail/indimail-mta/wiki/qmail-remote.8) issues the EHLO command to get the capability of the remote server. Both [qmail-smtpd(8)](https://github.com/indimail/indimail-mta/wiki/qmail-smtpd.8) and [qmail-remote(8)](https://github.com/indimail/indimail-mta/wiki/qmail-remote.8) support channel binding too. Hence [qmail-smtpd(8)](https://github.com/indimail/indimail-mta/wiki/qmail-smtpd.8) advertises **SCRAM-SHA-1-PLUS** and **SCRAM-SHA-256-PLU**S authentication methods. Similarly [qmail-remote(8)](https://github.com/indimail/indimail-mta/wiki/qmail-remote.8) uses tls-unique or the tls-exporter channel binding when the remote supports SCRAM-SHA\*-PLUS methods. You can use the [vpasswd(1)](https://github.com/indimail/indimail-mta/wiki/vpasswd.1) (or [vmoduser(1)](https://github.com/indimail/indimail-mta/wiki/vmoduser.1) program to set passwords enabled for SCRAM authentication. For example, the below password will allow **AUTH**, **LOGIN**, **PLAIN** and all SCRAM methods to work.
+IndiMail supports **SCRAM-SHA-1** and **SCRAM-SHA-256** SCRAM authentication methods. [qmail-smtpd(8)](https://github.com/indimail/indimail-mta/wiki/qmail-smtpd.8) advertises these methods to an EHLO response. [qmail-remote(8)](https://github.com/indimail/indimail-mta/wiki/qmail-remote.8) issues the EHLO command to get the capability of the remote server. Both [qmail-smtpd(8)](https://github.com/indimail/indimail-mta/wiki/qmail-smtpd.8) and [qmail-remote(8)](https://github.com/indimail/indimail-mta/wiki/qmail-remote.8) support channel binding too. Hence [qmail-smtpd(8)](https://github.com/indimail/indimail-mta/wiki/qmail-smtpd.8) advertises **SCRAM-SHA-1-PLUS** and **SCRAM-SHA-256-PLU**S authentication methods. Similarly [qmail-remote(8)](https://github.com/indimail/indimail-mta/wiki/qmail-remote.8) uses tls-unique or the tls-exporter channel binding when the remote supports SCRAM-SHA\*-PLUS methods. You can use the [vpasswd(1)](https://github.com/indimail/indimail-mta/wiki/vpasswd.1) (or [vmoduser(1)](https://github.com/indimail/indimail-mta/wiki/vmoduser.1) program to set passwords enabled for SCRAM authentication. For example, the below password will allow **AUTH**, **LOGIN**, **PLAIN**, **XOAUTH2** and all SCRAM methods to work.
 
 ```
 sudo vpasswd -m SCRAM-SHA-256 manny@example.com supersecret
@@ -4228,7 +4229,7 @@ Activ Date    : (127.0.0.1) Tue Jul  2 09:33:55 2019
 Delivery Time : No Mails Delivered yet / Per Day Limit not configured
 ```
 
-If you carefully notice the passwd field, you will see the password starting with {SCRAM-SHA-256}. The iteration count is 4096. This is the iteration used by the algorithm. The salt is `HWvKDMG1R9hSSt/e`, the stored key is `thk3p9gV604V9A2chgmW/ovPgucUtFRhHJgfeWi2pJ4=`, the server key is `IvIc99nIBYdKFqW+ZTz1Ioz5nIxWXJDegzPlkq41tic=` and finally the salted password that will be used for AUTH LOGIN and AUTH PLAIN is `$5$7.Jwtq6QiQaLsguq$RXUJkrI5PUhtqGa4jKGbLPZaLmJiGdpqXhe68qtqyE/`. When using SCRAM, the stored key and the server key is all that the server requires to verify if the client's response to the challenge is correct or not.
+If you carefully notice the passwd field, you will see the password starting with {SCRAM-SHA-256}. The iteration count is 4096. This is the iteration used by the algorithm. The salt is `HWvKDMG1R9hSSt/e`, the stored key is `thk3p9gV604V9A2chgmW/ovPgucUtFRhHJgfeWi2pJ4=`, the server key is `IvIc99nIBYdKFqW+ZTz1Ioz5nIxWXJDegzPlkq41tic=` and finally the salted password that will be used for AUTH LOGIN, AUTH PLAIN AUTH XOAUTH2 is `$5$7.Jwtq6QiQaLsguq$RXUJkrI5PUhtqGa4jKGbLPZaLmJiGdpqXhe68qtqyE/`. When using SCRAM, the stored key and the server key is all that the server requires to verify if the client's response to the challenge is correct or not.
 
 To additionally allow CRAM methods, use the -C argument to [vpasswd(1)](https://github.com/indimail/indimail-mta/wiki/vpasswd.1) (or [vmoduser(1)](https://github.com/indimail/indimail-mta/wiki/vmoduser.1). Now look carefull at the password field by doing vuserinfo.
 
@@ -4261,7 +4262,7 @@ Inact Date    : Not yet Inactivated
 Activ Date    : (127.0.0.1) Tue Jul  2 09:33:55 2019
 Delivery Time : No Mails Delivered yet / Per Day Limit not configured
 ```
-You will notice two additional fields - the hex salted password `a8bac1a24c7aa2725630c9ab6813a631b366c79c6bc959bf344d3af8e685a375` and the clear text password `supersecret` following it (separated by a colon). This kind of password will allow you to use AUTH PLAIN, LOGIN, all CRAM methods and all SCRAM / SCRAM-PLUS methods. When you set passwords using the -m and -C argument to [vadddomain(1)](https://github.com/indimail/indimail-mta/wiki/vadddomain.1), [vadduser(1)](https://github.com/indimail/indimail-mta/wiki/vadduser.1), [vgroup(1)](https://github.com/indimail/indimail-mta/wiki/vgroup.1), [vpasswd(1)](https://github.com/indimail/indimail-mta/wiki/vpasswd.1), [vmoduser(1)](https://github.com/indimail/indimail-mta/wiki/vmoduser.1), CRAM authentication will not require setting of the environment variable **ENABLE_CRAM**. But the problem with enabling CRAM auth methods is that attackers can get hold of the clear text passwords for all your users in case your database is stolen. Apart from the clear text password, the hex salted password too allows the attacker to impersonate both client and the server. If you use SCRAM authentication, you can disable all CRAM authentication methods and not use the -<b>C</b> argument to [vpasswd(1)](https://github.com/indimail/indimail-mta/wiki/vpasswd.1) (or [vmoduser(1)](https://github.com/indimail/indimail-mta/wiki/vmoduser.1). This will give you the safety of of having all your passwords encrypted in the database.
+You will notice two additional fields - the hex salted password `a8bac1a24c7aa2725630c9ab6813a631b366c79c6bc959bf344d3af8e685a375` and the clear text password `supersecret` following it (separated by a colon). This kind of password will allow you to use AUTH PLAIN, LOGIN, XOAUTH2 and all CRAM methods and all SCRAM / SCRAM-PLUS methods. When you set passwords using the -m and -C argument to [vadddomain(1)](https://github.com/indimail/indimail-mta/wiki/vadddomain.1), [vadduser(1)](https://github.com/indimail/indimail-mta/wiki/vadduser.1), [vgroup(1)](https://github.com/indimail/indimail-mta/wiki/vgroup.1), [vpasswd(1)](https://github.com/indimail/indimail-mta/wiki/vpasswd.1), [vmoduser(1)](https://github.com/indimail/indimail-mta/wiki/vmoduser.1), CRAM authentication will not require setting of the environment variable **ENABLE_CRAM**. But the problem with enabling CRAM auth methods is that attackers can get hold of the clear text passwords for all your users in case your database is stolen. Apart from the clear text password, the hex salted password too allows the attacker to impersonate both client and the server. If you use SCRAM authentication, you can disable all CRAM authentication methods and not use the -<b>C</b> argument to [vpasswd(1)](https://github.com/indimail/indimail-mta/wiki/vpasswd.1) (or [vmoduser(1)](https://github.com/indimail/indimail-mta/wiki/vmoduser.1). This will give you the safety of of having all your passwords encrypted in the database.
 
 ## Authentication SMTP mechanism in qmail-smtpd
 
@@ -7336,7 +7337,7 @@ Note: <b>todo-proc</b> is a dedicated todo processor whose basic working comes f
  * blackholedrcpt for blackholing mails to specific recipients.
  * Control files spamignore, blackholedsender, badmailfrom, relaymailfrom, badrcptto, chkrcptdomains, goodrcptto, blackholedrcpt, badip can be specified in plain text, cdb format or in MySQL tables.
  * relaying and message rewriting for authorized clients
- * authenticated SMTP PLAIN, LOGIN, CRAM-MD5 (HMAC), CRAM-SHA1, CRAM-SHA224, CRAM-SHA256, CRAM-SHA384, CRAM-SHA512, CRAM-RIPEMD, DIGEST-MD5, SCRAM-SHA-1, SCRAM-SHA-256, SCRAM-SHA-1-PLUS, SCRAM-SHA-256-PLUS (RFC 1321, RFC 2104, RFC 2554, RFC 2617, RFC 5802, RFC 7677, RFC 5056, RFC 5929, RFC 9l66). Supports tls-unique and tls-exporter channel bindings.
+ * authenticated SMTP PLAIN, LOGIN, XOAUTH2, CRAM-MD5 (HMAC), CRAM-SHA1, CRAM-SHA224, CRAM-SHA256, CRAM-SHA384, CRAM-SHA512, CRAM-RIPEMD, DIGEST-MD5, SCRAM-SHA-1, SCRAM-SHA-256, SCRAM-SHA-1-PLUS, SCRAM-SHA-256-PLUS (RFC 1321, RFC 2104, RFC 2554, RFC 2617, RFC 5802, RFC 7677, RFC 5056, RFC 5929, RFC 9l66). Supports tls-unique and tls-exporter channel bindings.
  * STARTTLS extension, TLS
  * Support for SMTPS
  * POP/IMAP before SMTP
@@ -7429,7 +7430,7 @@ Note: <b>todo-proc</b> is a dedicated todo processor whose basic working comes f
  * per-buffer timeouts
  * passive SMTP queue---perfect for SLIP/PPP (<b>serialmail</b>)
  * AutoTURN support (<b>serialmail</b>)
- * Authenticated SMTP (username/password in control/smtproutes) - PLAIN, LOGIN, CRAM-MD5 (HMAC), CRAM-SHA1, CRAM-SHA224, CRAM-SHA256, CRAM-SHA384, CRAM-SHA512, CRAM-RIPEMD, DIGEST-MD5, SCRAM-SHA-1, SCRAM-SHA-256, SCRAM-SHA-1-PLUS, SCRAM-SHA-256-PLUS (RFC 1321, RFC 2104, RFC 2554, RFC 2617, RFC 5802, RFC 7677, RFC 5056, RFC 5929, RFC 9266). Supports tls-unique, tls-exporter channel binding.
+ * Authenticated SMTP (username/password in control/smtproutes) - PLAIN, LOGIN, XOAUTH2, CRAM-MD5 (HMAC), CRAM-SHA1, CRAM-SHA224, CRAM-SHA256, CRAM-SHA384, CRAM-SHA512, CRAM-RIPEMD, DIGEST-MD5, SCRAM-SHA-1, SCRAM-SHA-256, SCRAM-SHA-1-PLUS, SCRAM-SHA-256-PLUS (RFC 1321, RFC 2104, RFC 2554, RFC 2617, RFC 5802, RFC 7677, RFC 5056, RFC 5929, RFC 9266). Supports tls-unique, tls-exporter channel binding.
  * STARTTLS, TLS
  * Static and Dynamic Routing. (**SMTPROUTES** environment variable)
  * User based routing instead of normal DNS/smtproutes.
@@ -7536,7 +7537,7 @@ Some of the features available in this package
 20. Added ability in [qmail-queue(8)](https://github.com/indimail/indimail-mta/wiki/qmail-queue.8) to do line processing. Line processing allows [qmail-queue(8)](https://github.com/indimail/indimail-mta/wiki/qmail-queue.8) to do some of the stuff mentioned above
 21. plugins support for QHPSI interface (qmail-queue). [qmail-queue(8)](https://github.com/indimail/indimail-mta/wiki/qmail-queue.8) will use dlopen to load any shared objected defined by **PLUGINDIR** environment. Multiple plugins can be loaded. For details see man [qmail-queue(8)](https://github.com/indimail/indimail-mta/wiki/qmail-queue.8)
 22. Message Submission Port (port 587) RFC 2476
-23. Integrated authenticated SMTP with Indimail (PLAIN, LOGIN, CRAM-MD5, CRAM-SHA1, CRAM-SHA224, CRAM-SHA256, CRAM-SHA384, CRAM-SHA512, CRAM-RIPEMD, DIGEST-MD5, pop-bef-smtp)
+23. Integrated authenticated SMTP with Indimail (PLAIN, LOGIN, XOAUTH2, CRAM-MD5, CRAM-SHA1, CRAM-SHA224, CRAM-SHA256, CRAM-SHA384, CRAM-SHA512, CRAM-RIPEMD, DIGEST-MD5, pop-bef-smtp)
 24. duplicate eliminator using [822header(1)](https://github.com/indimail/indimail-mta/wiki/822header.1).
 25. [qmail-remote(8)](https://github.com/indimail/indimail-mta/wiki/qmail-remote.8) has configurable TCP timeout table (<b>max\_tolerance</b>, <b>min\_backoff</b> periods can be configured in smtproutes)
 26. Ability to change concurrency of [tcpserver(1)](https://github.com/indimail/indimail-mta/wiki/tcpserver.1) without restarting [tcpserver(1)](https://github.com/indimail/indimail-mta/wiki/tcpserver.1).
