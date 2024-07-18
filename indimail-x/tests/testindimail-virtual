@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: testindimail-virtual,v 1.30 2024-05-30 22:50:59+05:30 Cprogrammer Exp mbhangui $
+# $Id: testindimail-virtual,v 1.31 2024-07-18 09:25:18+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -1318,15 +1318,15 @@ do_smtp_auth_qmr_o()
 	# type     = $4 1 - CRAM=NO (plain user), 2 - CRAM=YES (plain user), 3 - CRAM=YES (scram user)
 	case $4 in
 		1)
-		methods="LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5"
+		methods="LOGIN PLAIN XOAUTH2 CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5"
 		type=" "
 		;;
 		2)
-		methods="LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5"
+		methods="LOGIN PLAIN XOAUTH2 CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5"
 		type=" "
 		;;
 		3)
-		methods="LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5"
+		methods="LOGIN PLAIN XOAUTH2 CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5"
 		type=" "
 		;;
 		4)
@@ -1354,7 +1354,7 @@ do_smtp_auth_qmr_o()
 		do
 			if [ $4 -eq 1 ] ; then
 				case $i in
-					LOGIN|PLAIN)
+					LOGIN|PLAIN|XOAUTH2)
 					pass=$3
 					;;
 					*)
@@ -4204,8 +4204,8 @@ display_tests()
 	echo "test valias by creating a valias forward and sending mail to it"
 	echo "test setting inlookup in debug mode"
 	echo "test inlookup caching"
-	echo "Test authenticated SMTP using swaks with auth methods PLAIN, LOGIN CRAM-MD5, DIGEST-MD5"
-	echo "Test authenticated SMTP using qmail-remote with auth methods LOGIN PLAIN CRAM-MD5"
+	echo "Test authenticated SMTP using swaks with auth methods PLAIN LOGIN CRAM-MD5, DIGEST-MD5"
+	echo "Test authenticated SMTP using qmail-remote with auth methods LOGIN PLAIN XOAUTH2 CRAM-MD5"
 	echo "  CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5"
 	echo "Test IMAP, IMAPS, POP3, POP3S login with the user created to support non-SCRAM methods"
 	echo "Test authenticated SMTP using gsasl to use SCRAM methods SCRAM-SHA-1, SCRAM-SHA-256, SCRAM-SHA-1-PLUS"
@@ -4424,7 +4424,7 @@ failed=""
 if [ -f $testdir/itotal.count ] ; then
 	total_tests=$(cat $testdir/itotal.count)
 else
-	total_tests=1334
+	total_tests=1371
 fi
 prompt=1
 continue_on_err=0
@@ -4580,6 +4580,9 @@ exit 0
 
 #
 # $Log: testindimail-virtual,v $
+# Revision 1.31  2024-07-18 09:25:18+05:30  Cprogrammer
+# added tests for XOAUTH2 authentication
+#
 # Revision 1.30  2024-05-30 22:50:59+05:30  Cprogrammer
 # fixed typo
 #
