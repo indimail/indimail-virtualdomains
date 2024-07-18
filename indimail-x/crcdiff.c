@@ -1,5 +1,8 @@
 /*
  * $Log: crcdiff.c,v $
+ * Revision 1.4  2024-07-18 09:17:52+05:30  Cprogrammer
+ * added -C option to display checksum
+ *
  * Revision 1.3  2024-05-02 20:54:42+05:30  Cprogrammer
  * display L1, L2 changes
  * added -c, -s options
@@ -14,7 +17,7 @@
  *
  * By Jon Zeeff (zeeff@b-tech.ann-arbor.mi.us)
  *
- * Permission is granted to use this in any manner provided that   
+ * Permission is granted to use this in any manner provided that
  * 1) the copyright notice is left intact,
  * 2) you don't hold me responsible for any bugs and
  * 3) you mail me any improvements that you make.
@@ -23,7 +26,7 @@
  * report:
  *     corrupt  - crc changed w/o date change
  *     replaced - crc + date changed
- *     perm     - permissions changed
+ *     permiss  - permissions changed
  *     own/grp  - owner or group changed
  *     deleted  -
  *     added    -
@@ -36,6 +39,8 @@
  * to generate a crc list (crc.c should accompany this source).
  *
  * Assume that no files have tabs or spaces in the name.
+ * A crc line is like this
+ * 0x5d784e43 dr-xr-xr-x root	root	Jun 11 07:57:46 2024 /usr/bin
  *
  -*/
 
@@ -57,7 +62,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: crcdiff.c,v 1.3 2024-05-02 20:54:42+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: crcdiff.c,v 1.4 2024-07-18 09:17:52+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -102,14 +107,17 @@ main(int argc, char **argv)
 
 	char           *new_ptr, *old_ptr, *critical_file_list = NULL;
 	FILE           *newfp, *oldfp, *fp = NULL;
-	int             match, c, sorted = 0, crit_flag;
+	int             match, c, sorted = 0, crit_flag, display_checksum = 0;
 	unsigned long   add_count, del_count, corrupt_count, perm_count,
 					owner_count, mod_count, crit_l1_count, crit_l2_count, count;
 	char            new_line[BUF_SIZE], old_line[BUF_SIZE];
 
-	while ((c = getopt(argc, argv, "c:s")) != -1) {
+	while ((c = getopt(argc, argv, "c:Cs")) != -1) {
 		switch (c)
 		{
+		case 'C':
+			display_checksum = 1;
+			break;
 		case 'c':
 			critical_file_list = optarg;
 			if (!(fp = fopen(critical_file_list, "r"))) {
@@ -118,7 +126,7 @@ main(int argc, char **argv)
 			}
 			break;
 		case 's':
-			sorted = 0;
+			sorted = 1;
 			break;
 		default:
 			usage(100);
@@ -156,7 +164,7 @@ main(int argc, char **argv)
 		}
 		/*- old filename */
 		if (!(old_ptr = strrchr(old_line, ' '))) {
-			(void) printf("Error in input data\n");
+			fprintf(stderr, "Error in input data\n");
 			exit(1);
 		}
 		for (count = match = 0;; count++) {
@@ -175,16 +183,17 @@ main(int argc, char **argv)
 			}
 			/*- new filename */
 			if (!(new_ptr = strrchr(new_line, ' '))) {
-				(void) printf("Error in input data\n");
+				fprintf(stderr, "Error in input data\n");
 				exit(1);
 			}
 			/*- Compare just the file names */
 			c = strcmp(old_ptr, new_ptr);
 			if (sorted && c < 0) {
 				rewind(newfp);
-				(void) printf("deleted    %s", old_line + 11);
+				printf("deleted    %s", old_line + (display_checksum ? 0 : 11));
+				fflush(stdout);
 				if (fp && check_critical_list(fp, old_line)) {
-					(void) printf("WARN L2 <  %s", old_line + 11);
+					fprintf(stderr, "WARN L2 <  %s", old_line + 11);
 					crit_l2_count++;
 				}
 				del_count++;
@@ -195,22 +204,23 @@ main(int argc, char **argv)
 				new_ptr = strrchr(new_line, '\t'); /*- timestamp */
 				old_ptr = strrchr(old_line, '\t'); /*- timestamp */
 				if (!new_ptr || !old_ptr) {
-					(void) printf("Error in input data\n");
+					fprintf(stderr, "Error in input data\n");
 					return (1);
 				}
 				/*- check crc change */
 				if (strncmp(new_line, old_line, 10)) {
 					if (!strcmp(new_ptr, old_ptr)) {
-						(void) printf("corrupt    %s", new_line + 11);
+						printf("corrupt    %s", new_line + (display_checksum ? 0 : 11));
 						if (fp && check_critical_list(fp, new_line)) {
-							(void) printf("WARN L2 >  %s", new_line + 11);
+							fprintf(stderr, "WARN L2 >  %s", new_line + 11);
 							crit_l2_count++;
 						}
 						corrupt_count++;
 					} else {
-						(void) printf("replaced   %s", new_line + 11);
+						printf("replaced   %s", new_line + (display_checksum ? 0 : 11));
+						fflush(stdout);
 						if (fp && check_critical_list(fp, new_line)) {
-							(void) printf("WARN L2 >  %s", new_line + 11);
+							fprintf(stderr, "WARN L2 >  %s", new_line + 11);
 							crit_l2_count++;
 						}
 						mod_count++;
@@ -220,18 +230,19 @@ main(int argc, char **argv)
 				/*- check permission change */
 				crit_flag = 0;
 				if (strncmp(new_line + 11, old_line + 11, 10)) {
-					(void) printf("permiss <  %s", old_line + 11);
-					(void) printf("permiss >  %s", new_line + 11);
+					printf("permiss <  %s", old_line + (display_checksum ? 0 : 11));
+					printf("permiss >  %s", new_line + (display_checksum ? 0 : 11));
+					fflush(stdout);
 					/* setuid, setgid bit changed */
 					if (*(old_line + 14) == 's' || *(old_line + 17) == 's') {
-						(void) printf("WARN L1 <  %s", old_line + 11);
+						fprintf(stderr, "WARN L1 <  %s", old_line + 11);
 						if (!crit_flag) {
 							crit_l1_count++;
 							crit_flag = 1;
 						}
 					}
 					if (*(new_line + 14) == 's' || *(new_line + 17) == 's') {
-						(void) printf("WARN L1 >  %s", new_line + 11);
+						fprintf(stderr, "WARN L1 >  %s", new_line + 11);
 						if (!crit_flag) {
 							crit_l1_count++;
 							crit_flag = 1;
@@ -242,18 +253,19 @@ main(int argc, char **argv)
 				}
 				/*- check  owner/group */
 				if (strncmp(new_line + 22, old_line + 22, new_ptr - new_line - 21)) {
-					(void) printf("own/grp <  %s", old_line + 11);
-					(void) printf("own/grp >  %s", new_line + 11);
+					printf("own/grp <  %s", old_line + (display_checksum ? 0 : 11));
+					printf("own/grp >  %s", new_line + (display_checksum ? 0 : 11));
+					fflush(stdout);
 					/* owner/group changes to setuid, setgid files */
 					if (*(old_line + 14) == 's' || *(old_line + 17) == 's') {
-						(void) printf("WARN L1 <  %s", old_line + 11);
+						fprintf(stderr, "WARN L1 <  %s", old_line + 11);
 						if (!crit_flag) {
 							crit_l1_count++;
 							crit_flag = 1;
 						}
 					}
 					if (*(new_line + 14) == 's' || *(new_line + 17) == 's') {
-						(void) printf("WARN L1 >  %s", new_line + 11);
+						fprintf(stderr, "WARN L1 >  %s", new_line + 11);
 						if (!crit_flag) {
 							crit_l1_count++;
 							crit_flag = 1;
@@ -268,9 +280,10 @@ main(int argc, char **argv)
 				rewind(newfp);
 		} /* for (count = match = 0;; count++) */
 		if (!sorted && !match) {
-			(void) printf("deleted    %s", old_line + 11);
+			printf("deleted    %s", old_line + (display_checksum ? 0 : 11));
+			fflush(stdout);
 			if (fp && check_critical_list(fp, new_line)) {
-				(void) printf("WARN L2 <  %s", old_line + 11);
+				fprintf(stderr, "WARN L2 <  %s", old_line + 11);
 				crit_l2_count++;
 			}
 			del_count++;
@@ -286,7 +299,7 @@ main(int argc, char **argv)
 			exit (1);
 		}
 		if (!(new_ptr = strrchr(new_line, ' '))) {
-			(void) printf("Error in input data\n");
+			fprintf(stderr, "Error in input data\n");
 			exit(1);
 		}
 		for (count = match = 0;; count++) {
@@ -303,14 +316,15 @@ main(int argc, char **argv)
 				break;
 			}
 			if (!(old_ptr = strrchr(old_line, ' '))) {
-				(void) printf("Error in input data\n");
+				fprintf(stderr, "Error in input data\n");
 				exit(1);
 			}
 			c = strcmp(new_ptr, old_ptr);
 			if (sorted && c < 0) {
-				(void) printf("added      %s", new_line + 11);
+				printf("added      %s", new_line + (display_checksum ? 0 : 11));
+				fflush(stdout);
 				if (fp && check_critical_list(fp, new_line)) {
-					(void) printf("WARN L2 >  %s", new_line + 11);
+					fprintf(stderr, "WARN L2 >  %s", new_line + 11);
 					crit_l2_count++;
 				}
 				rewind(oldfp);
@@ -325,9 +339,10 @@ main(int argc, char **argv)
 				rewind(oldfp);
 		} /*- end of for(match = 0;;) */
 		if (!sorted && !match) {
-			(void) printf("added      %s", new_line + 11);
+			printf("added      %s", new_line + (display_checksum ? 0 : 11));
+			fflush(stdout);
 			if (fp && check_critical_list(fp, new_line)) {
-				(void) printf("WARN L2 >  %s", new_line + 11);
+				fprintf(stderr, "WARN L2 >  %s", new_line + 11);
 				crit_l2_count++;
 			}
 			add_count++;
@@ -346,9 +361,12 @@ main(int argc, char **argv)
 	printf("4. corrupted           : %lu\n", corrupt_count);
 	printf("5. permission  changes : %lu\n", perm_count);
 	printf("6. owner/group changes : %lu\n", owner_count);
-	printf("NOTE: Critical Changes\n");
-	printf("1. critical L1 changes : %lu\n", crit_l1_count);
-	printf("2. critical L2 changes : %lu\n", crit_l2_count);
+	if (crit_l1_count || crit_l2_count) {
+		printf("\n");
+		printf("NOTE: Critical Changes\n");
+		printf("1. critical L1 changes : %lu\n", crit_l1_count);
+		printf("2. critical L2 changes : %lu\n", crit_l2_count);
+	}
 	printf("--------------------------\n");
 	return (1);
 }

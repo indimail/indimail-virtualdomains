@@ -1,5 +1,8 @@
 /*
  * $Log: crc.c,v $
+ * Revision 1.6  2024-07-18 09:22:59+05:30  Cprogrammer
+ * removed ignoring errors
+ *
  * Revision 1.5  2024-05-02 20:40:01+05:30  Cprogrammer
  * fixed bug with -d option
  * fixed bug with printing group permissions
@@ -65,12 +68,13 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: crc.c,v 1.5 2024-05-02 20:40:01+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: crc.c,v 1.6 2024-07-18 09:22:59+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define MAXBUF 4096
 static char     strnum[FMT_ULONG];
 #define FATAL "crc: fatal: "
+#define WARN  "crc: warn: "
 
 #ifndef S_IRGRP
 #define S_IRGRP	(S_IREAD >> 3)
@@ -396,9 +400,10 @@ printcrc(const char *file, unsigned long *lcount, int statflag, int displayhex)
 	unsigned long   length = 0, bytes_read;
 	struct stat     statbuf, statbuf_t;
 
-	/*- We silently ignore errors */
-	if (stat(file, &statbuf))
+	if (stat(file, &statbuf)) {
+		strerr_warn3(WARN, file, ": ", &strerr_sys);
 		return (-1);
+	}
 	if (lcount)
 		*lcount = 0l;
 	if (!S_ISREG(statbuf.st_mode)) {
@@ -452,11 +457,13 @@ printcrc(const char *file, unsigned long *lcount, int statflag, int displayhex)
 #else
 #define SYS_OPEN(FILE,FLAG,MODE) syscall(SYS_open,FILE,FLAG,MODE)
 #endif
-    if ((fd = SYS_OPEN(file, O_RDONLY, 0)) == -1)
+    if ((fd = SYS_OPEN(file, O_RDONLY, 0)) == -1) {
 #else
-    if ((fd = open(file, O_RDONLY)) == -1)
+    if ((fd = open(file, O_RDONLY)) == -1) {
 #endif
+		strerr_warn3(WARN, file, ": ", &strerr_sys);
 		return (-1);
+	}
 	for (crc = initial_crc;;) {
 		if ((nr = read(fd, (char *) buf, MAXBUF)) == -1) {
 #ifdef ERESTART
