@@ -1,5 +1,5 @@
-* XXX XXX XX XXXX XX:XX:XX +0000 @email@ @version@-@release@%{?dist}
-Release @version@-@release@ Start 02/05/2024 End XX/XX/XXXX
+* Tue Aug 06 2024 13:36:48 +0000 Manvendra Bhangui <indimail-virtualdomains@indimail.org> 3.4.7-1.1%{?dist}
+Release 3.4.7-1.1 Start 02/05/2024 End 06/08/2024
 - 02/05/2024
 01. crc.c: fixed bug with -d option
 02. crc.c: fixed bug with printing group permissions
