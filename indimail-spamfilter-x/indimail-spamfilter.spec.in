@@ -59,7 +59,9 @@ Source4: http://downloads.sourceforge.net/indimail/%{name}-permissions.paranoid
 %endif
 
 URL: https://github.com/mbhangui/indimail-virtualdomains
+%if %{undefined suse_version} && %{undefined sles_version}
 AutoReqProv: Yes
+%endif
 
 BuildRequires: rpm gcc gcc-c++ make coreutils grep
 BuildRequires: glibc glibc-devel
