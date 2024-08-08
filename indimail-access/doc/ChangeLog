@@ -10,6 +10,8 @@ Release 1.3-1.1 Start 10/05/2024 End 06/08/2024
 04. upgraded courier-imap to 5.2.7
 05. upgraded maildrop to 3.1.7
 - 06/08/2024 - indimail-3.4.7
+- 08/08/2024
+06. Turn of AutoReqProv for suse builds
 
 * Sun Dec 03 2023 12:34:44 +0000 Manvendra Bhangui <indimail-access@indimail.org> 1.2-1.2%{?dist}
 Release 1.2-1.1 Start 28/11/2024 End 03/12/2023
