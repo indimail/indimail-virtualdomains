@@ -252,6 +252,32 @@ fi
 
 create_mysql_db()
 {
+if [ -x /usr/sbin/mariadbd ] ; then
+	mysqld=/usr/sbin/mariadbd
+elif [ -x /usr/libexec/mysqld ] ; then
+	mysqld=/usr/libexec/mysqld
+elif [ -x /usr/sbin/mysqld ] ; then
+	mysqld=/usr/sbin/mysqld
+elif [ -x /usr/bin/mysqld ] ; then
+	mysqld=/usr/bin/mysqld
+else
+	echo "mysqld: No such File or directory" 1>&2
+	return 1
+fi
+tmysql_version=`$mysqld --version`
+mysql_version=`echo $tmysql_version | awk '{print $3}' 2>&1`
+echo $mysql_version | grep MariaDB > /dev/null 2>&1
+if [ $? -eq 0 ] ; then
+	mysql_version=`echo $mysql_version|cut -d- -f1`
+	mariadb=1
+	major=$(echo $tmysql_version|awk '{print $3}'|cut -d. -f1)
+	minor=$(echo $tmysql_version|awk '{print $3}'|cut -d. -f2)
+	if [ $major -ge 11 ] ; then # mariadb ssl fails when using self-signed cert
+		mysqld_server_opt="--skip-ssl"
+		mysql_client_opt="--skip-ssl-verify-server-cert"
+	fi
+fi
+
 ps -ef|grep -E "mariadbd|mysqld"|egrep -v "systemctl|grep" > /dev/null 2>&1
 if [ $? -ne 0 -o ! -S /var/run/mysqld/mysqld.sock ] ; then
 	if [ -x /service/mysql.3306/run ] ; then
@@ -310,13 +336,13 @@ if [ -S $mysqld_sock ] ; then
 		echo "CREATE USER roundcube IDENTIFIED BY 'subscribed';"
 		echo "GRANT ALL PRIVILEGES ON RoundCube_db.* TO roundcube;"
 		echo "FLUSH PRIVILEGES;"
-	) | $mysql -u mysql -p"$PRIV_PASS" mysql
+	) | $mysql -u mysql -p"$PRIV_PASS" $mysql_client_opt mysql
 	if [ -f $rcube_base/SQL/mysql.initial.sql ] ; then
 		echo "initializing roundcube db"
-		$mysql -u roundcube -psubscribed RoundCube_db < $rcube_base/SQL/mysql.initial.sql
+		$mysql -u roundcube -psubscribed $mysql_client_opt RoundCube_db < $rcube_base/SQL/mysql.initial.sql
 	fi
 	if [ -f $rcube_base/plugins/sauserprefs/sauserprefs.sql ] ; then
-		$mysql -u roundcube -psubscribed RoundCube_db < $rcube_base/plugins/sauserprefs/sauserprefs.sql
+		$mysql -u roundcube -psubscribed $mysql_client_opt RoundCube_db < $rcube_base/plugins/sauserprefs/sauserprefs.sql
 	fi
 	if [ -x /service/mysql.3306/shutdown ] ; then
 		/service/mysql.3306/shutdown
@@ -698,7 +724,7 @@ elif [ -f /etc/php7/fpm/php-fpm.d/www.conf ] ; then
 	php_fpm_www_conf=/etc/php7/fpm/php-fpm.d/www.conf
 else #debian /etc/php/7.3/fpm/pool.d/www.conf
 	php_fpm_www_conf=`ls /etc/php/*/fpm/pool.d/www.conf 2>/dev/null`
-	php_fpm_conf=$(ls /etc/php/*/fpm/php-fpm.conf)
+	php_fpm_conf=$(ls /etc/php/*/fpm/php-fpm.conf 2>/dev/null)
 fi
 if [ -z "$php_fpm_conf" -a -f /etc/php-fpm.conf ] ; then
 	php_fpm_conf=/etc/php-fpm.conf
@@ -756,7 +782,7 @@ if [ $is_suse -eq 1 ] ; then
 	fi
 fi
 
-if [ -n "$php_fpm_www_conf" -a -f $php_fpm_www_conf ] ; then
+if [ -n "$php_fpm_www_conf" -a -f "$php_fpm_www_conf" ] ; then
 	echo "fixing $php_fpm_www_conf"
 	$sed -i \
 		-e "s}^user = nobody}user = $httpd_user}" \
