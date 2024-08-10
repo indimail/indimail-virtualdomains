@@ -84,7 +84,9 @@ Source6: http://downloads.sourceforge.net/indimail/%{name}-permissions.paranoid
 %endif
 
 URL: https://github.com/mbhangui/indimail-virtualdomains
-%if %{undefined suse_version} && %{undefined sles_version}
+%if %{defined suse_version} || %{defined sles_version}
+AutoReqProv: No
+%else
 AutoReqProv: Yes
 %endif
 Requires: indimail-mta > 2.6
