@@ -1,3 +1,6 @@
+/*
+ * $Id: logsrv.c,v 1.25 2024-09-05 19:02:34+05:30 Cprogrammer Exp mbhangui $
+ */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -53,21 +56,13 @@
 #ifdef HAVE_QMAIL
 #include <substdio.h>
 #include <subfd.h>
-#include <getEnvConfig.h>
-#include <tcpbind.h>
 #include <sgetopt.h>
 #include <stralloc.h>
 #include <fmt.h>
-#include <strerr.h>
-#include <getln.h>
-#include <qprintf.h>
-#include <timeoutwrite.h>
-#include <scan.h>
-#include <open.h>
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: logsrv.c,v 1.24 2023-04-14 22:30:46+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: logsrv.c,v 1.25 2024-09-05 19:02:34+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*-
@@ -98,7 +93,7 @@ main(int argc, char **argv)
 char            strnum[FMT_ULONG];
 char           *loghost;
 CLIENT         *cl;
-static char    *usage = "usage: logsrv [-v] [-c connect_timeout] [-d data_timeout] [-r host] dir";
+static char    *usage = "usage: logsrv [-v] [-c connect_timeout] [-d data_timeout] [-r host] statusdir";
 static stralloc line = {0}, rhost = {0}, statusfn = {0}, tmp = {0};
 unsigned long   dtimeout = 300;
 
@@ -277,6 +272,9 @@ getversion_logsrv_c()
 
 /*
  * $Log: logsrv.c,v $
+ * Revision 1.25  2024-09-05 19:02:34+05:30  Cprogrammer
+ * updated usage string
+ *
  * Revision 1.24  2023-04-14 22:30:46+05:30  Cprogrammer
  * removed -c option
  *

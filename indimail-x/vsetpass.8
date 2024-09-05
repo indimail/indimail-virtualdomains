@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH vsetpass 8 "03 Aug 2009" IndiMail "Authentication"
 .SH "NAME"
 vsetpass \- change passwords from across the network using
@@ -23,8 +24,8 @@ uses the
 .B setpassword
 interface for setting the password.
 .B setpassword
-interface provides a simple, uniform password-setting interface to all root applications. It is suitable for use by
-applications such as pop3d, imapd.
+interface provides a simple, uniform password-setting interface to all root
+applications. It is suitable for use by applications such as pop3d, imapd.
 
 .PP
 .I subprogram
@@ -38,8 +39,9 @@ another 0 byte, the new password, and a final one 0 bytes.
 .B vsetpass
 invokes
 .I subprogram
-upon unsuccessful authentication, passing the same data (read earlier on descriptor 3) on a pipe with file descriptor 4
-as the write end and file descriptor 3 as the read end.
+upon unsuccessful authentication, passing the same data (read earlier on
+descriptor 3) on a pipe with file descriptor 4 as the write end and file
+descriptor 3 as the read end.
 .I subprogram
 should read file descriptor 3 and should in turn return 0 to
 .BR vsetpass
@@ -52,47 +54,39 @@ There can be multiple
 .I subprograms
 for a particular type of authentication / password update. The last
 .I subprogram
-should typically be /bin/false or /usr/bin/false depending on your Operating System.
+should typically be /bin/false or /usr/bin/false depending on your
+Operating System.
 
 .PP
 .B vsetpass
-sleeps 5 seconds after an unsuccessful password
-change attempt. This feature is designed to make brute force attacks
-against passwords harder to perform.
+sleeps 5 seconds after an unsuccessful password change attempt. This
+feature is designed to make brute force attacks against passwords harder to
+perform.
 
 .SH "LOGGING"
 Logging is done to descriptor 2.
 .B vsetpass
-logs all authentication and password change attempts whether they are successful or not.
+logs all authentication and password change attempts whether they are
+successful or not.
 
 .SH "EXAMPLE CLIENT-SERVER CONVERSATION"
-All messages passed between server and client are text based allowing
-a client session to be easily mimicked with telnet. Using telnet, 
-changing a user's password would look like this:
+All messages passed between server and client are text based allowing a
+client session to be easily mimicked with tcpclient(1) or telnet(1). Using
+tcpclient, changing a user's password would look like this:
 
-	Connected to localhost.localdomain (127.0.0.1).
-.br
-	Escape character is '^]'.
-.br
-	200 indimail.org hello, who are you?\\r\\n
-.br
-	user <username>\\r\\n
-.br
-	200 Your password please.\\r\\n
-.br
-	pass <current password>
-.br
-	200 Your new password please.\\r\\n
-.br
-	newpass <new password>\\r\\n
-.br
-	200 Password changed, thank-you.\\r\\n
-.br
-	quit\\r\\n
-.br
-	200 Bye.\\r\\n
-.br
-	Connection closed by foreign host.
+.EX
+$ tcpclient -n /etc/indimail/certs/clientcert.pem 0 poppassd
+200 indimail.org hello, who are you?\\r\\n
+user <username>\\r\\n
+200 Your password please.\\r\\n
+pass <current password>
+200 Your new password please.\\r\\n
+newpass <new password>\\r\\n
+200 Password changed, thank-you.\\r\\n
+quit\\r\\n
+200 Bye.\\r\\n
+Connection closed by foreign host.
+.EE
 
 .SH "BUGS"
 .PP

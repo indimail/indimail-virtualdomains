@@ -1,5 +1,8 @@
 /*
  * $Log: crcdiff.c,v $
+ * Revision 1.5  2024-09-05 19:01:08+05:30  Cprogrammer
+ * updated usage string
+ *
  * Revision 1.4  2024-07-18 09:17:52+05:30  Cprogrammer
  * added -C option to display checksum
  *
@@ -62,13 +65,13 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: crcdiff.c,v 1.4 2024-07-18 09:17:52+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: crcdiff.c,v 1.5 2024-09-05 19:01:08+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
 usage(int exitval)
 {
-	fprintf(stderr, "crcdiff [-s] file1 file2)n");
+	fprintf(stderr, "crcdiff [-Cs] [-c critical_list] file1 file2)\n");
 	exit(exitval);
 }
 
