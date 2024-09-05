@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: testindimail-virtual,v 1.31 2024-07-18 09:25:18+05:30 Cprogrammer Exp mbhangui $
+# $Id: testindimail-virtual,v 1.32 2024-09-05 17:23:30+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -453,13 +453,18 @@ setup_svscan()
 			echo $cntrldir               > $servicedir/"$i"$j/variables/CONTROLDIR
 			echo $sysconfdir             > $servicedir/"$i"$j/variables/SYSCONFDIR
 			echo $sysconfdir/users       > $servicedir/"$i"$j/variables/ASSIGNDIR
-			echo $certdir                > $servicedir/"$i"$j/variables/CERTDIR
 			echo $qmaildir               > $servicedir/"$i"$j/variables/DOMAINDIR
 			echo 1                       > $servicedir/"$i"$j/variables/DEBUG
 			echo 1                       > $servicedir/"$i"$j/variables/DEBUG_LOGIN
-			echo NONE                    > $servicedir/"$i"$j/variables/TLS_VERIFYPEER
 			echo 1                       > $servicedir/"$i"$j/variables/OPEN_SMTP
+			echo $certdir                > $servicedir/"$i"$j/variables/CERTDIR
+			echo NONE                    > $servicedir/"$i"$j/variables/TLS_VERIFYPEER
 			echo $certdir/servercert.pem > $servicedir/"$i"$j/variables/TLS_CERTFILE
+			echo $certdir/dhparams.pem   > $servicedir/"$i"$j/variables/TLS_DHPARAMS
+			echo TLSv1.2                 > $servicedir/"$i"$j/variables/TLS_STARTTLS_PROTOCOL
+			echo YES                     > $servicedir/"$i"$j/variables/IMAP_STARTTLS
+			echo YES                     > $servicedir/"$i"$j/variables/POP3_STARTTLS
+			echo /usr/bin/couriertls     > $servicedir/"$i"$j/variables/COURIERTLS
 		done
 		(
 		echo "#!/bin/sh"
@@ -475,7 +480,7 @@ setup_svscan()
 		) > $servicedir/"$i"d/run
 		cp $servicedir/"$i"d/run $servicedir/"$i"d-ssl/run
 		(
-		echo "$tcpserver -o -H -l $HOSTNAME -R -u $INUID -g $INGID $LOCALIP $port1 \\"
+		echo "$tcpserver -o -H -l $HOSTNAME -R -u $INUID -g $INGID,qcerts $LOCALIP $port1 \\"
 		echo "\$prefix/sbin/"$i"login $IMAPMODULES $bindir/"$i"d Maildir"
 		) >> $servicedir/"$i"d/run
 		(
@@ -1548,18 +1553,6 @@ check_relay()
 	return $?
 }
 
-select_relay()
-{
-	TM=$(expr $(date +%s) - 1800)
-	echo "SELECT email,ipaddr from relay where timestamp > $TM" | \
-		$mysql --defaults-file=$sysconfdir/indimail.cnf \
-			-s -u $MYSQL_USER -p$MYSQL_PASS -S $MYSQL_SOCK $MYSQL_DB
-	echo "------------------------------------------"
-	echo "SELECT email,ipaddr,timestamp from relay" | \
-		$mysql --defaults-file=$sysconfdir/indimail.cnf \
-			-s -u $MYSQL_USER -p$MYSQL_PASS -S $MYSQL_SOCK $MYSQL_DB
-}
-
 delete_relay()
 {
 	echo "DELETE from relay where 1=1" | \
@@ -1664,22 +1657,15 @@ auth_pop3()
 	return $?
 }
 
-test_pop3()
+create_tcpclient_pop3()
 {
-	tm1=$(date +"%s.%4N")
-	if [ "$5" = "CRAM-SHA256" ] ; then
-	swaks -S --tls --to $1 --from $1 --server localhost --port $smtp_port -a "CRAM-MD5" -au $1 -ap "$2"
-	else
-	swaks -S --tls --to $1 --from $1 --server localhost --port $smtp_port -a $5 -au $1 -ap "$2"
-	fi
-	check_mail indimail $4 no-delete
 	(
 	echo "#!/bin/sh"
 	echo "exec 0<&6"
 	echo "exec 1>&7"
 	echo "read line"
 	echo "printf \"%s\n\" \"\$line\" 1>&2"
-	if [ "$5" = "PLAIN" ] ; then
+	if [ "$3" = "PLAIN" ] ; then
 		b64=$(printf "\0$1\0$2" | base64)
 		echo "printf \"AUTH PLAIN\r\n\" 1>&2"
 		echo "printf \"AUTH PLAIN\r\n\""
@@ -1687,12 +1673,12 @@ test_pop3()
 		echo "printf \"%s\n\" \"\$line\" 1>&2"
 		echo "printf \"$b64\r\n\" 1>&2"
 		echo "printf \"$b64\r\n\""
-	elif [ "$5" = "CRAM-MD5" -o "$5" = "CRAM-SHA1" -o "$5" = "CRAM-SHA256" ] ; then
-		echo "printf \"AUTH $5\r\n\" 1>&2"
-		echo "printf \"AUTH $5\r\n\""
+	elif [ "$3" = "CRAM-MD5" -o "$3" = "CRAM-SHA1" -o "$3" = "CRAM-SHA256" ] ; then
+		echo "printf \"AUTH $3\r\n\" 1>&2"
+		echo "printf \"AUTH $3\r\n\""
 		echo "read line"
 		echo "line=\$(echo \$line | cut -c3- | sed -e 's/\r//g')"
-		echo "b64=\$($authcram -t $5 $1 $2 \$line | sed -e 's/\r//g')"
+		echo "b64=\$($authcram -t $3 $1 $2 \$line | sed -e 's/\r//g')"
 		echo "printf \"%s\r\n\" \"\$b64\" 1>&2"
 		echo "printf \"%s\r\n\" \"\$b64\""
 	fi
@@ -1762,6 +1748,18 @@ test_pop3()
 	echo "fi"
 	) > $testdir/tcpclient.pop3
 	chmod +x $testdir/tcpclient.pop3
+}
+
+test_pop3()
+{
+	if [ "$5" = "CRAM-SHA256" ] ; then
+		swaks -S --tls --to $1 --from $1 --server localhost --port $smtp_port -a "CRAM-MD5" -au $1 -ap "$2"
+	else
+		swaks -S --tls --to $1 --from $1 --server localhost --port $smtp_port -a $5 -au $1 -ap "$2"
+	fi
+	check_mail indimail $4 no-delete
+
+	create_tcpclient_pop3 $1 $2 $5
 	check_service pop3d
 	tm1=$(date +"%s.%4N")
 	tcpclient -a 10 -vDHR 0 1100 $testdir/tcpclient.pop3 2>$logdir/pop3d/pop3d.log
@@ -1770,13 +1768,14 @@ test_pop3()
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
 		if [ "$5" = "PLAIN" -o "$5" = "LOGIN" ] ; then
-		printf "\r  testing POP3  login %-15s hash=%-8s %-11s and mail retrieval (%s) succeeded %4s [%.4f sec]\n" "$1" "$hash" "$5" "$str" " " "$secs"
+		printf "\r  testing POP3   login %-15s hash=%-8s %-11s +  mail retrieval (%s) succeeded %4s [%.4f sec]\n" "$1" "$hash" "$5" "$str" " " "$secs"
 		else
-		printf "\r  testing POP3  login %-15s hash=xxxxxxxx %-11s and mail retrieval (%s) succeeded %4s [%.4f sec]\n" "$1" "$5" "$str" " " "$secs"
+		printf "\r  testing POP3   login %-15s hash=xxxxxxxx %-11s +  mail retrieval (%s) succeeded %4s [%.4f sec]\n" "$1" "$5" "$str" " " "$secs"
 		fi
 		print_pct
 	else
 		fcount=$(expr $fcount + 1)
+		echo
 		if [ "$5" = "PLAIN" -o "$5" = "LOGIN" ] ; then
 		printf "  testing POP3  login %s hash=%-8s %-11s and mail retrieval (%s) failed\n" "$1" "$hash" "$5" "$str"
 		else
@@ -1798,8 +1797,8 @@ test_pop3()
 		print_pct
 	else
 		fcount=$(expr $fcount + 1)
-		select_relay 2>>$logdir/pop3d/pop3d.log
 		delete_relay 2>>$logdir/pop3d/pop3d.log
+		echo
 		printf "  testing record in relay table failed\n"
 		if [ $prompt -eq 1 ] ; then
 			less $logdir/pop3d/pop3d.log
@@ -1820,8 +1819,8 @@ test_pop3()
 		print_pct
 	else
 		fcount=$(expr $fcount + 1)
-		select_relay 2>>$logdir/pop3d/pop3d.log
 		delete_relay 2>>$logdir/pop3d/pop3d.log
+		echo
 		printf "  testing Open RELAY using POP3  login failed ret1=%d ret2=%d\n" $ret1 $ret2
 		if [ $prompt -eq 1 ] ; then
 			less $logdir/pop3d/pop3d.log
@@ -1844,14 +1843,15 @@ test_pop3()
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
 		if [ "$5" = "PLAIN" -o "$5" = "LOGIN" ] ; then
-		printf "\r  testing POP3S login %-15s hash=%-8s %-11s and mail retrieval (%s) succeeded %4s [%.4f sec]\n" "$1" "$hash" "$5" "$str" " " "$secs"
+		printf "\r  testing POP3S  login %-15s hash=%-8s %-11s +  mail retrieval (%s) succeeded %4s [%.4f sec]\n" "$1" "$hash" "$5" "$str" " " "$secs"
 		else
-		printf "\r  testing POP3S login %-15s hash=xxxxxxxx %-11s and mail retrieval (%s) succeeded %4s [%.4f sec]\n" "$1" "$5" "$str" " " "$secs"
+		printf "\r  testing POP3S  login %-15s hash=xxxxxxxx %-11s +  mail retrieval (%s) succeeded %4s [%.4f sec]\n" "$1" "$5" "$str" " " "$secs"
 		fi
 		print_pct
 	else
 		fcount=$(expr $fcount + 1)
-		delete_relay 2>>$logdir/pop3d/pop3d.log
+		delete_relay 2>>$logdir/pop3d-ssl/pop3d-ssl.log
+		echo
 		if [ "$5" = "PLAIN" -o "$5" = "LOGIN" ] ; then
 		printf "  testing POP3S login %s hash=%s %s and mail retrieval (%s) failed\n" "$1" "$hash" "$5" "$str"
 		else
@@ -1872,13 +1872,13 @@ test_pop3()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		delete_relay 2>>$logdir/pop3d/pop3d.log
+		delete_relay 2>>$logdir/pop3d-ssl/pop3d-ssl.log
 		printf "\r  testing Open RELAY using POP3S login succeeded %64s [%.4f sec]\n" " " "$secs"
 		print_pct
 	else
 		fcount=$(expr $fcount + 1)
-		select_relay 2>>$logdir/pop3d/pop3d.log
-		delete_relay 2>>$logdir/pop3d/pop3d.log
+		echo
+		delete_relay 2>>$logdir/pop3d-ssl/pop3d-ssl.log
 		printf "  testing Open RELAY using POP3S login failed ret1=%d ret2=%d\n" $ret1 $ret2
 		if [ $prompt -eq 1 ] ; then
 			less $logdir/pop3d-ssl/pop3d-ssl.log
@@ -1886,6 +1886,7 @@ test_pop3()
 		[ -z "$failed" ] && failed="open relay pop3s" || failed="$failed, open relay pop3s"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
+	check_mail indimail $4
 }
 
 auth_imap()
@@ -1975,15 +1976,8 @@ auth_imap()
 	return $?
 }
 
-test_imap()
+create_tcpclient_imap()
 {
-	tm1=$(date +"%s.%4N")
-	if [ "$5" = "CRAM-SHA256" ] ; then
-	swaks -S --tls --to $1 --from $1 --server localhost --port $smtp_port -a "CRAM-MD5" -au $1 -ap "$2"
-	else
-	swaks -S --tls --to $1 --from $1 --server localhost --port $smtp_port -a $5 -au $1 -ap "$2"
-	fi
-	check_mail indimail $4 no-delete
 	b64=$(printf "\0$1\0$2" | base64)
 	(
 	echo "#!/bin/sh"
@@ -1991,19 +1985,19 @@ test_imap()
 	echo "exec 1>&7"
 	echo "read key"
 	echo "printf \"%s\n\" \"\$key\" 1>&2"
-	if [ "$5" = "PLAIN" ] ; then
+	if [ "$3" = "PLAIN" ] ; then
 		echo "printf \"a1 AUTHENTICATE PLAIN\r\n\" 1>&2"
 		echo "printf \"a1 AUTHENTICATE PLAIN\r\n\""
 		echo "read line"
 		echo "printf \"%s\n\" \"\$line\" 1>&2"
 		echo "printf \"%s\r\n\" $b64 1>&2"
 		echo "printf \"%s\r\n\" $b64"
-	elif [ "$5" = "CRAM-MD5" -o "$5" = "CRAM-SHA1" -o "$5" = "CRAM-SHA256" ] ; then
-		echo "printf \"a1 AUTHENTICATE $5\r\n\" 1>&2"
-		echo "printf \"a1 AUTHENTICATE $5\r\n\""
+	elif [ "$3" = "CRAM-MD5" -o "$3" = "CRAM-SHA1" -o "$3" = "CRAM-SHA256" ] ; then
+		echo "printf \"a1 AUTHENTICATE $3\r\n\" 1>&2"
+		echo "printf \"a1 AUTHENTICATE $3\r\n\""
 		echo "read line"
 		echo "line=\$(echo \$line | cut -c3- | sed -e 's/\r//g')"
-		echo "b64=\$($authcram -t $5 $1 $2 \$line | sed -e 's/\r//g')"
+		echo "b64=\$($authcram -t $3 $1 $2 \$line | sed -e 's/\r//g')"
 		echo "printf \"%s\r\n\" \"\$b64\" 1>&2"
 		echo "printf \"%s\r\n\" \"\$b64\""
 	fi
@@ -2062,6 +2056,17 @@ test_imap()
 	echo "fi"
 	) > $testdir/tcpclient.imap
 	chmod +x $testdir/tcpclient.imap
+}
+
+test_imap()
+{
+	if [ "$5" = "CRAM-SHA256" ] ; then
+		swaks -S --tls --to $1 --from $1 --server localhost --port $smtp_port -a "CRAM-MD5" -au $1 -ap "$2"
+	else
+		swaks -S --tls --to $1 --from $1 --server localhost --port $smtp_port -a $5 -au $1 -ap "$2"
+	fi
+	check_mail indimail $4 no-delete
+	create_tcpclient_imap $1 $2 $5
 	check_service imapd 3
 	tm1=$(date +"%s.%4N")
 	tcpclient -a 10 -vDHR 0 1430 $testdir/tcpclient.imap 2>$logdir/imapd/imapd.log
@@ -2070,16 +2075,17 @@ test_imap()
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
 		if [ "$5" = "PLAIN" -o "$5" = "LOGIN" ] ; then
-		printf "\r  testing IMAP  login %-15s hash=%-8s %-11s and mail retrieval (%s) succeeded %4s [%.4f sec]\n" "$1" "$hash" "$5" "$str" " " "$secs"
+		printf "\r  testing IMAP   login %-15s hash=%-8s %-11s +  mail retrieval (%s) succeeded %4s [%.4f sec]\n" "$1" "$hash" "$5" "$str" " " "$secs"
 		else
-		printf "\r  testing IMAP  login %-15s hash=xxxxxxxx %-11s and mail retrieval (%s) succeeded %4s [%.4f sec]\n" "$1" "$5" "$str" " " "$secs"
+		printf "\r  testing IMAP   login %-15s hash=xxxxxxxx %-11s +  mail retrieval (%s) succeeded %4s [%.4f sec]\n" "$1" "$5" "$str" " " "$secs"
 		fi
 		print_pct
 	else
+		echo
 		if [ "$5" = "PLAIN" -o "$5" = "LOGIN" ] ; then
-		printf "  testing IMAP  login %s hash=%-8s and mail retrieval (%s) failed\n" "$1" "$hash" "$str"
+		printf "  testing IMAP login %s hash=%-8s and mail retrieval (%s) failed\n" "$1" "$hash" "$str"
 		else
-		printf "  testing IMAP  login %s hash=xxxxxxxx and mail retrieval (%s) failed\n" "$1" "$str"
+		printf "  testing IMAP login %s hash=xxxxxxxx and mail retrieval (%s) failed\n" "$1" "$str"
 		fi
 		if [ $prompt -eq 1 ] ; then
 			less $logdir/imapd/imapd.log
@@ -2088,7 +2094,7 @@ test_imap()
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
 	tm1=$(date +"%s.%4N")
-	check_relay > /dev/null 2>>$logdir/pop3d/pop3d.log
+	check_relay > /dev/null 2>>$logdir/imapd/imapd.log
 	if [ $? -eq 0 ] ; then
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
@@ -2097,8 +2103,8 @@ test_imap()
 		print_pct
 	else
 		fcount=$(expr $fcount + 1)
-		select_relay 2>>$logdir/pop3d/pop3d.log
-		delete_relay 2>>$logdir/pop3d/pop3d.log
+		delete_relay 2>>$logdir/imapd/imapd.log
+		echo
 		printf "  testing record in relay table failed\n"
 		if [ $prompt -eq 1 ] ; then
 			less $logdir/imapd/imapd.log
@@ -2119,8 +2125,8 @@ test_imap()
 		print_pct
 	else
 		fcount=$(expr $fcount + 1)
-		select_relay 2>>$logdir/pop3d/pop3d.log
-		delete_relay 2>>$logdir/pop3d/pop3d.log
+		delete_relay 2>>$logdir/imapd/imapd.log
+		echo
 		printf "  testing Open RELAY using IMAP  login failed ret1=%d ret2=%d\n" $ret1 $ret2
 		if [ $prompt -eq 1 ] ; then
 			less $logdir/imapd/imapd.log
@@ -2137,21 +2143,21 @@ test_imap()
 	tm1=$(date +"%s.%4N")
 	sudo $setuidgid -g qcerts $user tcpclient -a 10 -f $cntrldir/$fn  \
 		-n $certdir/clientcert.pem -vDHR 0 9930 $testdir/tcpclient.imap \
-		2>$logdir/pop3d-ssl/imapd-ssl.log
+		2>$logdir/imapd-ssl/imapd-ssl.log
 	if [ $? -eq 0 ] ; then
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
 		if [ "$5" = "PLAIN" -o "$5" = "LOGIN" ] ; then
-		printf "\r  testing IMAPS login %-15s hash=%-8s %-11s and mail retrieval (%s) succeeded %4s [%.4f sec]\n" "$1" "$hash" "$5" "$str" " " "$secs"
+		printf "\r  testing IMAPS  login %-15s hash=%-8s %-11s +  mail retrieval (%s) succeeded %4s [%.4f sec]\n" "$1" "$hash" "$5" "$str" " " "$secs"
 		else
-		printf "\r  testing IMAPS login %-15s hash=xxxxxxxx %-11s and mail retrieval (%s) succeeded %4s [%.4f sec]\n" "$1" "$5" "$str" " " "$secs"
+		printf "\r  testing IMAPS  login %-15s hash=xxxxxxxx %-11s +  mail retrieval (%s) succeeded %4s [%.4f sec]\n" "$1" "$5" "$str" " " "$secs"
 		fi
 		print_pct
 	else
 		fcount=$(expr $fcount + 1)
-		select_relay 2>>$logdir/pop3d/pop3d.log
-		delete_relay 2>>$logdir/pop3d/pop3d.log
+		delete_relay 2>>$logdir/imapd-ssl/imapd-ssl.log
+		echo
 		if [ "$5" = "PLAIN" -o "$5" = "LOGIN" ] ; then
 		printf "  testing IMAPS login %s hash=%-8s and mail retrieval (%s) failed\n" "$1" "$hash" "$str"
 		else
@@ -2172,13 +2178,13 @@ test_imap()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		delete_relay 2>>$logdir/pop3d/pop3d.log
+		delete_relay 2>>$logdir/imapd-ssl/imapd-ssl.log
 		printf "\r  testing Open RELAY using IMAPS login succeeded %64s [%.4f sec]\n" " " "$secs"
 		print_pct
 	else
 		fcount=$(expr $fcount + 1)
-		select_relay 2>>$logdir/pop3d/pop3d.log
-		delete_relay 2>>$logdir/pop3d/pop3d.log
+		delete_relay 2>>$logdir/imapd-ssl/imapd-ssl.log
+		echo
 		printf "  testing Open RELAY using IMAPS login failed ret1=%d ret2=%d\n" $ret1 $ret2
 		if [ $prompt -eq 1 ] ; then
 			less $logdir/imapd-ssl/imapd-ssl.log
@@ -2186,6 +2192,81 @@ test_imap()
 		[ -z "$failed" ] && failed="open relay imaps" || failed="$failed, open relay imaps"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
+	check_mail indimail $4
+}
+
+test_pop3_starttls()
+{
+	swaks -S --tls --to $1 --from $1 --server localhost --port $smtp_port -a PLAIN -au $1 -ap "$2"
+	check_mail indimail $4 no-delete
+
+	n1=$(openssl ciphers -v | awk '{print $2}' | grep TLS | sort | uniq | tail -1 |cut -c5- |cut -d. -f1)
+	n2=$(openssl ciphers -v | awk '{print $2}' | grep TLS | sort | uniq | tail -1 |cut -c5- |cut -d. -f2)
+	max=$(expr 10 \* $n1 + $n2)
+	[ $max -gt 12 ] && fn=clientciphersuite || fn=clientcipherlist
+
+	create_tcpclient_pop3 $1 $2 "PLAIN"
+	sed -i -e '4,5d' $testdir/tcpclient.pop3
+	check_service pop3d-ssl 3
+
+	tm1=$(date +"%s.%4N")
+	sudo $setuidgid -g qcerts $user tcpclient -s pop3 -a 10 -f $cntrldir/$fn  \
+		-n $certdir/clientcert.pem -vDHR 0 1100 $testdir/tcpclient.pop3 >$logdir/pop3d-ssl/pop3d-ssl.log 2>&1
+	if [ $? -eq 0 ] ; then
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing POP3STARTTLS %-15s hash=%-8s PLAIN       +  mail retrieval (%s) succeeded %4s [%.4f sec]\n" "$1" "$hash" "$str" " " "$secs"
+		print_pct
+	else
+		fcount=$(expr $fcount + 1)
+		delete_relay 2>>$logdir/pop3d-ssl/pop3d-ssl.log
+		echo
+		printf "  testing POP3 STARTTLS login %s hash=%-8s and mail retrieval (%s) failed\n" "$1" "$hash" "$str"
+		if [ $prompt -eq 1 ] ; then
+			less $logdir/pop3d-ssl/pop3d-ssl.log
+		fi
+		[ -z "$failed" ] && failed="POP3 STARTTLS login $hash" || failed="$failed, POP3 STARTTLS login $hash"
+		[ $continue_on_err -eq 0 ] && exit 1 || return 0
+	fi
+	delete_relay 2>>$logdir/pop3d-ssl/pop3d-ssl.log
+}
+
+test_imap_starttls()
+{
+	swaks -S --tls --to $1 --from $1 --server localhost --port $smtp_port -a PLAIN -au $1 -ap "$2"
+	check_mail indimail $4 no-delete
+
+	n1=$(openssl ciphers -v | awk '{print $2}' | grep TLS | sort | uniq | tail -1 |cut -c5- |cut -d. -f1)
+	n2=$(openssl ciphers -v | awk '{print $2}' | grep TLS | sort | uniq | tail -1 |cut -c5- |cut -d. -f2)
+	max=$(expr 10 \* $n1 + $n2)
+	[ $max -gt 12 ] && fn=clientciphersuite || fn=clientcipherlist
+
+	create_tcpclient_imap $1 $2 "PLAIN"
+	sed -i -e '4,5d' $testdir/tcpclient.imap
+	check_service imapd-ssl 3
+
+	tm1=$(date +"%s.%4N")
+	sudo $setuidgid -g qcerts $user tcpclient -s imap -a 10 -f $cntrldir/$fn  \
+		-n $certdir/clientcert.pem -vDHR 0 1430 $testdir/tcpclient.imap >$logdir/imapd-ssl/imapd-ssl.log 2>&1
+	if [ $? -eq 0 ] ; then
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing IMAPSTARTTLS %-15s hash=%-8s PLAIN       +  mail retrieval (%s) succeeded %4s [%.4f sec]\n" "$1" "$hash" "$str" " " "$secs"
+		print_pct
+	else
+		fcount=$(expr $fcount + 1)
+		delete_relay 2>>$logdir/imapd-ssl/imapd-ssl.log
+		echo
+		printf "  testing IMAP STARTTLS login %s hash=%-8s and mail retrieval (%s) failed\n" "$1" "$hash" "$str"
+		if [ $prompt -eq 1 ] ; then
+			less $logdir/imapd/imapd.log
+		fi
+		[ -z "$failed" ] && failed="IMAP STARTTLS login $hash" || failed="$failed, IMAP STARTTLS login $hash"
+		[ $continue_on_err -eq 0 ] && exit 1 || return 0
+	fi
+	delete_relay 2>>$logdir/imapd-ssl/imapd-ssl.log
 }
 
 do_post_handle()
@@ -2396,7 +2477,7 @@ do_valias()
 		SYSCONFDIR=$sysconfdir \
 		CONTROLDIR=$cntrldir \
 		DOMAINDIR=$qmaildir \
-	valias -i "&$2" $1 # forward mails to testuser1 to testuser2
+	valias -i "&$2" $1 # forward mails from testuser1 to testuser2
 	if [ $? -eq 0 ] ; then
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
@@ -2832,10 +2913,13 @@ do_plain_cram_user_tests()
 			test_imap $testuser2 $t2 $testuser1 $destdir2/Maildir "PLAIN"
 			test_imap $testuser1 $t1 $testuser2 $destdir1/Maildir "PLAIN"
 			if [ "$hash" = "default" ] ; then
-			test_imap $testuser3 $t3 $testuser1 $destdir3/Maildir "CRAM-MD5"
-			test_imap $testuser3 $t3 $testuser1 $destdir3/Maildir "CRAM-SHA1"
-			test_imap $testuser3 $t3 $testuser1 $destdir3/Maildir "CRAM-SHA256"
+				test_imap $testuser3 $t3 $testuser1 $destdir3/Maildir "CRAM-MD5"
+				test_imap $testuser3 $t3 $testuser1 $destdir3/Maildir "CRAM-SHA1"
+				test_imap $testuser3 $t3 $testuser1 $destdir3/Maildir "CRAM-SHA256"
 			fi
+			check_mail indimail $destdir1/Maildir
+			test_pop3_starttls $testuser1 $t1 $testuser2 $destdir1/Maildir
+			test_imap_starttls $testuser1 $t1 $testuser2 $destdir1/Maildir
 			printf "\r  testing SMTP AUTH, qmail-remote, IMAP/POP3 login tests for hash $hash plain/cram users succeeded"
 		done
 		delete_user $testuser1
@@ -2937,19 +3021,24 @@ do_scram_user_tests()
 			done
 			destdir1=$($sudo $setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -d $testuser1 | awk '{print $3}')
 			check_service pop3d 3
-			test_pop3 $testuser1 $t1 $testuser2 $destdir1 "PLAIN"
 			check_service pop3d-ssl 3
+			test_pop3 $testuser1 $t1 $testuser2 $destdir1 "PLAIN"
+			check_service imapd 3
+			check_service imapd-ssl 3
 			test_imap $testuser1 $t1 $testuser2 $destdir1 "PLAIN"
+			test_pop3_starttls $testuser1 $t1 $testuser2 $destdir1/Maildir
+			test_imap_starttls $testuser1 $t1 $testuser2 $destdir1/Maildir
 		done
 		delete_user $testuser1
 		delete_user $testuser2
 		printf "\r%126s" " "
 		printf "\r  testing SMTP AUTH, IMAP/POP3 login, GSASL tests for hash $hash scram users succeeded\n"
 	done
-	tcount=$(expr $tcount + 3)
+	tcount=$(expr $tcount + 4)
 	printf "  testing command tcpserver non-encrypted succeeded\n"
 	printf "  testing command tcpclient non-encrypted succeeded\n"
 	printf "  testing command tcpclient encrypted     succeeded\n"
+	printf "  testing command tcpclient starttls      succeeded\n"
 	print_pct
 }
 
@@ -4424,7 +4513,7 @@ failed=""
 if [ -f $testdir/itotal.count ] ; then
 	total_tests=$(cat $testdir/itotal.count)
 else
-	total_tests=1371
+	total_tests=1413
 fi
 prompt=1
 continue_on_err=0
@@ -4580,6 +4669,9 @@ exit 0
 
 #
 # $Log: testindimail-virtual,v $
+# Revision 1.32  2024-09-05 17:23:30+05:30  Cprogrammer
+# added imap/pop3 starttls tests
+#
 # Revision 1.31  2024-07-18 09:25:18+05:30  Cprogrammer
 # added tests for XOAUTH2 authentication
 #
