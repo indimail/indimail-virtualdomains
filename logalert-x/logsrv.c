@@ -1,5 +1,5 @@
 /*
- * $Id: logsrv.c,v 1.26 2024-09-05 20:22:26+05:30 Cprogrammer Exp mbhangui $
+ * $Id: logsrv.c,v 1.27 2024-09-05 21:12:32+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -60,10 +60,15 @@
 #include <stralloc.h>
 #include <fmt.h>
 #include <strerr.h>
+#include <getln.h>
+#include <timeoutwrite.h>
+#include <open.h>
+#include <qprintf.h>
+#include <scan.h>
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: logsrv.c,v 1.26 2024-09-05 20:22:26+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: logsrv.c,v 1.27 2024-09-05 21:12:32+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*-
@@ -273,6 +278,9 @@ getversion_logsrv_c()
 
 /*
  * $Log: logsrv.c,v $
+ * Revision 1.27  2024-09-05 21:12:32+05:30  Cprogrammer
+ * included additional qmail headers
+ *
  * Revision 1.26  2024-09-05 20:22:26+05:30  Cprogrammer
  * added strerr.h
  *
