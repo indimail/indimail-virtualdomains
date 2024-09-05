@@ -1,5 +1,5 @@
 /*
- * $Id: logsrv.c,v 1.25 2024-09-05 19:02:34+05:30 Cprogrammer Exp mbhangui $
+ * $Id: logsrv.c,v 1.26 2024-09-05 20:22:26+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -59,10 +59,11 @@
 #include <sgetopt.h>
 #include <stralloc.h>
 #include <fmt.h>
+#include <strerr.h>
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: logsrv.c,v 1.25 2024-09-05 19:02:34+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: logsrv.c,v 1.26 2024-09-05 20:22:26+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*-
@@ -272,6 +273,9 @@ getversion_logsrv_c()
 
 /*
  * $Log: logsrv.c,v $
+ * Revision 1.26  2024-09-05 20:22:26+05:30  Cprogrammer
+ * added strerr.h
+ *
  * Revision 1.25  2024-09-05 19:02:34+05:30  Cprogrammer
  * updated usage string
  *
