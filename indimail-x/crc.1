@@ -11,7 +11,7 @@ crcdiff \- compare two crc lists and report the difference
 .PP
 \fBcrc\fR [-dv] [-i \fIinitial_crc\fR] file ...
 .PP
-\fBcrcdiff\fR [-s] [-c \fIcritical_list\fR] \fIcrclist\fR \fIcrclist\fR
+\fBcrcdiff\fR [-Cs] [-c \fIcritical_list\fR] \fIcrclist\fR \fIcrclist\fR
 
 .SH DESCRIPTION
 For each file, \fBcrc\fR calculates and prints a 32-bit CRC in hexadecimal.
@@ -30,7 +30,8 @@ link-level protocol).
 
 \fBcrcdiff\fR compares two crc lists and reports the differences. If -c
 option is used, directories/files listed in \fIcritical_list\fR will be
-used to give L2 warnings for changes to such files.
+used to give L2 warnings for changes to such files. The -C option displays
+the checksum in the diff.
 
 .EX
   corrupt    - crc changed without date change 

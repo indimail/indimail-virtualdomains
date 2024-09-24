@@ -7,10 +7,10 @@ vmoveuserdir \- move homedir of a virtual user to a new path
 \fBvmoveuserdir\fR \fIemail_addr\fR \fInew_homedir\fR
 
 .SH DESCRIPTION
-\fBvmoveuserdir\fR changes the current homedir path to \fInew_homedir\fR,
+\fBvmoveuserdir\fR changes the current homedir to \fInew_homedir\fR,
 moving all existing files to the new path. \fBvmoveuserdir\fR has setuid
 bit set and can be run by the root user, by user having uid/gid of the
-domain in @sysconfdir@/users/assign or if the user has the gid of the
+domain in \fI@sysconfdir@/users/assign\fR or if the user has the gid of the
 domain as a supplementary group.
 
 .SH POST HANDLE
