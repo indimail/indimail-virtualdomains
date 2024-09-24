@@ -28,7 +28,7 @@ jobs:
       run: |
         sudo apt-get update; sudo apt-get install libncurses5-dev
         cd indimail-utils; ./prepare_obs indimail-utils
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v4
       with:
         name: indimail-utils
         path: ~/stage

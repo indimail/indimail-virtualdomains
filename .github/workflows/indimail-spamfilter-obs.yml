@@ -23,7 +23,7 @@ jobs:
       run: |
         sudo apt-get update; sudo apt-get install xmlto libgsl-dev bison flex libdb-dev
         cd indimail-spamfilter-x; ./default.configure; make ;make clean;./prepare_obs indimail-spamfilter
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v4
       with:
         name: indimail-spamfilter
         path: ~/stage

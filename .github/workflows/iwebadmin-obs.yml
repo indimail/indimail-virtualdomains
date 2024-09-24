@@ -31,7 +31,7 @@ jobs:
       run: cd indimail-x; ./default.configure; sudo make install-strip
     - name: prepare obs
       run: cd iwebadmin-x; ./prepare_obs iwebadmin
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v4
       with:
         name: iwebadmin
         path: ~/stage

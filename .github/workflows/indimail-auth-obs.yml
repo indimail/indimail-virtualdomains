@@ -33,7 +33,7 @@ jobs:
     - name: prepare obs
       run: |
         cd indimail-auth; ./prepare_obs indimail-auth
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v4
       with:
         name: indimail-auth
         path: ~/stage

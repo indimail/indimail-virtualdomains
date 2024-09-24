@@ -25,7 +25,7 @@ jobs:
       run: |
         sudo apt-get update; sudo apt-get install automake gettext autopoint libpam0g-dev libpcre3-dev libgdbm-dev libdb-dev libgcrypt20-dev python2 libssl-dev bison flex libidn2-dev
         cd indimail-access; ./prepare_obs indimail-access
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v4
       with:
         name: indimail-access
         path: ~/stage

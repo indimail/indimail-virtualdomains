@@ -22,7 +22,7 @@ jobs:
       run: |
         sudo apt-get update; sudo apt-get install libmysqlclient-dev tcl-dev
         cd indium-x; ./prepare_obs indium
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v4
       with:
         name: indium
         path: ~/stage
