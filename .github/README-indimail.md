@@ -6338,7 +6338,7 @@ Once all your configuration is ready, you can move <u>.mpdev</u> to <u>mpdev</u>
 Rename .mpdev to mpdev
 
 # cd /service
-# mv .mpdev mpd
+# mv .mpdev mpdev
 # svps -h
 ```
 
