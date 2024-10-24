@@ -6312,7 +6312,6 @@ Create the wait config file
 echo "10"
 echo "mpd"
 ) > wait
-```
 
 Create the log/run file
 
