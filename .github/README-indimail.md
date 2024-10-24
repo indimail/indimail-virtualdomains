@@ -6046,17 +6046,17 @@ Above was a very simplistic explanation of svscan and bit about <b>supervise</b>
 * If your system has <u>/run</u> or <u>/var/run</u>, <b>svscan</b> writes it pid to <u>.svscan.pid</u> in <u>/run/svscan</u> (or <u>/var/run/svscan</u>) directory in exclusive mode. If <u>.svscan.pid</u> exists it reads the pid from this file and checks if the pid belongs to another <b>svscan</b> process. If it does, <b>svscan</b> exits 0. If the pid belongs to another process, <b>svscan</b> removes the pidfile and proceeds further. If <u>/run/svscan</u> (or <u>/var/run/svscan</u>) doesn't exist, it is created.
 * It sets <b>SCANDIR</b> and <b>PWD</b> environment variable setting them to the value of <u>scandir</u>.
 * If <b>SETSID</b> environment variable is set, <b>svscan</b> becomes a session leader by calling setsid(2).
-* If <b>SCANLOG</b> is set, <b>svscan</b> sets up a logger to write all output on descriptor 1 and 2 to the directory <u>/var/log/svscan/current</u>.
+* If <b>SCANLOG</b> is set, <b>svscan</b> sets up a logger to write all output on descriptor 1 and 2 to the log <u>/var/log/svscan/current</u>.
 * <b>svscan</b> sets up signal handers for <b>SIGHUP</b> and <b>SIGTERM</b>. The <b>SIGHUP</b> handler reaps childs that die and <b>SIGTERM</b> handler shuts down <b>supervise</b> processes gracefully.
-* If <b>INITCMD</b> environment variable is set, it calls an initialization program (value of <b>INITCMD</b> env variable). If <b>INITCMD</b> is set but empty, <b>svscan</b> executes /service/.svscan/run if /service/.svscan/run has executable bit set. This initialization routine is run only once during the lifespan of supervise.
+* If <b>INITCMD</b> environment variable is set, it calls an initialization program (value of <b>INITCMD</b> env variable). If <b>INITCMD</b> is set but empty, <b>svscan</b> executes /service/.svscan/run if it has the executable bit set. This initialization routine is run only once during the lifespan of supervise.
 * It then gets the value of <b>AUTOSCAN</b> environment variable.
 * It then finds all subdirectories in <u>scandir</u>.
 * From this point onwards it runs forever
-* If <b>AUTOSCAN</b> variable is not set or if it's value is zero, <b>svscan</b> runs in an infinite loop of 60 seconds. If any supervised service dies, it restarts it. The default of 60 seconds can be changed by setting <b>SCANINTERVAL</b> environment variable. Without <b>AUTOSCAN</b> set, the only job of <b>svscan</b> is to reap processes that die. <b>svscan</b> doesn't scan <u>scandir</u> after startup. So new services if created will not get started automatically. But you can send a HUP signal to <b>svscan</b> to scan <u>scandir</u>.
+* If <b>AUTOSCAN</b> variable is not set or if it's value is zero, <b>svscan</b> runs in an infinite loop of 60 seconds. If any supervised service dies, it restarts it. The default of 60 seconds can be changed by setting <b>SCANINTERVAL</b> environment variable. Without <b>AUTOSCAN</b> set, the only job of <b>svscan</b> is to reap processes that die. <b>svscan</b> doesn't scan <u>scandir</u> after startup. So new services if created will not get started automatically. But you can send a HUP signal to <b>svscan</b> to scan <u>scandir</u> and take up new services to be started and monitored.
 * If <b>AUTOSCAN</b> variable is set, wakes up every 60 seonds to scan <u>scandir</u> for new subdirectories. The default of 60 seconds can be changed by setting <b>SCANINTERVAL</b> environment variable.
 * The name of every subdirectory represents a service.
 * For each subdirectory <u>dir</u>, <b>svscan</b> starts a supervised process passing the subdirectory name <u>dir</u> as a single argument to [supervise(8)](https://github.com/indimail/indimail-mta/wiki/supervise.8).
-* If the subdirectory has a subdirectory named log, <b>svscan</b> starts another supervised process passing two arguments; The subdirctory name <u>log</u> as the first argument and <u>dir</u> as the second argument. <b>svscan</b> also creates a pipe when <u>dir/log</u> exists. The output of the first supervised process on descriptor 1 is passed through the pipe to the second supervised process. Thus, the second supervised process can read descriptor 0 to log the output of the first supervised process to a log file. If you use [multilog](https://github.com/indimail/indimail-mta/wiki/multilog.8), the output typically gets logged to <u>/var/log/svc/dir/current</u>. This pipe is always kept open so that even if the log process dies, <b>svscan</b> can again start another supervised log process which reads the pending data in the pipe and log it safely. This ensures that logs do not get lost as long as <b>svscan</b> is up and running. If <b>svscan</b> dies, this pipe will get closed and you may end up loosing any data that was written to the pipe but not read by the logger.
+* If the subdirectory has a subdirectory named log, <b>svscan</b> starts another supervised process passing two arguments; The subdirctory name <u>log</u> as the first argument and <u>dir</u> as the second argument. <b>svscan</b> also creates a pipe when <u>dir/log</u> exists. The output of the first supervised process on descriptor 1 is passed through the pipe to the second supervised process. Thus, the second supervised process can read descriptor 0 to log the output of the first supervised process to a log file. If you use [multilog](https://github.com/indimail/indimail-mta/wiki/multilog.8), the output typically gets logged to <u>/var/log/svc/dir/current</u>. This pipe is always kept open, so that, even if the log process dies, <b>svscan</b> can again start another supervised log process which reads the pending data in the pipe and log it safely. This ensures that output logged by your service do not get lost as long as <b>svscan</b> is up and running. If <b>svscan</b> dies, this pipe will get closed and you may end up loosing any data that was written to the pipe but not read by the logger.
 * <b>svscan</b> executes <u>/service/.svscan/shutdown</u> if it exists on receipt of <b>SIGTERM</b>. You can write your shutdown script to kill all non-logger supervised processes first. You can do this by using [svc(8)](https://github.com/indimail/indimail-mta/wiki/svc.8) by calling `svc -dxW /service/*`. Once the <b>svc</b> command returns you can use `svc -dxW /service/*/log` to terminate all log processes.
 * After executing shutdown program, what <b>svscan</b> does, depends on if it is running as PID 1 or PID > 1.
 * If running as PID 1, <b>svscan</b> sends a <b>SIGTERM</b> signal to all supervised process using kill(0, SIGTERM), waits for 30 seconds to send a second <b>SIGTERM</b> using kill(0, SIGTERM) and again waits for 30 seconds before sending a third <b>SIGTERM</b> using kill(0, SIGTERM). The time intervals between sending the <b>SIGTERM</b> signal can be adjusted by setting KILLWAIT, KILLWAIT1, KILLWAIT2 environment variables. See [svscan(8)](https://github.com/indimail/indimail-mta/wiki/svscan.8) for explanation of these variables.
@@ -6066,7 +6066,7 @@ Above was a very simplistic explanation of svscan and bit about <b>supervise</b>
 
 ## The supervise program
 
-[supervise(8)](https://github.com/indimail/indimail-mta/wiki/supervise.8) monitors a service, restarting the service if it goes down. It makes sure to stay alive. It can run initialization jobs on behalf of a service before it starts up. It can run cleanup/shutdown jobs when a service is brought down normally or if it goes down abnormally. It can run a program to setup alerts or do housekeeping if the service crashes. You can start <b>supervise</b> manually, by specifying a directory configured for <b>supervise</b>, on the command line. It can also be started automatically by [svscan(8)](https://github.com/indimail/indimail-mta/wiki/svscan.8). If you have just few sevices that need to be started you can also write systemd unit files to run <b>supervise</b> for those services.
+[supervise(8)](https://github.com/indimail/indimail-mta/wiki/supervise.8) monitors a service, restarting the service if it goes down. It takes various measures to stay alive unless asked to quit. It can run initialization jobs on behalf of a service before it starts up. It can run cleanup/shutdown jobs when a service is brought down normally or if it goes down abnormally. It can run a program to setup alerts or do housekeeping if the service crashes. It can wait for another service to start up. You can start <b>supervise</b> manually, by specifying a directory configured for <b>supervise</b>, on the command line. It can also be started automatically by [svscan(8)](https://github.com/indimail/indimail-mta/wiki/svscan.8). If you have just few sevices that need to be started you can also write systemd unit files to run <b>supervise</b> for those services.
 
 * <b>supervise</b> needs an argument <u>dir</u> passed on the command line. <u>dir</u> should be relative to the current directory and cannot start with `.` or the `/` character. You can pass a second argument to <b>supervise</b> so that it shows up in ps(1) listing.
 * <b>supervise</b> changes directory to <u>dir</u>.
@@ -6075,7 +6075,7 @@ Above was a very simplistic explanation of svscan and bit about <b>supervise</b>
 * After <u>./init</u> exits with zero exit status, <b>supervise</b> starts <u>./run</u>. It restarts <u>./run</u> if <u>./run</u> exits.
 * In case <u>./run</u> exits with non-zero status, it pauses for a second after restarting <u>./run</u>. It does this to avoid hogging up the CPU.
 * <b>supervise</b> expects <u>./run</u> to remain in the foreground. Sometimes daemon fork themselves into background, which some consider bad software design. If you want to monitor such a daemon, set the sticky bit on <u>./run</u>. This makes <b>supervise</b> go into subreaper mode using prctl(2) PR\_SET\_CHILD\_SUBREAPER on Linux or procctl(2) PROC\_REAP\_ACQUIRE on FreeBSD. In subpreaper mode or when the environment variable <b>SETPGID</b> is set, <u>./run</u> will have it's process Group ID set to the value of it's PID. Setting the process Group ID is required to monitor <u>./run</u> reliably when <u>./run</u> has a command which double forks (forks in the background). It is also required in such cases to make [svc(8)](https://github.com/indimail/indimail-mta/wiki/svc.8) command operate and control <b>supervise</b> reliably for such double forked daemon/commands in <u>./run</u>.
-* The script <u>./run</u> is passed two command line arguments with <u>dir</u> as argv[1] and how as argv[2]. The value of <b>how</b> is depicted in the table below. You can use these arguments to take decisions in </u>./run</u>.
+* The script <u>./run</u> is passed two command line arguments with <u>dir</u> as argv[1] and <u>how</u> as argv[2]. The value of <u>how</u> is depicted in the table below. You can use these arguments to take decisions in </u>./run</u>.
 
     how|Description
     -----------------|-----------
@@ -6092,15 +6092,15 @@ Above was a very simplistic explanation of svscan and bit about <b>supervise</b>
 * <b>supervise</b> may exit immediately after startup if it cannot find the files it needs in <u>dir</u> or if another copy of <b>supervise</b> is already running in <u>dir</u>. Once <b>supervise</b> is successfully running, it will not exit unless it is killed or specifically asked to exit.
 * Once <b>supervise</b> is successfully running, it will not exit unless it is killed or specifically asked to exit by using the <b>svc</b> command.
 * On a successful startup supervise opens the fifo <u>dir/supervise/ok</u> in <b>O\_RDONLY</b>|<b>O\_NDELAY</b> mode.
-* When started by <b>svscan</b>, error messages printed by <b>supervise</b> will go the standard error output of <b>svscan</b> process. You can redirect this in <u>dir/run</u> file.
+* When started by <b>svscan</b> and <u>dir/log/run</u> exists, error messages printed by <b>supervise</b> will go to the standard error output of <b>svscan</b> process. You can redirect this in <u>dir/run</u> file by doing `exec 2>&1`
 * <b>supervise</b> can wait for another service by having a file named <u>dir/wait</u>. This file has two lines. The first line is time <u>t</u> in seconds and the second line is service name <u>w</u>. <u>w</u> refers to the service which service <u>dir</u> should wait <u>t</u> secs after service <u>w</u> starts up. The amount of time <u>t</u> is limited to a max of 32767 secs. Any value above this value will be limited to 60 secs.
 * <b>supervise</b> opens <u>dir/supervise/up</u> in read mode just after it executes <u>./run</u>. Hence, if service <u>w</u> is up, write on <u>w/supervise/up</u> returns immediately. If service <u>w</u> is down, the write will block until <u>w</u> is up and running. If service <u>w</u> doesn't have <b>supervise</b> running, <b>supervise</b> will wait for 60 seconds before opening the file <u>w/supervise/up</u> again in read mode. The default value of 60 seconds gets overriden by the <b>SCANINTERVAL</b> environment variable used by <b>svscan</b>. If service <u>w</u> doesn't exist, <u>dir/wait</u> will be ignored.
-* <b>supervise</b> opens <u>dir/supervise/dn</u> in read mode when asked to bring down a service using svc (-d or -r option). It opens this named pipe after issuing the <b>SIGTERM</b>, <b>SIGCONT</b> signal to the service. Hence, if service <u>w</u> is down, write on <u>w/supervise/dn</u> returns immediately. if service <u>w</u> is up, the write will block until <u>w</u> is down.
+* <b>supervise</b> opens <u>dir/supervise/dn</u> in read mode when asked to bring down a service using svc (-d or -r option). It opens this named pipe after executing <u>dir/shutdown</u> and after issuing the <b>SIGTERM</b>, <b>SIGCONT</b> signal to the service. Hence, if service <u>w</u> is down, write on <u>w/supervise/dn</u> returns immediately. if service <u>w</u> is up, the write will block until <u>w</u> is down.
 * <b>supervise</b> logs informational, warning and error messages to descriptor 2. Informational messages can be turned on by setting the environment variable <b>VERBOSE</b>. Warning messages can be turned off by setting the environment variable <b>SILENT</b>. If you are using <b>svscan</b> for service startup (as setup for indimail-mta), you can set environment variables for <b>supervise</b> in <u>/service/.svscan/variables directory</u>.
 
 ### The svc, svstat programs
 
-The [svc(8)](https://github.com/indimail/indimail-mta/wiki/svc.8) command is used for interfacing with <b>supervise</b>. You can used it to start, stop, restart services managed by <b>supervise</b>. You can use it also to stop <b>supervise</b> itself. The [svstat(8)](https://github.com/indimail/indimail-mta/wiki/svstat.8) command can be used to display the status of a service or multiple services. You can also use the [svps(1)](https://github.com/indimail/indimail-mta/wiki/svps.1) command to display the status of all supervised service and supervised log services.
+The [svc(8)](https://github.com/indimail/indimail-mta/wiki/svc.8) command is used for interfacing with <b>supervise</b>. You can use it to start, stop, restart services managed by <b>supervise</b>. You can use it also to stop <b>supervise</b> itself. The [svstat(8)](https://github.com/indimail/indimail-mta/wiki/svstat.8) command can be used to display the status of a service or multiple services. You can also use the [svps(1)](https://github.com/indimail/indimail-mta/wiki/svps.1) command to display the status of all supervised service and supervised log services.
 
 e.g.
 ```
@@ -6229,13 +6229,10 @@ mkdir -p /service/mpdev/variables
 echo /home/mbhangui > /service/mpdev/variables/HOME
 ```
 
-Then your ./run file will look like this
+Then your ./run file can look like this
 
 ```
 #!/bin/sh
-# generated run script for  on Tuesday 10 September 2024 10:48:06 PM IST
-# by the below command
-# /usr/libexec/mpdev/create_service --servicedir=/service --user=1000 --add-service
 exec 2>&1
 
 exec /usr/bin/envdir variables /usr/bin/mpdev -v
@@ -6275,7 +6272,7 @@ An example of <u>dir/log/run</u> for a supervised service will be like this
 exec setuidgid qmaill /usr/sbin/splogger <u>dir</u>
 ```
 
-## Creating a supervised service](#creating-a-supervised-service)
+## Creating a supervised service
 
 To create a supervised service you need to have the following informaton at hand
 
@@ -6338,6 +6335,8 @@ chmod +x alert
 Once all your configuration is ready, you can move <u>.mpdev</u> to <u>mpdev</u> so that <b>svscan</b> will pick it up in the next scan and start it. Or you can send a HUP signal to svscan by calling `svps -h`.
 
 ```
+Rename .mpdev to mpdev
+
 # cd /service
 # mv .mpdev mpd
 # svps -h
