@@ -158,7 +158,17 @@ Table of Contents
       * [DKIM Author Domain Signing Practices](#dkim-author-domain-signing-practices)
       * [Testing outbound signatures](#testing-outbound-signatures)
       * [DKIM signing for bounces](#dkim-signing-for-bounces)
-   * [iwebadmin – Web Administration of IndiMail](#iwebadmin--web-administration-of-indimail)
+   * [svscan and supervise](#svscan-and-supervise)
+      * [The svscan program](#the-svscan-program)
+      * [The supervise program](#the-supervise-program)
+        * [The svc, svstat programs](#the-svc-svstat-programs)
+        * [Setting limits for supervised programs](#setting-limits-for-supervised-programs)
+        * [Setting environment varibles for supervised programs](#setting-environment-variables-for-supervised-programs)
+      * [Logging supervised services](#logging-supervised-services)
+        * [The multilog program](#the-multilog-program)
+        * [The splogger program](#the-splogger-program)
+      * [Creating a supervised service](#creating-a-supervised-service)
+   * [iwebadmin - Web Administration of IndiMail](#iwebadmin---web-administration-of-indimail)
    * [Publishing statistics for IndiMail Server](#publishing-statistics-for-indimail-server)
    * [RoundCube Installation for IndiMail](#roundcube-installation-for-indimail)
    * [Setting up MySQL](#setting-up-mysql)
@@ -5992,7 +6002,349 @@ $ cd /etc/indimail/control
 # echo "*:DKIMSIGN=/etc/indimail/control/domainkeys/default,BOUNCEQUEUE=/usr/sbin/qmail-dkim" > bounce.envrules
 ```
 
-# iwebadmin – Web Administration of IndiMail
+# svscan and supervise
+
+Each and every service in indimail is supervised. This is implemented by using [svscan(8)](https://github.com/indimail/indimail-mta/wiki/svscan.8). All services are configured in the directory <u>/service</u>. The way this happens is through a systemd <b>service</b> file <u>/usr/lib/systemd/system/svscan.service</u>. Using this service file, [svscanboot(8)](https://github.com/indimail/indimail-mta/wiki/svscanboot.8) invokes <b>svscan</b> as `/usr/sbin/svscan /service`. <b>svscan</b> then scans the directory <u>/service</u> and runs <b>supervise</b> on each directory found, to start up, various indimail services. Each of the subdirecotry in <u>/service</u> has configuration to start, shutdown the service and (optionally) log data from the service to a file named current in <u>/var/log/svc/service_name</u> directory. This log is created by [multilog(8)](https://github.com/indimail/indimail-mta/wiki/multilog.8).
+
+<b>systemd service file for svscan</b>
+
+```
+# svscan - runlevel compatibility
+# WARNING: This file was auto-generated. Do not edit!
+#
+#
+# $Id: systemd.in,v 1.10 2024-02-26 02:08:36+05:30 Cprogrammer Exp mbhangui $
+#
+[Unit]
+Description=SVscan Service
+After=local-fs.target network.target
+
+[Service]
+ExecStart=/usr/libexec/indimail/svscanboot /service
+ExecStop=/usr/bin/qmailctl stop
+Restart=on-failure
+RestartSec=10
+Type=simple
+PrivateTmp=no
+
+[Install]
+Alias=indimail.service
+Alias=indimail-mta.service
+WantedBy=multi-user.target
+# Start daemontools
+# to start - systemctl start svscan|indimail|indimail-mta
+# to stop  - systemctl stop  svscan|indimail|indimail-mta
+```
+
+Above was a very simplistic explanation of svscan and bit about <b>supervise</b>. Let us dwell into this in detail by understanding few of the main programs that are used to implement supervised services.
+
+## The svscan program
+
+[svscan(8)](https://github.com/indimail/indimail-mta/wiki/svscan.8) scans a directory given on command line or the current directory if run without any arguments. This directory is known as <u>scandir</u>. Every subdirectory in <u>scandir</u> represents a service and svscan uses [supervise(8)](https://github.com/indimail/indimail-mta/wiki/supervise.8) program to start and monitor these services represented by the subdirectories in <u>scandir</u>.
+
+* If given <u>scandir</u> argument <b>svscan</b> switches to it, else it uses the current directory.
+* If your system has <u>/run</u> or <u>/var/run</u>, <b>svscan</b> writes it pid to <u>.svscan.pid</u> in <u>/run/svscan</u> (or <u>/var/run/svscan</u>) directory in exclusive mode. If <u>.svscan.pid</u> exists it reads the pid from this file and checks if the pid belongs to another <b>svscan</b> process. If it does, <b>svscan</b> exits 0. If the pid belongs to another process, <b>svscan</b> removes the pidfile and proceeds further. If <u>/run/svscan</u> (or <u>/var/run/svscan</u>) doesn't exist, it is created.
+* The use of <u>/run</u> (or <u>/var/run</u>) allows <b>svscan</b> to have <u>scandir</u> located in a read-only filesystem. However, it makes <b>svscan</b> switch back and forth between subdirectories in <u>scandir</u> and sub directories in <u>/run/svscan</u> (or <u>/var/run/svscan</u>) directory. This can cause <b>svscan</b> to exit if there is any problem using chdir(2). If you don't like this behaviour, set the <b>DISABLE_RUN</b> environment variable in <u>/service/.svscan/variables</u>.
+* It sets <b>SCANDIR</b> and <b>PWD</b> environment variable setting them to the value of <u>scandir</u>.
+* If <b>SETSID</b> environment variable is set, <b>svscan</b> becomes a session leader by calling setsid(2).
+* If <b>SCANLOG</b> is set, <b>svscan</b> sets up a logger to write all output on descriptor 1 and 2 to the log <u>/var/log/svscan/current</u>.
+* <b>svscan</b> sets up signal handers for <b>SIGHUP</b> and <b>SIGTERM</b>. The <b>SIGHUP</b> handler reaps childs that die and <b>SIGTERM</b> handler shuts down <b>supervise</b> processes gracefully.
+* If <b>INITCMD</b> environment variable is set, it calls an initialization program (value of <b>INITCMD</b> env variable). If <b>INITCMD</b> is set but empty, <b>svscan</b> executes /service/.svscan/run if it has the executable bit set. This initialization routine is run only once during the lifespan of supervise.
+* It then gets the value of <b>AUTOSCAN</b> environment variable.
+* It then finds all subdirectories in <u>scandir</u>.
+* From this point onwards it runs forever
+* If <b>AUTOSCAN</b> variable is not set or if it's value is zero, <b>svscan</b> runs in an infinite loop of 60 seconds. If any supervised service dies, it restarts it. The default of 60 seconds can be changed by setting <b>SCANINTERVAL</b> environment variable. Without <b>AUTOSCAN</b> set, the only job of <b>svscan</b> is to reap processes that die. <b>svscan</b> doesn't scan <u>scandir</u> after startup. So new services if created will not get started automatically. But you can send a HUP signal to <b>svscan</b> to scan <u>scandir</u> and take up new services to be started and monitored.
+* If <b>AUTOSCAN</b> variable is set, wakes up every 60 seonds to scan <u>scandir</u> for new subdirectories. The default of 60 seconds can be changed by setting <b>SCANINTERVAL</b> environment variable.
+* The name of every subdirectory represents a service.
+* For each subdirectory <u>dir</u>, <b>svscan</b> starts a supervised process passing the subdirectory name <u>dir</u> as a single argument to [supervise(8)](https://github.com/indimail/indimail-mta/wiki/supervise.8).
+* If the subdirectory has a subdirectory named log, <b>svscan</b> starts another supervised process passing two arguments; The subdirctory name <u>log</u> as the first argument and <u>dir</u> as the second argument. <b>svscan</b> also creates a pipe when <u>dir/log</u> exists. The output of the first supervised process on descriptor 1 is passed through the pipe to the second supervised process. Thus, the second supervised process can read descriptor 0 to log the output of the first supervised process to a log file. If you use [multilog](https://github.com/indimail/indimail-mta/wiki/multilog.8), the output typically gets logged to <u>/var/log/svc/dir/current</u>. This pipe is always kept open, so that, even if the log process dies, <b>svscan</b> can again start another supervised log process which reads the pending data in the pipe and log it safely. This ensures that output logged by your service do not get lost as long as <b>svscan</b> is up and running. If <b>svscan</b> dies, this pipe will get closed and you may end up loosing any data that was written to the pipe but not read by the logger.
+* <b>svscan</b> executes <u>/service/.svscan/shutdown</u> if it exists on receipt of <b>SIGTERM</b>. You can write your shutdown script to kill all non-logger supervised processes first. You can do this by using [svc(8)](https://github.com/indimail/indimail-mta/wiki/svc.8) by calling `svc -dxW /service/*`. Once the <b>svc</b> command returns you can use `svc -dxW /service/*/log` to terminate all log processes.
+* After executing shutdown program, what <b>svscan</b> does, depends on if it is running as PID 1 or PID > 1.
+* If running as PID 1, <b>svscan</b> sends a <b>SIGTERM</b> signal to all supervised process using kill(0, SIGTERM), waits for 30 seconds to send a second <b>SIGTERM</b> using kill(0, SIGTERM) and again waits for 30 seconds before sending a third <b>SIGTERM</b> using kill(0, SIGTERM). The time intervals between sending the <b>SIGTERM</b> signal can be adjusted by setting KILLWAIT, KILLWAIT1, KILLWAIT2 environment variables. See [svscan(8)](https://github.com/indimail/indimail-mta/wiki/svscan.8) for explanation of these variables.
+* If <b>svscan</b> is running as PID > 1 and TERMINATE\_SESSION environment variable is set, <b>svscan</b> sends a <b>SIGTERM</b> to all it's supervised processes using kill(0, SIGTERM) immediately.
+* <b>svscan</b> then startes reaping all processes as they terminate as a result of geting <b>SIGTERM</b> signal.
+* <b>svscan</b> then exits.
+
+## The supervise program
+
+[supervise(8)](https://github.com/indimail/indimail-mta/wiki/supervise.8) monitors a service, restarting the service if it goes down. It takes various measures to stay alive unless asked to quit. It can run initialization jobs on behalf of a service before it starts up. It can run cleanup/shutdown jobs when a service is brought down normally or if it goes down abnormally. It can run a program to setup alerts or do housekeeping if the service crashes. It can wait for another service to start up. You can start <b>supervise</b> manually, by specifying a directory configured for <b>supervise</b>, on the command line. It can also be started automatically by [svscan(8)](https://github.com/indimail/indimail-mta/wiki/svscan.8). If you have just few sevices that need to be started you can also write systemd unit files to run <b>supervise</b> for those services.
+
+* <b>supervise</b> needs an argument <u>dir</u> passed on the command line. <u>dir</u> should be relative to the current directory and cannot start with `.` or the `/` character. You can pass a second argument to <b>supervise</b> so that it shows up in ps(1) listing.
+* <b>supervise</b> changes directory to <u>dir</u>.
+* If the directory <u>run/svscan</u> exists, supervise creates the directory <u>dir/supervise</u> in <u>run/svscan</u> where run is either <u>/run</u> or <u>/var/run</u> tmpfs filesystem (depending on your operating system). The directory <u>run/svscan</u> is created by svscan when <b>DISABLE\_RUN</b> isn't set. supervise maintains status information in a binary format in the directory <u>dir/supervise</u>. The directory <u>dir</u> must be writable to supervise. The status information can be read by <b>svstat</b>.
+* <b>supervise</b> looks for a program named <b>init</b>. If found it executes it. In case <u>./init</u> exits with non-zero status, it pauses for 60 seconds before restarting <u>./init</u>. It does this to avoid hogging up the CPU. <u>./init</u> is run only once during the lifespan of <b>supervise</b>
+* The use of <u>/run</u> (or <u>/var/run</u>) allows <b>supervise</b> to have <u>dir</u> located in a read-only filesystem. However, it makes them switch back and forth between <u>dir</u> and <u>/run/svscan/dir</u> (or <u>/var/run/svscan/dir</u>) directory. This can cause <b>supervise</b> to exit if there is any problem using chdir(2). If you don't like this behaviour, set the <b>DISABLE_RUN</b> environment variable in <u>/service/.svscan/variables</u>.
+* After <u>./init</u> exits with zero exit status, <b>supervise</b> starts <u>./run</u>. It restarts <u>./run</u> if <u>./run</u> exits.
+* In case <u>./run</u> exits with non-zero status, it pauses for a second after restarting <u>./run</u>. It does this to avoid hogging up the CPU.
+* <b>supervise</b> uses the [self pipe trick](https://cr.yp.to/docs/selfpipe.html) to detect when the <u>./run</u> exits.
+* <b>supervise</b> expects <u>./run</u> to remain in the foreground. Sometimes daemon fork themselves into background, which some consider bad software design. If you want to monitor such a daemon, set the sticky bit on <u>./run</u>. This makes <b>supervise</b> go into subreaper mode using prctl(2) PR\_SET\_CHILD\_SUBREAPER on Linux or procctl(2) PROC\_REAP\_ACQUIRE on FreeBSD. In subpreaper mode or when the environment variable <b>SETPGID</b> is set, <u>./run</u> will have it's process Group ID set to the value of it's PID. Setting the process Group ID is required to monitor <u>./run</u> reliably when <u>./run</u> has a command which double forks (forks in the background). It is also required in such cases to make [svc(8)](https://github.com/indimail/indimail-mta/wiki/svc.8) command operate and control <b>supervise</b> reliably for such double forked daemon/commands in <u>./run</u>.
+* The script <u>./run</u> is passed two command line arguments with <u>dir</u> as argv[1] and <u>how</u> as argv[2]. The value of <u>how</u> is depicted in the table below. You can use these arguments to take decisions in </u>./run</u>.
+
+    how|Description
+    -----------------|-----------
+    abnormal startup|When <u>./run</u> exits on its own
+    system failure|When <b>supervise</b> is unable to fork to execute <u>./run</u>
+    manual restart|When svc -u or -r is used to start the service
+    one-time startup|When svc -o is used to start the service
+    auto startup|Normal startup after <b>supervise</b> is run by <b>svscan</b> or manually
+
+* If the file <u>dir/down</u> exists, <b>supervise</b> does not start <u>./run</u> immediately. You can use <b>svc</b> to start <u>./run</u> or to give other commands to <b>supervise</b>. <b>supervise</b> uses <u>dir/supervise/control</u> fifo to read these commands.
+* On receipt of <b>SIGTERM</b>, <b>supervise</b> sends <b>SIGTERM</b> followed by <b>SIGCONT</b> to its child. It uses killpg(3) to send the signal if runnning in supreaper mode or when <b>SETPGID</b> environment variable is set. It uses kill(2) to send signals when not running in subreaper mod and when <b>SETPGID</b> environment variable is not set. <b>supervise</b> requires two <b>SIGTERM</b> signals to get terminated when running as a logger and when started by <b>svscan</b> running as PID 1.
+* if the file <u>dir/shutdown</u> exists <b>supervise</b> executes <u>./shutdown</u> when asked to exit. <u>dir</u> is passed as the first argument and the pid of the process that exited is passed as the second argument to <u>./shutdown</u>.
+* if the file <u>dir/alert</u> exists <b>supervise</b> executes alert whenever run exits. <u>dir</u> is passed as the first argument, the pid of the process that exited is passed as the second argument, the exit value or signal (if killed by signal) is passed as the third argument to alert. The fourth argument is either of the strings exited or stopped / signalled.
+* <b>supervise</b> may exit immediately after startup if it cannot find the files it needs in <u>dir</u> or if another copy of <b>supervise</b> is already running in <u>dir</u>. Once <b>supervise</b> is successfully running, it will not exit unless it is killed or specifically asked to exit.
+* Once <b>supervise</b> is successfully running, it will not exit unless it is killed or specifically asked to exit by using the <b>svc</b> command.
+* On a successful startup supervise opens the fifo <u>dir/supervise/ok</u> in <b>O\_RDONLY</b>|<b>O\_NDELAY</b> mode.
+* When started by <b>svscan</b> and <u>dir/log/run</u> exists, error messages printed by <b>supervise</b> will go to the standard error output of <b>svscan</b> process. You can redirect this in <u>dir/run</u> file by doing `exec 2>&1`
+* <b>supervise</b> can wait for another service by having a file named <u>dir/wait</u>. This file has two lines. The first line is time <u>t</u> in seconds and the second line is service name <u>w</u>. <u>w</u> refers to the service which service <u>dir</u> should wait <u>t</u> secs after service <u>w</u> starts up. The amount of time <u>t</u> is limited to a max of 32767 secs. Any value above this value will be limited to 60 secs.
+* <b>supervise</b> opens <u>dir/supervise/up</u> in read mode just after it executes <u>./run</u>. Hence, if service <u>w</u> is up, write on <u>w/supervise/up</u> returns immediately. If service <u>w</u> is down, the write will block until <u>w</u> is up and running. If service <u>w</u> doesn't have <b>supervise</b> running, <b>supervise</b> will wait for 60 seconds before opening the file <u>w/supervise/up</u> again in read mode. The default value of 60 seconds gets overriden by the <b>SCANINTERVAL</b> environment variable used by <b>svscan</b>. If service <u>w</u> doesn't exist, <u>dir/wait</u> will be ignored.
+* <b>supervise</b> opens <u>dir/supervise/dn</u> in read mode when asked to bring down a service using svc (-d or -r option). It opens this named pipe after executing <u>dir/shutdown</u> and after issuing the <b>SIGTERM</b>, <b>SIGCONT</b> signal to the service. Hence, if service <u>w</u> is down, write on <u>w/supervise/dn</u> returns immediately. if service <u>w</u> is up, the write will block until <u>w</u> is down.
+* <b>supervise</b> logs informational, warning and error messages to descriptor 2. Informational messages can be turned on by setting the environment variable <b>VERBOSE</b>. Warning messages can be turned off by setting the environment variable <b>SILENT</b>. If you are using <b>svscan</b> for service startup (as setup for indimail-mta), you can set environment variables for <b>supervise</b> in <u>/service/.svscan/variables directory</u>.
+
+### The svc, svstat programs
+
+The [svc(8)](https://github.com/indimail/indimail-mta/wiki/svc.8) command is used for interfacing with <b>supervise</b>. You can use it to start, stop, restart services managed by <b>supervise</b>. You can use it also to stop <b>supervise</b> itself. The [svstat(8)](https://github.com/indimail/indimail-mta/wiki/svstat.8) command can be used to display the status of a service or multiple services. You can also use the [svps(1)](https://github.com/indimail/indimail-mta/wiki/svps.1) command to display the status of all supervised service and supervised log services.
+
+e.g.
+```
+# svstat /service/qmail-smtpd.25
+/service/qmail-smtpd.25/: up 5290 seconds pid 1518870 
+
+# svstat /service/*smtpd*
+/service/qmail-smtpd.25: up 5290 seconds pid 1518870 
+/service/qmail-smtpd.366: up 5290 seconds pid 1518910 
+/service/qmail-smtpd.465: up 5290 seconds pid 1518700 
+/service/qmail-smtpd.587: up 5290 seconds pid 1518928 
+
+# svps
+============ svscan                state uptime ===== pid/spid ==
+/usr/sbin/svscan /service          up      5325 secs  pid 1518668
+
+============ /service              state uptime ===== pid/spid ==
+/service/conslog.6339              down    5325 secs spid 1518755
+/service/fetchmail                 down    5325 secs spid 1518701
+/service/httpd                     down    5325 secs spid 1518735
+/service/mpdev                     down    5325 secs spid 1518751
+/service/qmail-qmqpd.628           down    5325 secs spid 1518694
+/service/notify-screen             up         1 secs  pid 1530929
+/service/clamd                     up      5285 secs  pid 1519751
+/service/inlookup.infifo           up      5315 secs  pid 1519502
+/service/dnscache                  up      5325 secs  pid 1518822
+/service/fclient                   up      5325 secs  pid 1518826
+/service/freshclam                 up      5325 secs  pid 1518796
+/service/greylist.1999             up      5325 secs  pid 1518948
+/service/indisrvr.4000             up      5325 secs  pid 1518926
+/service/mrtg                      up      5325 secs  pid 1518759
+/service/mysql.3306                up      5325 secs  pid 1518875
+/service/php-fpm                   up      5325 secs  pid 1518911
+/service/proxy-imapd.4143          up      5325 secs  pid 1518770
+/service/proxy-imapd-ssl.9143      up      5325 secs  pid 1518794
+/service/proxy-pop3d.4110          up      5325 secs  pid 1518768
+/service/proxy-pop3d-ssl.9110      up      5325 secs  pid 1518931
+/service/qmail-daned.1998          up      5325 secs  pid 1518917
+/service/qmail-imapd.143           up      5325 secs  pid 1518785
+/service/qmail-imapd-ssl.993       up      5325 secs  pid 1518924
+/service/qmail-logfifo             up      5325 secs  pid 1518761
+/service/qmail-pop3d.110           up      5325 secs  pid 1518795
+/service/qmail-pop3d-ssl.995       up      5325 secs  pid 1518774
+/service/qmail-poppass.106         up      5325 secs  pid 1518771
+/service/qmail-qmtpd.209           up      5325 secs  pid 1518923
+/service/qmail-send.25             up      5325 secs  pid 1518710
+/service/qmail-smtpd.25            up      5325 secs  pid 1518870
+/service/qmail-smtpd.366           up      5325 secs  pid 1518910
+/service/qmail-smtpd.465           up      5325 secs  pid 1518700
+/service/qmail-smtpd.587           up      5325 secs  pid 1518928
+/service/qscanq                    up      5325 secs  pid 1518961
+/service/resolvconf                up      5325 secs  pid 1518842
+/service/scrobble-button           up      5325 secs  pid 1518790
+/service/slowq-send                up      5325 secs  pid 1518884
+/service/udplogger.3000            up      5325 secs  pid 1518784
+
+# svps -d
+============ svscan                state uptime ===== pid/spid ==
+/usr/sbin/svscan /service          up    0 days, 01 hrs, 29 mins, 14 secs  pid 1518668
+
+============ /service              state uptime ===== pid/spid ==
+/service/conslog.6339              down  0 days, 01 hrs, 29 mins, 15 secs spid 1518755
+/service/fetchmail                 down  0 days, 01 hrs, 29 mins, 15 secs spid 1518701
+/service/httpd                     down  0 days, 01 hrs, 29 mins, 15 secs spid 1518735
+/service/mpdev                     down  0 days, 01 hrs, 29 mins, 15 secs spid 1518751
+/service/qmail-qmqpd.628           down  0 days, 01 hrs, 29 mins, 15 secs spid 1518694
+/service/notify-screen             up    0 days, 00 hrs, 00 mins, 01 secs  pid 1531659
+/service/clamd                     up    0 days, 01 hrs, 28 mins, 35 secs  pid 1519751
+/service/inlookup.infifo           up    0 days, 01 hrs, 29 mins, 05 secs  pid 1519502
+/service/dnscache                  up    0 days, 01 hrs, 29 mins, 15 secs  pid 1518822
+/service/fclient                   up    0 days, 01 hrs, 29 mins, 15 secs  pid 1518826
+/service/freshclam                 up    0 days, 01 hrs, 29 mins, 15 secs  pid 1518796
+/service/greylist.1999             up    0 days, 01 hrs, 29 mins, 15 secs  pid 1518948
+/service/indisrvr.4000             up    0 days, 01 hrs, 29 mins, 15 secs  pid 1518926
+/service/mrtg                      up    0 days, 01 hrs, 29 mins, 15 secs  pid 1518759
+/service/mysql.3306                up    0 days, 01 hrs, 29 mins, 15 secs  pid 1518875
+/service/php-fpm                   up    0 days, 01 hrs, 29 mins, 15 secs  pid 1518911
+/service/proxy-imapd.4143          up    0 days, 01 hrs, 29 mins, 15 secs  pid 1518770
+/service/proxy-imapd-ssl.9143      up    0 days, 01 hrs, 29 mins, 15 secs  pid 1518794
+/service/proxy-pop3d.4110          up    0 days, 01 hrs, 29 mins, 15 secs  pid 1518768
+/service/proxy-pop3d-ssl.9110      up    0 days, 01 hrs, 29 mins, 15 secs  pid 1518931
+/service/qmail-daned.1998          up    0 days, 01 hrs, 29 mins, 15 secs  pid 1518917
+/service/qmail-imapd.143           up    0 days, 01 hrs, 29 mins, 15 secs  pid 1518785
+/service/qmail-imapd-ssl.993       up    0 days, 01 hrs, 29 mins, 15 secs  pid 1518924
+/service/qmail-logfifo             up    0 days, 01 hrs, 29 mins, 15 secs  pid 1518761
+/service/qmail-pop3d.110           up    0 days, 01 hrs, 29 mins, 15 secs  pid 1518795
+/service/qmail-pop3d-ssl.995       up    0 days, 01 hrs, 29 mins, 15 secs  pid 1518774
+/service/qmail-poppass.106         up    0 days, 01 hrs, 29 mins, 15 secs  pid 1518771
+/service/qmail-qmtpd.209           up    0 days, 01 hrs, 29 mins, 15 secs  pid 1518923
+/service/qmail-send.25             up    0 days, 01 hrs, 29 mins, 15 secs  pid 1518710
+/service/qmail-smtpd.25            up    0 days, 01 hrs, 29 mins, 15 secs  pid 1518870
+/service/qmail-smtpd.366           up    0 days, 01 hrs, 29 mins, 15 secs  pid 1518910
+/service/qmail-smtpd.465           up    0 days, 01 hrs, 29 mins, 15 secs  pid 1518700
+/service/qmail-smtpd.587           up    0 days, 01 hrs, 29 mins, 15 secs  pid 1518928
+/service/qscanq                    up    0 days, 01 hrs, 29 mins, 15 secs  pid 1518961
+/service/resolvconf                up    0 days, 01 hrs, 29 mins, 15 secs  pid 1518842
+/service/scrobble-button           up    0 days, 01 hrs, 29 mins, 15 secs  pid 1518790
+/service/slowq-send                up    0 days, 01 hrs, 29 mins, 15 secs  pid 1518884
+/service/udplogger.3000            up    0 days, 01 hrs, 29 mins, 15 secs  pid 1518784
+```
+
+### Setting limits for supervised programs
+
+You can use various methods for setting limits for your service. You can use [softlimit(8)](https://github.com/indimail/indimail-mta/wiki/softlimit.8), the ulimit program by calling it in <u>./run</u>. e.g. The ./run file below sets a data segement soft limit for httpd to 1024000 bytes
+
+```
+#!/bin/sh
+# created by roundcube_config for indimail+roundcube docker container
+# service started by docker-entrypoint
+#
+if [ ! -d /usr/share/roundcubemail/config -a ! -L /usr/share/roundcubemail/config ] ; then
+  echo "ln -s /etc/roundcubemail /usr/share/roundcubemail/config"
+  ln -s /etc/roundcubemail /usr/share/roundcubemail/config
+fi
+mkdir -p /run/httpd
+exec softlimit -d 1024000 /usr/sbin/httpd -DFOREGROUND
+
+```
+
+### Setting environment variables for supervised programs
+
+For any supervised service <u>dir</u>, you can set environment variables in <u>dir/variables</u> directory. e.g. you want to set <b>HOME=/home/mbhangui</b> for a service named mpdev, you can use [envdir(8)](https://github.com/indimail/indimail-mta/wiki/envdir.8) like below 
+
+```
+mkdir -p /service/mpdev/variables
+echo /home/mbhangui > /service/mpdev/variables/HOME
+```
+
+Then your ./run file can look like this
+
+```
+#!/bin/sh
+exec 2>&1
+
+exec /usr/bin/envdir variables /usr/bin/mpdev -v
+```
+
+## Logging supervised services
+
+If you are using <b>svscan</b> to manage your supervised services you can log output from your service <u>dir</u>, by having <u>dir/log/run</u> file. You can simply use the cat command. If you want to have precise timestamps and have the ability to rotate your logs, you can use [multilog(8)](https://github.com/indimail/indimail-mta/wiki/multilog.8). If you want your logs to go to your system logs, you can use [splogger(8)](https://github.com/indimail/indimail-mta/wiki/splogger.8).
+
+### The multilog program
+
+[multilog(8)](https://github.com/indimail/indimail-mta/wiki/multilog.8) - reads a sequence of lines from stdin and appends selected lines to any number of logs. To use multilog in your supervised scripts, you can have the following script in <u>dir/log/run</u>.
+
+```
+#!/bin/sh
+exec /usr/bin/setuidgid qmaill 
+  /usr/sbin/multilog t /var/log/svc/<u>dir</u>
+```
+
+You can rotate the logs for service <u>dir</u> by doing `svc -a /service/dir/log`. With the <u>t</u> option passed to multilog, a price timestamp is put on every line. This can be read by using [tai64nlocal(8)](https://github.com/indimail/indimail-mta/wiki/tai64nlocal.8).
+
+### The splogger program
+
+* splogger reads a series of messages and feeds them to syslog. At the front of each message it puts tag (default: splogger) and a numerical timestamp.
+* splogger checks for alert: or warning: at the beginning of each message. It selects a priority of LOG\_ALERT, LOG\_WARNING, or LOG\_INFO accordingly.
+* splogger logs messages with facility fac. fac (default: 2) must be numeric.
+* splogger converts unprintable characters to question marks.
+* splogger does not log blank lines.
+* splogger folds messages after 800 characters, since syslog can't handle long messages. splogger uses a + after the timestamp to mark folded lines.
+
+Note that the syslog mechanism is inherently unreliable: it does not guarantee that messages will be logged. It is also very slow.
+
+An example of <u>dir/log/run</u> for a supervised service will be like this
+
+```
+#!/bin/sh
+exec setuidgid qmaill /usr/sbin/splogger <u>dir</u>
+```
+
+## Creating a supervised service
+
+To create a supervised service you need to have the following informaton at hand
+
+1. name of the service. Let's say the name of this service is <u>mpdev</u>.
+2. Do you want to do some initialization once. If yes create <u>mpdev</u>/init with your initialization commands.
+3. How to start your service. This should be a command that when executed stays in the foreground. This command should be in the file <u>mpdev</u>/run. 
+4. How to shutdown your service. If all that is required to stop the service is sending it a TERM signal, then you don't need to do anything. If your application requires a shutdown command you need to create <u>mpdev/shutdown</u>
+5. Does it have to wait for a service? If yes, then you have to create <u>mpdev/wait</u>. It should have two lines. The first line should be number of seconds your service has to wait after the dependency service is started. The second line should be the name of the service for which your current service should wait. Let's say our service <b>mpdev</b> should be started after another service named <b>mpd</b>.
+6. If your service goes down abnormally, do you require an alert to be sent? If yes, create a file <u>mpdev/alert</u> which has a command that sends an alert
+7. Do you want to log the output of your mpdev service? If yes, then create a file <u>mpdev</u>/log/run
+8. Do you want an alert to be send if your service goes down abnormally. If yes, create <u>mpdev/alert</u> file
+9. Do you want to set an environment variable. If yes, create the environment variables in <u>mpdev/variables</u> directory
+10. Do you want to set some limits for your service. If yes, use softlimit in your run script
+
+With the above information at hand, let's create the service. we will create a service for mpdev with the RSS limited to 1024000 bytes and set two environment variables MPD\_HOST and MPD\_PORT.
+
+```
+Create the run file
+
+# mkdir -p /service/.mpdev/log
+# mkdir -p /service/.mpdev/variables
+# cd /service/.mpdev
+(
+echo "#!/bin/sh"
+echo "exec 2>&1" # redirect standard error to log output
+echo "exec softlimit -r 1024000 /usr/bin/envdir variables /usr/bin/mpdev -v"
+) > run
+chmod +x run
+
+Create environment variables
+echo "192.168.2.101" > variables/MPD_HOST
+echo "6600"          > variables/MPD_PORT
+
+Create the wait config file
+
+(
+echo "10"
+echo "mpd"
+) > wait
+
+Create the log/run file
+
+(
+echo "#!/bin/sh"
+echo "exec /usr/bin/setuidgid qmaill \\"
+echo "  /usr/sbin/multilog t /var/log/svc/mpdev"
+) > log/run
+chmod +x log/run
+
+Create alert file
+(
+echo "#!/bin/sh"
+echo "echo mpdev failed | mail -s \"mpdev failed\" root@localhost"
+echo "exit 0"
+) > alert
+chmod +x alert
+```
+
+Once all your configuration is ready, you can move <u>.mpdev</u> to <u>mpdev</u> so that <b>svscan</b> will pick it up in the next scan and start it. Or you can send a HUP signal to svscan by calling `svps -h`.
+
+```
+Rename .mpdev to mpdev
+
+# cd /service
+# mv .mpdev mpdev
+# svps -h
+```
+
+# iwebadmin - Web Administration of IndiMail
 
 I always find using the web ugly. It is a pain using the mouse almost all the time to do anything. One of the reasons I have never focussed on building a web administration tool for Indimail.
 
