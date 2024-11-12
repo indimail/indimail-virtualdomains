@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: checkout_ircube
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: prepare obs
       run: cd ircube-x; ./prepare_obs ircube
