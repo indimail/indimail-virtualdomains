@@ -26,7 +26,7 @@ jobs:
     - name: extra_packages
       run: |
         if [ "${OS}" = "macos-latest" ] ; then brew install automake autoconf libtool pkgconfig openssl mysql gsasl; fi
-        if [ "${OS}" = "macos-latest" ] ; then sudo mkdir -p /usr/local/include /usr/local/lib; sudo ln -sf /opt/homebrew/Cellar/mysql/9.0.1_2/include/mysql /usr/local/include/mysql; sudo ln -s /opt/homebrew/Cellar/mysql/9.0.1_2/lib/mysql /usr/local/lib/mysql; fi
+        if [ "${OS}" = "macos-latest" ] ; then sudo mkdir -p /usr/local/include /usr/local/lib; sudo ln -sf /opt/homebrew/Cellar/mysql/9.0.1_4/include/mysql /usr/local/include/mysql; sudo ln -s /opt/homebrew/Cellar/mysql/9.0.1_4/lib/mysql /usr/local/lib/mysql; fi
         if [ "${OS}" = "ubuntu-latest" ] ; then sudo apt-get install gcc g++ automake autoconf libtool libssl-dev libmysqlclient-dev libncurses5-dev libgsasl7-dev; fi
         if [ "${OS}" = "ubuntu-22.04" ] ; then sudo apt-get install gcc g++ automake autoconf libtool libssl-dev libmysqlclient-dev libncurses5-dev libgsasl-dev; fi
       env:
