@@ -1387,9 +1387,9 @@ The below configuration causes all inbound SMTP email to be fed through the filt
 
 ```
 $ sudo /bin/bash
-# echo /usr/sbin/qmail-multi   > /srevice/qmail-smtpd.25/variables/QMAILQUEUE
-# echo /usr/local/bin/myfilter > /service/qmail-smtpd.25/variables/FILTERARGS
-# echo "/usr/sbin/qmail-dkim"  > /service/qmail-smtpd.25/variables/QUEUEPROG
+# echo "/usr/sbin/qmail-multi"   > /service/qmail-smtpd.25/variables/QMAILQUEUE
+# echo "/usr/local/bin/myfilter" > /service/qmail-smtpd.25/variables/FILTERARGS
+# echo "/usr/sbin/qmail-dkim"    > /service/qmail-smtpd.25/variables/QUEUEPROG
 # svc -r /service/qmail-smtpd.25
 ```
 
