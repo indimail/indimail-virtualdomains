@@ -2036,8 +2036,8 @@ You can keep on updating the subfolders easy\_ham\_2 and spam\_2 subfolders in <
 
 You can refer the following documents for more clarity.
 
-1. https://github.com/indimail/indimail-virtualdomains/blob/master/indimail-spamfilter-x/GETTING.STARTED
-2. https://github.com/indimail/indimail-virtualdomains/blob/master/indimail-spamfilter-x/doc/bogofilter-tuning.HOWTO.html
+1. [Getting Started](https://github.com/indimail/indimail-virtualdomains/blob/master/indimail-spamfilter-x/GETTING.STARTED)
+2. [Bogofilter Tuning](https://htmlpreview.github.io/?https://github.com/indimail/indimail-virtualdomains/blob/master/indimail-spamfilter-x/doc/bogofilter-tuning.HOWTO.html)
 
 ## SPAM Control using badip control file
 
