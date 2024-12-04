@@ -105,13 +105,13 @@ Summary:
 
     Here are some sample commands:
 
-       bogofilter -vn < ham.message.file
-       bogofilter -vnM <ham.message.mbox
-       bogofilter -vnMB ham.maildir
+       bogofilter -vn  < ham.message.file
+       bogofilter -vnM < ham.message.mbox
+       bogofilter -vnB   ham.maildir
 
-       bogofilter -vs < spam.message.file
-       bogofilter -vsM <spam.message.mbox
-       bogofilter -vsMB spam.maildir
+       bogofilter -vs  < spam.message.file
+       bogofilter -vsM < spam.message.mbox
+       bogofilter -vsB   spam.maildir
 
 3. Setting up the mail transfer and delivery agents
 ---------------------------------------------------
