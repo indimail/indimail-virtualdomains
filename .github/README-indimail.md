@@ -2014,16 +2014,30 @@ Training [bogofilter(1)](https://github.com/indimail/indimail-mta/wiki/bogofilte
 ```
 $ mkdir /home/manny/bogofilter
 $ cd /home/manny/bogofilter
+
+# Download spamassasin corpus
 $ curl -s https://raw.githubusercontent.com/indimail/indimail-virtualdomains/master/bogofilter-wordlist-x/download.sh | sh
+
+# run training.sh script
 $ curl -s https://raw.githubusercontent.com/indimail/indimail-virtualdomains/master/bogofilter-wordlist-x/training.sh | sh
+
+# copy wordlist.db to /etc/indimail
 $ sudo cp wordlist.db /etc/indimail
 $ sudo chmod 644 /etc/indimail/wordlist.db
 $ sudo chown indimail:indimail /etc/indimail/wordlist.db
+
+# Download training.sh for later use
+$ wget https://raw.githubusercontent.com/indimail/indimail-virtualdomains/master/bogofilter-wordlist-x/training.sh
 ```
 
 The above steps will download the spamasassin corpus in the directory <u>/home/manny/bogofilter/training</u> and also create a bogofilter spam database wordlist.db trained from spamassasin corpus at http://spamassassin.apache.org/old/publiccorpus.
 
 You can keep on updating the subfolders easy\_ham\_2 and spam\_2 subfolders in <u>/home/manny/bogofilter/training</u> directory and run the training.sh script. One possible method could be to have a script that uses the find command to copy ham emails from your Maildir subfolders, that you know for sure have non-spam emails, to the easy\_ham\_2 subfolder in the training directory. You can have folder named `Spam` in your Maildir where you move spam emails using your mail client. This will be spam emails not caught by [bogofilter(1)](https://github.com/indimail/indimail-mta/wiki/bogofilter.1). You can have the same script copy spam mails from `Spam` folder to spam\_2 subfolder in the training directory.
+
+You can refer the following documents for more clarity.
+
+1. https://github.com/indimail/indimail-virtualdomains/blob/master/indimail-spamfilter-x/GETTING.STARTED
+2. https://github.com/indimail/indimail-virtualdomains/blob/master/indimail-spamfilter-x/doc/bogofilter-tuning.HOWTO.html
 
 ## SPAM Control using badip control file
 
