@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: testindimail-virtual,v 1.32 2024-09-05 17:23:30+05:30 Cprogrammer Exp mbhangui $
+# $Id: testindimail-virtual,v 1.33 2024-12-12 21:23:35+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -420,6 +420,7 @@ setup_svscan()
 	echo 1 > $servicedir/.svscan/variables/DISABLE_RUN
 	echo 1 > $servicedir/.svscan/variables/SCANLOG
 	echo 1 > $servicedir/.svscan/variables/SILENT
+	echo 1 > $servicedir/.svscan/variables/VERBOSE
 	echo   > $servicedir/.svscan/variables/INITCMD
 	echo "/bin:/usr/bin:/usr/sbin" > $servicedir/.svscan/variables/PATH
 
@@ -578,7 +579,7 @@ do_svscan_start()
 	(
 	cd $servicedir/.svscan
 	exec $sudo envdir -c variables $svscan $servicedir
-	) &
+	) 2>$logdir/svscan/svscan.log &
 	sleep $sleep_int
 	tty -s && stty sane
 	$sudo chown -R $user $servicedir/*/supervise
@@ -4669,6 +4670,9 @@ exit 0
 
 #
 # $Log: testindimail-virtual,v $
+# Revision 1.33  2024-12-12 21:23:35+05:30  Cprogrammer
+# updated test script for svscan log
+#
 # Revision 1.32  2024-09-05 17:23:30+05:30  Cprogrammer
 # added imap/pop3 starttls tests
 #
