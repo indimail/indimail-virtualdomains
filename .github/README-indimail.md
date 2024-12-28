@@ -2011,7 +2011,7 @@ Now [qmail-spamfilter(8)](https://github.com/indimail/indimail-mta/wiki/qmail-sp
 X-Bogosity: Yes, spamicity=0.999616, cutoff=9.90e-01, ham_cutoff=0.00e+00, queueID=6cs66604wfk,
 ```
 
-The method describe above is a global SPAM filter. It will happen for all users, unless you use something like **envrules** to unset **SPAMFILTER** environment variable. You can use **envrules** to set **SPAMFILTER** for few specific email addresses. You can refer to the chapter [Envrules](#envrules) for more details.
+The method describe above is a global SPAM filter. It will happen for all users, unless you use something like **envrules** to unset **SPAMFILTER** environment variable. You can use **envrules** to set **SPAMFILTER** for few specific email addresses too. You can refer to the chapter [Envrules](#envrules) for more details.
 
 There is another way you can do spam filtering - during local delivery (you could do for remote delivery, but what would be the point?). IndiMail allows you to call an external program during local/remote delivery by settting **QMAILLOCAL** / **QMAILREMOTE** environment variable. You could use any method to call [bogofilter(1)](https://github.com/indimail/indimail-mta/wiki/bogofilter.1) (either directly in <u>filterargs</u> control file, or your own script). You can see a Pictorial representation of how this happens. ![LocalFilter](indimail_spamfilter_local.png)
 
@@ -2049,7 +2049,7 @@ You can refer the following documents for more clarity.
 
 ## SPAM Control using badip control file
 
-IndiMail has many methods to help deal with spam. For detecting spam, IndiMail uses [bogofilter(1)](https://github.com/indimail/indimail-mta/wiki/bogofilter.1) a fast bayesian spam filter. IndiMail's [qmail-smtpd(8)](https://github.com/indimail/indimail-mta/wiki/qmail-smtpd.8) which provides SMTP protocol is neatly integrated with [bogofilter(1)](https://github.com/indimail/indimail-mta/wiki/bogofilter.1). When [bogofilter(1)](https://github.com/indimail/indimail-mta/wiki/bogofilter.1) detects spam, [qmail-smtpd(8)](https://github.com/indimail/indimail-mta/wiki/qmail-smtpd.8) prints the <b>X-Bogosity</b> header as part of SMTP transaction log
+IndiMail has many methods to help deal with spam. For detecting spam, IndiMail uses [bogofilter(1)](https://github.com/indimail/indimail-mta/wiki/bogofilter.1) a fast bayesian spam filter. IndiMail's [qmail-smtpd(8)](https://github.com/indimail/indimail-mta/wiki/qmail-smtpd.8), which provides the SMTP protocol, is neatly integrated with [bogofilter(1)](https://github.com/indimail/indimail-mta/wiki/bogofilter.1). When [bogofilter(1)](https://github.com/indimail/indimail-mta/wiki/bogofilter.1) detects spam, [qmail-smtpd(8)](https://github.com/indimail/indimail-mta/wiki/qmail-smtpd.8) prints the <b>X-Bogosity</b> header as part of SMTP transaction log
 
 ```
 $ grep "X-Bogosity, Yes" /var/log/svc/smtpd.25/current
@@ -2078,7 +2078,7 @@ For turning on the BADIP functionality, you need to set the **BADIPCHECK** or th
 # svc -r /service/qmail-smtpd.25
 ```
 
-Clients whose IP match an entry in badip will be greeted as below
+A client whose IP match an entry in <u>/etc/indimail/control/badip</u> will be greeted as below
 
 ```
 421 indimail.org sorry, your IP (::ffff:88.191.35.203) is temporarily denied (#4.7.1)
@@ -2096,7 +2096,7 @@ If your <u>/etc/indimail/control/badip</u> file becomes very large, you can also
 
 ## Virus Scanning using QHPSI
 
-A large fraction of today’s emails is infected by a virus or a worm. It is necessary to recognize those malicious emails as soon as possible already in the DATA phase of the SMTP conversation and to reject them.
+A large fraction of today’s emails is infected by a virus or a worm. It is necessary to recognize those malicious emails, as soon as possible, in the DATA phase of the SMTP conversation and reject them.
 
 When you use IndiMail, it is ultimately [qmail-queue(8)](https://github.com/indimail/indimail-mta/wiki/qmail-queue.8) which is responsible for queueing your messages. [qmail-queue(8)](https://github.com/indimail/indimail-mta/wiki/qmail-queue.8) stores the message component of queued mails (captured duing DATA phase of the SMTP conversation) under the mess subdirectory.
 
@@ -2294,19 +2294,19 @@ $ sudo /bin/bash
 
 # IndiMail Delivery mechanism explained
 
-Any email that needs to be delivered needs to be put into a queue before it can be taken up for delivery. Email can be submitted to the queue using [qmail-queue(8)](https://github.com/indimail/indimail-mta/wiki/qmail-queue.8) command or qmail\_open() function. The following programs use the qmail\_open() API -
+Any email that needs to be delivered needs to be put in a queue before it can be taken up for delivery. Email can be submitted to the queue using [qmail-queue(8)](https://github.com/indimail/indimail-mta/wiki/qmail-queue.8) command or qmail\_open() function. The following programs use the qmail\_open() API -
 [condredirect(1)](https://github.com/indimail/indimail-mta/wiki/condredirect.1), [dot-forward(1)](https://github.com/indimail/indimail-mta/wiki/dot-forward.1), [fastforward(1)](https://github.com/indimail/indimail-mta/wiki/fastforward.1), [filterto(1)](https://github.com/indimail/indimail-mta/wiki/filterto.1), [forward(1)](https://github.com/indimail/indimail-mta/wiki/forward.1), [maildirserial(1)](https://github.com/indimail/indimail-mta/wiki/maildirserial.1), [new-inject(1)](https://github.com/indimail/indimail-mta/wiki/new-inject.1), [ofmipd(8)](https://github.com/indimail/indimail-mta/wiki/ofmipd.8), [qmail-inject(8)](https://github.com/indimail/indimail-mta/wiki/qmail-inject.8), [qmail-local(8)](https://github.com/indimail/indimail-mta/wiki/qmail-local.8), [qmail-qmqpd(8)](https://github.com/indimail/indimail-mta/wiki/qmail-qmqpd.8), [qmail-qmtpd(8)](https://github.com/indimail/indimail-mta/wiki/qmail-qmtpd.8), [qmail-queue(8)](https://github.com/indimail/indimail-mta/wiki/qmail-queue.8), [qmail-send(8)](https://github.com/indimail/indimail-mta/wiki/qmail-send.8), [qreceipt(1)](https://github.com/indimail/indimail-mta/wiki/qreceipt.1), [replier(1)](https://github.com/indimail/indimail-mta/wiki/replier.1), [rrforward(1)](https://github.com/indimail/indimail-mta/wiki/rrforward.1), [qmail-smtpd(8)](https://github.com/indimail/indimail-mta/wiki/qmail-smtpd.8). Of these, [qmail-smtpd(8)](https://github.com/indimail/indimail-mta/wiki/qmail-smtpd.8) and [qmail-qmtpd(8)](https://github.com/indimail/indimail-mta/wiki/qmail-qmtpd.8) accept an email for a domain only if the domain is listed in rcpthosts. Once an email is accepted into the queue, [todo-proc(8)](https://github.com/indimail/indimail-mta/wiki/todo-proc.8) decides if the mail is to be delivered locally or to a remote address. If you are using [slowq-send(8)](https://github.com/indimail/indimail-mta/wiki/slowq-send.8), it is [slowq-send(8)](https://github.com/indimail/indimail-mta/wiki/slowq-send.8) that does the job of [todo-proc(8)](https://github.com/indimail/indimail-mta/wiki/todo-proc.8) and [qmail-send(8)](https://github.com/indimail/indimail-mta/wiki/qmail-send.8). If you are using [qmta-send(8)](https://github.com/indimail/indimail-mta/wiki/qmta-send.8), it is [qmta-send(8)](https://github.com/indimail/indimail-mta/wiki/qmta-send.8) that does the job of [todo-proc(8)](https://github.com/indimail/indimail-mta/wiki/todo-proc.8) and [qmail-send(8)](https://github.com/indimail/indimail-mta/wiki/qmail-send.8). If the email address corresponds to a domain listed in <u>locals</u> or <u>virtualdomains</u> control file, steps are taken to have the email delivered locally.
 
 ## Delivery Mode
 
-The delivery mode depends on the argument passed to [qscheduler(8)](https://github.com/indimail/indimail-mta/wiki/qscheduler.8) during startup. The script <u>/service/qmail-send.25/run</u> passes the content of the file <u>/etc/indimail/control/defaultdelivery</u> as an argument to [qscheduler(8)](https://github.com/indimail/indimail-mta/wiki/qscheduler.8).
-See <u>INSTALL.mbox</u>, <u>INSTALL.maildir</u>, and <u>INSTALL.vsm</u> for more information.
-To select your default mailbox type, just enter the defaultdelivery value from the table into <u>/etc/indimail/control/defaultdelivery</u>.
+indimail-mta supports delivery to [Maildir](https://cr.yp.to/proto/maildir.html) or as [mbox](https://en.wikipedia.org/wiki/Mbox) in user's HOME directory or <u>/var/spool/mail</u>. The delivery mode depends on the argument passed to [qscheduler(8)](https://github.com/indimail/indimail-mta/wiki/qscheduler.8) during startup. The script <u>/service/qmail-send.25/run</u> passes the content of the file <u>/etc/indimail/control/defaultdelivery</u> as an argument to [qscheduler(8)](https://github.com/indimail/indimail-mta/wiki/qscheduler.8).
+
+See <u>INSTALL.mbox</u>, <u>INSTALL.maildir</u>, and <u>INSTALL.vsm</u> for more information. To select your default mailbox type, just enter the defaultdelivery value from the table into <u>/etc/indimail/control/defaultdelivery</u>.
 e.g., to select the standard qmail Maildir delivery, do:
 
 `echo ./Maildir/ >/etc/indimail/control/defaultdelivery`
 
-**NOTE**: If you are using [slowq-start(8)](https://github.com/indimail/indimail-mta/wiki/slowq-start.8), then the deliver mode depends on the argument passed to [slowq-start(8)](https://github.com/indimail/indimail-mta/wiki/slowq-start.8). The [slowq-send(8)](https://github.com/indimail/indimail-mta/wiki/slowq-send.8) startup script <u>/service/slowq-send/run</u> also uses <u>/etc/indimail/control/defaultdelivery</u> for the default delivery mode.  If you are using [qmta-send(8)](https://github.com/indimail/indimail-mta/wiki/qmta-send.8), the deliver mode depends on the -d option. [qmta-send(8)](https://github.com/indimail/indimail-mta/wiki/qmta-send.8) doesn't use the <u>defaultdelivery</u> control file.
+**NOTE**: If you are using [slowq-start(8)](https://github.com/indimail/indimail-mta/wiki/slowq-start.8), then the delivery mode depends on the argument passed to [slowq-start(8)](https://github.com/indimail/indimail-mta/wiki/slowq-start.8). The [slowq-send(8)](https://github.com/indimail/indimail-mta/wiki/slowq-send.8) startup script <u>/service/slowq-send/run</u> also uses <u>/etc/indimail/control/defaultdelivery</u> for the default delivery mode.  If you are using [qmta-send(8)](https://github.com/indimail/indimail-mta/wiki/qmta-send.8), the deliver mode depends on the -d option. [qmta-send(8)](https://github.com/indimail/indimail-mta/wiki/qmta-send.8) doesn't use the <u>defaultdelivery</u> control file.
 
 ## Addresses
 
@@ -2314,7 +2314,7 @@ Once you have decided the delivery mode above, one needs to have some mechanism 
 
 <b>locals</b>
 
-Any email addressed to user@domain listed in the file <u>/etc/indimail/control/locals</u> will be delivered to the local user user. If you have Maildir as the delivery mode and an email to user kanimoji@domain with home directory <u>/home/blackmoney</u>, will be delivered to <u>/home/blackmoney/Maildir/new</u>. [qmail-lspawn(8)](https://github.com/indimail/indimail-mta/wiki/qmail-spawn.8) uses the program [qmail-getpw(8)](https://github.com/indimail/indimail-mta/wiki/qmail-getpw.8) to the uid, gid, home, dash and extension for any user in the <u>/etc/passwd</u> file. You can set the environment variable **QMAILGETPW** to an alternate [qmail-getpw(8)](https://github.com/indimail/indimail-mta/wiki/qmail-getpw.8) program. Read [qmail-getpw(8)](https://github.com/indimail/indimail-mta/wiki/qmail-getpw.8) for more details.
+Any email addressed to <b>user@domain</b> listed in the file <u>/etc/indimail/control/locals</u> will be delivered to the local user <b>user</b>. If you have Maildir as the delivery mode and an email to user kanimoji@domain with home directory <u>/home/blackmoney</u>, will be delivered to <u>/home/blackmoney/Maildir/new</u>. [qmail-lspawn(8)](https://github.com/indimail/indimail-mta/wiki/qmail-spawn.8) uses the program [qmail-getpw(8)](https://github.com/indimail/indimail-mta/wiki/qmail-getpw.8) to the uid, gid, home, dash and extension for any user in the <u>/etc/passwd</u> file. You can set the environment variable **QMAILGETPW** to an alternate [qmail-getpw(8)](https://github.com/indimail/indimail-mta/wiki/qmail-getpw.8) program. Read [qmail-getpw(8)](https://github.com/indimail/indimail-mta/wiki/qmail-getpw.8) for more details.
 
 <b>virtualdomains</b>
 
@@ -2333,7 +2333,7 @@ $ cat /etc/indimail/control/virtualdomains
 example.com:example.com
 ```
 
-What this means is that any email addressed to user@example.com will be delivered to the address example.com-user@example.com. indimail-mta further uses [qmail-users(5)](https://github.com/indimail/indimail-mta/wiki/qmail-users.5) mechanism to deliver the email for users in a virtual domain. This is explained below
+What this means is that any email addressed to <b>user@example.com</b> will be delivered to the address <b>example.com-user@example.com</b>. indimail-mta further uses [qmail-users(5)](https://github.com/indimail/indimail-mta/wiki/qmail-users.5) mechanism to deliver the email for users in a virtual domain. This is explained below
 
 ## qmail-users
 
@@ -2361,7 +2361,7 @@ for every string ext. When you add a virtualdomain using [vadddomain(8)](https:/
 +example.com-:example.com:555:555:/var/indimail/domains/example.com:-::
 ```
 
-As stated earlier, any email addressed to user@example.com will be delivered to local user example.com-user@example.com because of virtualdomains control file. The above address can be looked as
+As stated earlier, any email addressed to <b>user@example.com</b> will be delivered to local user <b>example.com-user@example.com</b> because of virtualdomains control file. The above address can be looked as
 
 ```
 =user@example.com:example.com:555:555:/var/indimail/domains/example.com:-:user:
@@ -2377,7 +2377,7 @@ will cause emails to `customer_care-delhi@example.com`, `customer_care-mumba@exa
 
 ## Extension Addresses
 
-In the indimail-mta system, you control all local addresses of the form <b>user-anything</b>, as well as the address user itself, where user is your account name. Delivery to <b>user-anything</b> is controlled by the file <u>homedir/.qmail-anything</u>. (These rules may be changed by editing the assign file as given above in [qmail-users(5)](https://github.com/indimail/indimail-mta/wiki/qmail-users.5).
+In the indimail-mta system, you control all local addresses of the form <b>user-anything</b>, as well as the address <u>user</u> itself, where <u>user</u> is your account name. Delivery to <b>user-anything</b> is controlled by the file <u>homedir/.qmail-anything</u>, where <u>homedir</u> is the user <b>user</b>'s home directory. (These rules may be changed by editing the assign file as given above in [qmail-users(5)](https://github.com/indimail/indimail-mta/wiki/qmail-users.5).
 
 The <b>alias</b> user controls all other addresses. Delivery to user is controlled by the file <u>homedir/.qmail-user</u>, where homedir is alias's home directory.
 In the following description, [qmail-local(8)](https://github.com/indimail/indimail-mta/wiki/qmail-local.8) is handling a message addressed to local@domain, where local is controlled by <u>.qmail-ext</u>. Here is what it does.
@@ -2528,24 +2528,24 @@ In the delivery instruction in <u>.qmail-default</u>, you can replace [vdeliverm
 
 # TURN Mechanisms
 
-<b>TURN</b> stands for when a SMTP client and a SMTP server do a turn around and reverse the role of being a client or being a server. The SMTP server becomes a SMTP client and the SMTP client becomes a SMTP server. This mechanism usually requires both the server and the client to synchronize the turnaround but is not necessary as long as the SMTP server supports the mechanism (except for ATRN/ODMR protocol described later). This will become clear as you read the this full topic discussed here. indimail supports **ETRN**, **ATRN** and **AUTOTURN** mechanisms to fetch emails for a domain. These mechanisms are used by hosts that have **part-time** connectivity and have the services of an ISP or a host with **full-time** connectivity. For the same of brevity, I'm going to to refer to the ISP server as **isp-server** and the host with part-time connectivity as **part-time-host** throughout this document. The permanent connectivity allows the **isp-server** receive mails all the time and store mails temporarily. Once you have the mails stored somewhere on the **isp-server**, these can be delivered to **part-time-host** using either of the below two methods.
+<b>TURN</b> stands for when a SMTP client and a SMTP server do a turn around and reverse the role of being a client or being a server. The SMTP server becomes a SMTP client and the SMTP client becomes a SMTP server. This mechanism usually requires both the server and the client to synchronize the turnaround but is not necessary as long as the SMTP server supports the mechanism (except for **ATRN**/**ODMR** protocol described later). This will become clear as you read the this full topic discussed here. indimail supports **ETRN**, **ATRN** and **AUTOTURN** mechanisms to fetch emails for a domain. These mechanisms are used by hosts that have **part-time** connectivity and have the services of an ISP or a host with **full-time** connectivity. For the same of brevity, I'm going to to refer to the ISP server as **isp-server** and the host with part-time connectivity as **part-time-host** throughout this document. The permanent connectivity allows the **isp-server** receive mails all the time and store mails temporarily. Once you have the mails stored somewhere on the **isp-server**, these can be delivered to **part-time-host** using either of the below two methods.
 
-   1. The **part-time-host** wakes up the **isp-server** which then delivers queued mails to the **part-time-host** using SMTP. This is typically the case supported by ETRN or AUTOTURN. indimail-mta supports both these mechanisms if the **part-time-host** IP address is listed in the mail exchanger (MX) records for the domain or if the **part-time-host** is allowed access on the **isp-server** to access the queued mails. BOTH ETRN and AUTOTURN requires that the **part-time-host** be running a SMTP service at the time it issues the ETRN or the AUTOTURN command.
-   2. If **isp-server** SMTP server supports ETRN, ATRN then any software on the **part-time-host** (that supports ETRN, ATRN) can connect to **isp-server** SMTP port and reverse the connection. i.e. The **isp-server** becomes an SMTP client and the **part-time-host** becomes a SMTP server. The connection gets reversed by simply issuing the ETRN or ATRN smtp command. The ETRN and ATRN command requires the domain name for which mails needs to be fetched as an argument. One of the few software that supports both ETRN and ATRN is fetchmail. As stated earlier, the ETRN command requires the **part-time-host** to be running a independent SMTP service. The **isp-server** should be able to connect to the SMTP port on the client. The ATRN command however is more complicated. It requires the client to start accepting SMTP commands on the same channel in which it issued the ATRN command. The **part-time-host** will not connect to the **isp-server** SMTP port, but rather use the same connection that the **part-time-host** created when connecting to the SMTP port on the **isp-server**.
+   1. The **part-time-host** wakes up the **isp-server** which then delivers queued mails to the **part-time-host** using SMTP. This is typically the case supported by **ETRN** or **AUTOTURN**. indimail-mta supports both these mechanisms if the **part-time-host** IP address is listed in the mail exchanger (MX) records for the domain or if the **part-time-host** is allowed access on the **isp-server** to access the queued mails. BOTH **ETRN** and **AUTOTURN** requires that the **part-time-host** be running a SMTP service at the time it issues the **ETRN** or the **AUTOTURN** command.
+   2. If **isp-server** SMTP server supports **ETRN**, **ATRN** then any software on the **part-time-host** (that supports **ETRN**, **ATRN**) can connect to **isp-server** SMTP port and reverse the connection. i.e. The **isp-server** becomes an SMTP client and the **part-time-host** becomes a SMTP server. The connection gets reversed by simply issuing the **ETRN** or **ATRN** smtp command. The **ETRN** and **ATRN** command requires the domain name for which mails needs to be fetched as an argument. One of the few software that supports both **ETRN** and **ATRN** is fetchmail. As stated earlier, the **ETRN** command requires the **part-time-host** to be running a independent SMTP service. The **isp-server** should be able to connect to the SMTP port on the client. The **ATRN** command however is more complicated. It requires the client to start accepting SMTP commands on the same channel in which it issued the **ATRN** command. The **part-time-host** will not connect to the **isp-server** SMTP port, but rather use the same connection that the **part-time-host** created when connecting to the SMTP port on the **isp-server**.
 
-You can read [this document](https://cr.yp.to/smtp/turn.html) to understand more about TURN mechanisms. The original TURN mechanism had serious security implications. The Extended TURN (ETRN) was deviced to fix the security concerns with TURN and is defined by [RFC-1985](https://www.rfc-editor.org/rfc/rfc1985.html). The ATRN requrires SMTP authentication to work and hence is more secure. ATRN is also known as **On-Demand Mail Relay** (**ODMR**) and is defined by [RFC-2645](https://datatracker.ietf.org/doc/html/rfc2645). To support ETRN all that is required is to issue the ETRN command. No other client side support is needed other than having a SMTP server running on the client to accept mails. However, it is upto the server to accept the request. In general only those IP addresses that are part of the MX records for a domain are allowed to fetch mails from a server supporting ETRN, AUTOTURN. AUTOTURN is even much more simpler and requires no special command or client-side software. All you need is to connect to the SMTP server from the client to trigger the server to send queued mails meant for the client. indimail-mta supports all the methods ETRN, ATRN and AUTOTURN. ETRN and ATRN is directly supported. AUTOTURN requires a simple modification to the SMTP run script in <u>/service/qmail-smtpd.25/run</u>. Now let us talk about setting up an indimail-mta server for ETRN, AUTOTURN and ODMR.
+You can read [this document](https://cr.yp.to/smtp/turn.html) to understand more about <b>TURN</b> mechanisms. The original <b>TURN</b> mechanism had serious security implications. The <b>Extended TURN (ETRN)</b> was deviced to fix the security concerns with <b>TURN</b> and is defined by [RFC-1985](https://www.rfc-editor.org/rfc/rfc1985.html). The <b>ATRN</b> requrires SMTP authentication to work and hence is more secure. <b>ATRN</b> is also known as **On-Demand Mail Relay** (**ODMR**) and is defined by [RFC-2645](https://datatracker.ietf.org/doc/html/rfc2645). To support **ETRN** all that is required is to issue the **ETRN** command. No other client side support is needed other than having a SMTP server running on the client to accept mails. However, it is upto the server to accept the request. In general only those IP addresses that are part of the MX records for a domain are allowed to fetch mails from a server supporting **ETRN**, **AUTOTURN**. **AUTOTURN** is even much more simpler and requires no special command or client-side software. All you need is to connect to the SMTP server from the client to trigger the server to send queued mails meant for the client. indimail-mta supports all the methods **ETRN**, <b>ATRN</b> and **AUTOTURN**. **ETRN** and <b>ATRN</b> is directly supported. **AUTOTURN** requires a simple modification to the SMTP run script in <u>/service/qmail-smtpd.25/run</u>. Now let us talk about setting up an indimail-mta server for **ETRN**, **AUTOTURN** and **ODMR**.
 
 ## Setting Extended TURN (ETRN)
 
-ETRN can be setup for a domain in two ways.
+**ETRN** can be setup for a domain in two ways.
 
-1. One method is to map the ETRN domain to the fixed IP address of the **part-time-host**. When [qmail-smtpd(8)](https://github.com/indimail/indimail-mta/wiki/qmail-smtpd.8) is triggered for the ETRN domain, it will always send queued mails to the configured fixed IP address of the **part-time-host**. An important point to realize is that the ETRN command can be issued by any host connecting to the SMTP port of the **isp-server**, but queued mails will always be sent to he IP address of the **part-time-host**.
+1. One method is to map the **ETRN** domain to the fixed IP address of the **part-time-host**. When [qmail-smtpd(8)](https://github.com/indimail/indimail-mta/wiki/qmail-smtpd.8) is triggered for the **ETRN** domain, it will always send queued mails to the configured fixed IP address of the **part-time-host**. An important point to realize is that the **ETRN** command can be issued by any host connecting to the SMTP port of the **isp-server**, but queued mails will always be sent to he IP address of the **part-time-host**.
 
-2. The other method is not to have the domain mapped to a fixed IP address. This method requires to have the IP address of the **part-time-host** configured as a MX record for the ETRN domain in the DNS. When the **part-time-host** connects to the **isp-server**, the queued mails will be sent by SMTP to the IP address of the host that connects to the **isp-server**. An important point to realizes is that the ETRN command can be issued by any host that serves as a MX record for the ETRN domain. The ETRN command will be rejected for any host that does not serves as a MX record for the ETRN domain.
+2. The other method is not to have the domain mapped to a fixed IP address. This method requires to have the IP address of the **part-time-host** configured as a MX record for the **ETRN** domain in the DNS. When the **part-time-host** connects to the **isp-server**, the queued mails will be sent by SMTP to the IP address of the host that connects to the **isp-server**. An important point to realizes is that the **ETRN** command can be issued by any host that serves as a MX record for the **ETRN** domain. The **ETRN** command will be rejected for any host that does not serves as a MX record for the **ETRN** domain.
 
 ### Setup ETRN for a domain mapped to a fixed IP address
 
-We will use the [vadddomain(1)](https://github.com/indimail/indimail-mta/wiki/vadddomain.1) command from indimail-virtualdomains and will explain what it does. If you understand the steps than you can setup ETRN manually without using [vadddomain(1)](https://github.com/indimail/indimail-mta/wiki/vadddomain.1) command. The below shows an usage to create an ETRN domain that will receive mails in the directory <u>/var/indimail/autoturn/192.168.2.108/Maildir</u>.
+We will use the [vadddomain(1)](https://github.com/indimail/indimail-mta/wiki/vadddomain.1) command from indimail-virtualdomains and will explain what it does. If you understand the steps than you can setup **ETRN** manually without using [vadddomain(1)](https://github.com/indimail/indimail-mta/wiki/vadddomain.1) command. The below shows an usage to create an **ETRN** domain that will receive mails in the directory <u>/var/indimail/autoturn/192.168.2.108/Maildir</u>.
 
 ```
 # Assumption
@@ -2592,11 +2592,11 @@ nofiles:x:1001:
 
 Now let is dissect what has been done. The [vadddomain(1)](https://github.com/indimail/indimail-mta/wiki/vadddomain.1) command has done the following
 
-1. Added an entry to <u>/etc/indimail/users/assign</u> to create an autoturn user `autoturn` using [qmail-users(5)](https://github.com/indimail/indimail-mta/wiki/qmail-users.5) mechanism. The entry for autoturn is done only the first time any ETRN or ATRN domain is created.
+1. Added an entry to <u>/etc/indimail/users/assign</u> to create an autoturn user `autoturn` using [qmail-users(5)](https://github.com/indimail/indimail-mta/wiki/qmail-users.5) mechanism. The entry for autoturn is done only the first time any **ETRN** or **ATRN** domain is created.
 2. added entry `etrn1.dom:autoturn-192.168.2.108` to <u>/etc/indimail/control/virtualdomains</u>
 3. Now any email to `etrn1.dom` will be controlled by <u>/var/indimail/autoturn/.qmail-192:168:2:108-default</u>, which has the entry <u>./192.168.2.108/Maildir/</u>. This will result in [qmail-send(8)](https://github.com/indimail/indimail-mta/wiki/qmail-send.8) delivering all emails for `etrn1.dom` to <u>/var/indimail/autoturn/192.168.2.108/Maildir</u>.
 
-Now all that is required is for the host with IP 192.168.2.108 issues the ETRN command like this
+Now all that is required is for the host with IP 192.168.2.108 issues the **ETRN** command like this
 
 ```
 $ telnet 192.168.2.100 25
@@ -2653,7 +2653,7 @@ Now let us again dissect what has been done. The [vadddomain(1)](https://github.
 2. added entry `etrn2.dom:autoturn-etrn2.dom` to <u>/etc/indimail/control/virtualdomains</u>
 3. Now any email to `etrn2.dom` will be controlled by <u>/var/indimail/autoturn/.qmail-etrn2:dom-default</u>, which has the entry <u>/var/indimail/autoturn/etrn2.dom/Maildir/</u>. This will result in [qmail-send(8)](https://github.com/indimail/indimail-mta/wiki/qmail-send.8) delivering all emails for `etrn1.dom` to <u>/var/indimail/autoturn/etrn2.dom/Maildir</u>.
 
-Now let us see what happens when we issue the ETRN command from a host that is not a MX record for the ETRN domain.
+Now let us see what happens when we issue the <b>ETRN</b> command from a host that is not a MX record for the <b>ETRN</b> domain.
 
 ```
 $ telnet 192.168.2.100 smtp
@@ -2668,7 +2668,7 @@ quit
 Connection closed by foreign host.
 ```
 
-The ETRN request as expected is denied. One can however bypass the requirement of the **part-time-host** to be a MX record by creating a whitelist file with the IP address of the connecting client on the **isp-server**. The whitelist filename is <u>/var/indimail/autoturn/etrn2.dom/ipauth</u>. Now, the ETRN request will be accepted as shown below.
+The <b>ETRN</b> request as expected is denied. One can however bypass the requirement of the **part-time-host** to be a MX record by creating a whitelist file with the IP address of the connecting client on the **isp-server**. The whitelist filename is <u>/var/indimail/autoturn/etrn2.dom/ipauth</u>. Now, the <b>ETRN</b> request will be accepted as shown below.
 
 ```
 $ sudo sh -c "echo 191.168.2.108 > /var/indimail/autoturn/etrn2.dom/ipauth"
@@ -2684,7 +2684,7 @@ quit
 Connection closed by foreign host.
 ```
 
-Seeing the examples above where we have used telnet, demonstrates the ETRN doesn't require special software. You can automate the process of pulling mails using ETRN by having a cron script that uses [tcpclient(1)](https://github.com/indimail/indimail-mta/wiki/tcpclient.1) or the [netcat command](https://en.wikipedia.org/wiki/Netcat). Using nc is trivial like this snippet `printf "ETRN etrn2.dom\r\nQUIT\r\n" | nc argos2 25`. This however doesn't check if the SMTP server has ETRN capability.
+Seeing the examples above where we have used telnet, demonstrates the <b>ETRN</b> doesn't require special software. You can automate the process of pulling mails using <b>ETRN</b> by having a cron script that uses [tcpclient(1)](https://github.com/indimail/indimail-mta/wiki/tcpclient.1) or the [netcat command](https://en.wikipedia.org/wiki/Netcat). Using nc is trivial like this snippet `printf "ETRN etrn2.dom\r\nQUIT\r\n" | nc argos2 25`. This however doesn't check if the SMTP server has <b>ETRN</b> capability.
 
 Here is a more sophisticated example of a script that uses [tcpclient(1)](https://github.com/indimail/indimail-mta/wiki/tcpclient.1). Assuming this script is named tcpclient.atrn, then you need to execute the command `tcpclient -vDHR 192.168.2.102 25 /usr/local/bin/tcpclient.atrn`. The script needs to have executable bit set.
 
@@ -2731,7 +2731,7 @@ printf "QUIT\r\n"
 
 ## Setup ODMR (ATRN) for a domain
 
-ATRN stands for Authenticated Turn. ATRN requires indimail-virtualdomains to be installed. This is because a mapping needs to be maintained for ATRN domains against users. And ATRN domain can be fetched by any host that can authenticate. Unlike ETRN, ATRN requires special client-side software that can act as the SMTP server on the same channel that it used as a client. ATRN happens in multiple steps. The requirement of a database to maintain the mapping necessitates having indimail-virtualdomains.
+<b>ATRN</b> stands for Authenticated Turn. <b>ATRN</b> requires indimail-virtualdomains to be installed. This is because a mapping needs to be maintained for ATRN domains against users. And ATRN domain can be fetched by any host that can authenticate. Unlike <b>ETRN</b>, <b>ATRN</b> requires special client-side software that can act as the SMTP server on the same channel that it used as a client. ATRN happens in multiple steps. The requirement of a database to maintain the mapping necessitates having indimail-virtualdomains.
 
 1. The client authenticates using some username. Let's say <u>user</u>.
 2. The client issues the ATRN command for a domain. Let's say <u>domain</u>
@@ -2741,7 +2741,7 @@ ATRN stands for Authenticated Turn. ATRN requires indimail-virtualdomains to be 
 6. The server keeps on pushing all mails in the queue for <u>domain</u> to the client using SMTP. For each mail that the client accepts successfully or results in a permanent failure, the server removes the mail from the queue. For temporary failures, the mail is not removed from the queue.
 7. The client quits when the server issues the SMTP QUIT command.
 
-Now let us look at the steps (listed below) to create a ATRN domain. You can see that steps needed are the same needed to create an ETRN domain. The extra stip is either creating the <u>atrnaccess</u> control file or using the [vatrn(1)](https://github.com/indimail/indimail-mta/wiki/vatrn.1) command. The **vatrn** commands is used to add access to the atrn domain for the user `odmr@localhost`. <u>odmr</u> is a normal user in system password database without shell access. It can also be any user in indimail's virtual domain database. You can use a software like [fetchmail](https://github.com/indimail/indimail-mta/wiki/fetchmail.1). The indimail-access package comes with a version of [fetchmail](https://github.com/indimail/indimail-virtualdomains/tree/master/fetchmail-x) that is optimized for ODMR and ETRN. The original fetchmail is unusable for ODMR unless authentication is setup for CRAM-MD5 authentication. The version that comes with indimail-access allows other authentication methods supported by indimail-mta.
+Now let us look at the steps (listed below) to create a ATRN domain. You can see that steps needed are the same needed to create an <b>ETRN</b> domain. The extra stip is either creating the <u>atrnaccess</u> control file or using the [vatrn(1)](https://github.com/indimail/indimail-mta/wiki/vatrn.1) command. The **vatrn** commands is used to add access to the atrn domain for the user `odmr@localhost`. <u>odmr</u> is a normal user in system password database without shell access. It can also be any user in indimail's virtual domain database. You can use a software like [fetchmail](https://github.com/indimail/indimail-mta/wiki/fetchmail.1). The indimail-access package comes with a version of [fetchmail](https://github.com/indimail/indimail-virtualdomains/tree/master/fetchmail-x) that is optimized for <b>ODMR</b> and <b>ETRN</b>. The original fetchmail is unusable for <b>ODMR</b> unless authentication is setup for CRAM-MD5 authentication. The version that comes with indimail-access allows other authentication methods supported by indimail-mta.
 
 ```
 # Assumption
@@ -2870,11 +2870,11 @@ Dec 03 21:06:13 fetchmail: 6.5.0.beta9 querying 192.168.2.100 (protocol ODMR) at
 Dec 03 21:06:13 fetchmail: normal termination, status 0
 ```
 
-The advantage of ATRN is that the **part-time-host** need not be configured as a MX destination for the domain and can be accessed only by users granted access by the [vatrn(1)](https://github.com/indimail/indimail-mta/wiki/vatrn.1) command. The disadvantage is that it requires special software like [fetchmail(1)](https://github.com/indimail/indimail-mta/wiki/fetchmail.1) to pull mails from the queue.
+The advantage of **ATRN** is that the **part-time-host** need not be configured as a MX destination for the domain and can be accessed only by users granted access by the [vatrn(1)](https://github.com/indimail/indimail-mta/wiki/vatrn.1) command. The disadvantage is that it requires special software like [fetchmail(1)](https://github.com/indimail/indimail-mta/wiki/fetchmail.1) to pull mails from the queue.
 
 # Setup AUTOTURN
 
-This method will require you to setup maildir delivery to <u>/var/indimail/autoturn/$TCPREMOTEIP/Maildir</u> as described [here](#setup-etrn-for-a-domain-mapped-to-a-fixed-ip-address). Like ETRN, AUTOTURN is very simple. It doesn't require any special software on the **part-time-host**. Also, unlike ETRN and ATRN, it doesn't require any SMTP verb to initiate it. If setup, just a connect to the SMTP port, on the **isp-server** by the **part-time-host**, should trigger mail delivery to the **part-time-host**. To setup you need to create, modify your [qmail-smtpd(8)](https://github.com/indimail/indimail-mta/wiki/qmail-smtpd.8) run script to something like this
+This method will require you to setup maildir delivery to <u>/var/indimail/autoturn/$TCPREMOTEIP/Maildir</u> as described [here](#setup-etrn-for-a-domain-mapped-to-a-fixed-ip-address). Like ETRN, AUTOTURN is very simple. It doesn't require any special software on the **part-time-host**. Also, unlike **ETRN** and **ATRN**, it doesn't require any SMTP verb to initiate it. If setup, just a connect to the SMTP port, on the **isp-server** by the **part-time-host**, should trigger mail delivery to the **part-time-host**. To setup you need to create, modify your [qmail-smtpd(8)](https://github.com/indimail/indimail-mta/wiki/qmail-smtpd.8) run script to something like this
 
 ```
 #!/bin/sh
@@ -3364,7 +3364,7 @@ exec -a qmail-remote $PROG "$host" "$sender" "$qqeh" $size $*
 The sender address can be forged by spammers to look like a legitimate email address. If that email address belongs to you, all bounce backs will be received by your server. Your server ends up handling the entire processing load for the spammer. BATV allows your SMTP server to determine if the original email was ever initiated from your server. This is done by [qmail-remote(8)](https://github.com/indimail/indimail-mta/wiki/qmail-remote.8) marking each outbound email message with a key. When the bounce back arrives, [qmail-smtpd(8)](https://github.com/indimail/indimail-mta/wiki/qmail-smtpd.8) will identify that the key is either present or not present. If the key is not present then [qmail-smtpd(8)](https://github.com/indimail/indimail-mta/wiki/qmail-smtpd.8) knows it is not a valid bounce back and drops the email. This feature is known as [Bounce Address Tag Validation (BATV)](https://www.ietf.org/archive/id/draft-levine-smtp-batv-01.html).
 BATV allows [qmail-smtpd(8)](https://github.com/indimail/indimail-mta/wiki/qmail-smtpd.8) to distinguish between legitimate and illegitimate bounce (NDR) messages. Once you configure BATV, all outbound messages sent by [qmail-remote(8)](https://github.com/indimail/indimail-mta/wiki/qmail-remote.8) will be tagged using BATV. To enable BATV in IndiMail, all you need to do is create the <u>batvkey</u> control file. You can define **BATVKEY** environment variable to refer to another control file. You can also define **BATVKEY** environment variable for specific users or groups by using envrules. See [Envrules](#envrules).
 
-IndiMail's BATV implementation is based on [draft-levine-mass-batv-02](https://datatracker.ietf.org/doc/html/draft-levine-mass-batv-02).
+IndiMail's **BATV** implementation is based on [draft-levine-mass-batv-02](https://datatracker.ietf.org/doc/html/draft-levine-mass-batv-02).
 
 ```
 $ cd /etc/indimail/control
@@ -3388,7 +3388,7 @@ When you define the environment variable **BOUNCEPROCESSOR** as a valid path to 
 * original\_recipient
 * bounce\_recipient
 
-To set BOUNCEPROCESSOR, you would do the following
+To setup bounce processing, you would do the following
 
 ```
 $ sudo /bin/bash
@@ -3396,15 +3396,15 @@ $ sudo /bin/bash
 # svc -r /service/qmail-send.25
 ```
 
-There are few email marketing companies who are using BOUNCEPROCESSOR to insert the status of all bounces in MySQL table for their email marketing campaigns.
+There are few email marketing companies who are using **BOUNCEPROCESSOR** to insert the status of all bounces in MySQL table for their email marketing campaigns.
 
 ## Using environment variable BOUNCERULES or control files bounce.envrules.
 
 Using envrules, you can set specific environment variables only for bounced recipients. The format of this file is of the form
 
-`pat:envar1=val,envar2=val,...]`
+`pat:envar1=val1,envar2=val2,...]`
 
-where pat is a regular expression which matches a bounce recipient.  envar1, envar2 are list of environment variables to be set. If var is omitted, the environment variable is unset.
+where <u>pat</u> is a regular expression which matches a bounce recipient.  <u>envar1</u>, <u>envar2</u> are list of environment variables to be set. If <u>val1</u> is omitted, the environment variable <u>envar1</u> is unset.
 
 e.g.
 
@@ -3535,7 +3535,7 @@ $ sudo /bin/bash
 
 sets the [qmail-smtpd(8)](https://github.com/indimail/indimail-mta/wiki/qmail-smtpd.8) running on port 587 to force authentication.
 
-Setting environment variables in your startup script, in your .profile or your shell forces you to permanently set the environment variable to a specific value. Using **envrules**, IndiMail allows you to set these environment variables specific to different **senders** or **recipients** envrules allows IndiMail platform to be tuned differently for different users. No other messaging platform, to the best of my knowledge, is capable of doing that. Another way of saying is that envrules allows your IndiMail platform to dynamically change its behavior for each and every user.
+Setting environment variables in your startup script, in your .profile or your shell forces you to permanently set the environment variable to a specific value. Using **envrules**, IndiMail allows you to set these environment variables specific to different **senders** or **recipients**. Envrules allows IndiMail platform to be tuned differently for different users. No other messaging platform, to the best of my knowledge, is capable of doing that. Another way of saying is that envrules allows your IndiMail platform to dynamically change its behavior for each and every user.
 
 For the SMTP service, you can set different environment variables for different **senders**. All that is required is to define the following in the control file <u>/etc/indimail/control/from.envrules</u>. The format of this file is of the form
 
@@ -3581,7 +3581,7 @@ The following list of environment variables which can be modified using envrules
 
 `USE_SYNCDIR, USE_FSYNC, and LOCALDOMAINS`
 
-Do man [qmail-smtpd(8)](https://github.com/indimail/indimail-mta/wiki/qmail-smtpd.8), [spawn-filter(8)](https://github.com/indimail/indimail-mta/wiki/spawn-filter.8) to know the full list of environment variables that can be controlled using envrules.
+See the man pages [qmail-smtpd(8)](https://github.com/indimail/indimail-mta/wiki/qmail-smtpd.8), [spawn-filter(8)](https://github.com/indimail/indimail-mta/wiki/spawn-filter.8) to know the full list of environment variables that can be controlled using envrules.
 
 # Domain Specific Queues
 
@@ -3601,7 +3601,7 @@ indimail-mta has multiple daemons [qscheduler(8)](https://github.com/indimail/in
 
 ## indimail-mini - Using QMQP protocol provided by qmail-qmqpc / qmail-qmqpd
 
-QMQP provides a centralized mail queue within a cluster of hosts. QMQP clients do not require local queue for queueing messages. QMQP is faster than SMTP. You can use QMQP to send mails from your relay servers (or any server) to servers running QMQP service. The QMQP server can deliver mails to your local mailboxes or/and relay mails to the outside world. In short, to use QMQP, you need a client that uses QMQP protocol and a server that provides the QMQP service. [qmail-qmqpc(8)](https://github.com/indimail/indimail-mta/wiki/qmail-qmqpc.8) which uses [QMQP](https://cr.yp.to/proto/qmqp.html) protocol, is a QMQP client. [qmail-qmqpd(8)](https://github.com/indimail/indimail-mta/wiki/qmail-qmqpd.8) is a server that you run to provide a central hub offering the QMQP service. [qmail-qmqpd(8)](https://github.com/indimail/indimail-mta/wiki/qmail-qmqpd.8) can be run under [tcpserver(1)](https://github.com/indimail/indimail-mta/wiki/tcpserver.1) under port <u>628</u> on the central hub. If you have [qmail-send(8)](https://github.com/indimail/indimail-mta/wiki/qmail-send.8) running on the central hub, you can deliver local as well as relay mails. The central hub can also be a collection of multiple servers to aid performance. You just need to enter the IP addresses of these servers in <u>/etc/indimail/control/qmqpservers</u> on the client(s). The QMQP protocol doesn't require clients to have a local queue. In fact you can use QMQP protocol on a truly diskless client which doesn't even have any remote filesystem mounted. If you run web servers which need to send out emails, you can use QMQP to send emails without impacting performance. This is because you don't have the overhead of running an MTA like sendmail, postfix or qmail/netqmail/notqmail/indimail-mta. If you already have an installation of indimail-mta on your network, you can quickly setup a indimail-mini installation on your web server. The sendmail client provided by indimail-mini is fully compatible with PHP, python and any software that uses sendmail interface to push out emails. On a server, QMQP service is provided by having indimail-mta installed and enabling the [qmail-qmqpd(8)](https://github.com/indimail/indimail-mta/wiki/qmail-qmqpd.8) service. On the client you just need to have indimail-mini / indimail-mta or qmta installed and configure sendmail/qmail-inject to use [qmail-qmqpc(8)](https://github.com/indimail/indimail-mta/wiki/qmail-qmqpc.8). If you install indimail-mini, the installation will configure sendmail/qmail-inject to use [qmail-qmqpc(8)](https://github.com/indimail/indimail-mta/wiki/qmail-qmqpc.8). If you have ezmlm, indimail-mta, qmta installed, you need to set **QMAILQUEUE** to use [qmail-qmqpc(8)](https://github.com/indimail/indimail-mta/wiki/qmail-qmqpc.8). You can refer to [Setting Environment Variables](#setting-environment-variables) to set your **QMAILQUEUE** variable. The process for setting up QMQP service is outlined in the next chapter.
+**QMQP** provides a centralized mail queue within a cluster of hosts. **QMQP** clients do not require local queue for queueing messages. **QMQP** is faster than **SMTP**. You can use **QMQP** to send mails from your relay servers (or any server) to servers running **QMQP** service. The **QMQP** server can deliver mails to your local mailboxes or/and relay mails to the outside world. In short, to use **QMQP**, you need a client that uses **QMQP** protocol and a server that provides the **QMQP** service. [qmail-qmqpc(8)](https://github.com/indimail/indimail-mta/wiki/qmail-qmqpc.8) which uses [QMQP](https://cr.yp.to/proto/qmqp.html) protocol, is a **QMQP** client. [qmail-qmqpd(8)](https://github.com/indimail/indimail-mta/wiki/qmail-qmqpd.8) is a server that you run to provide a central hub offering the **QMQP** service. [qmail-qmqpd(8)](https://github.com/indimail/indimail-mta/wiki/qmail-qmqpd.8) can be run under [tcpserver(1)](https://github.com/indimail/indimail-mta/wiki/tcpserver.1) under port <u>628</u> on the central hub. If you have [qmail-send(8)](https://github.com/indimail/indimail-mta/wiki/qmail-send.8) running on the central hub, you can deliver local as well as relay mails. The central hub can also be a collection of multiple servers to aid performance. You just need to enter the IP addresses of these servers in <u>/etc/indimail/control/qmqpservers</u> on the client(s). The **QMQP** protocol doesn't require clients to have a local queue. In fact you can use **QMQP** protocol on a truly diskless client which doesn't even have any remote filesystem mounted. If you run web servers which need to send out emails, you can use **QMQP** to send emails without impacting performance. This is because you don't have the overhead of running an MTA like sendmail, postfix or qmail/netqmail/notqmail/indimail-mta. If you already have an installation of indimail-mta on your network, you can quickly setup a indimail-mini installation on your web server. The sendmail client provided by indimail-mini is fully compatible with PHP, python and any software that uses sendmail interface to push out emails. On a server, **QMQP** service is provided by having indimail-mta installed and enabling the [qmail-qmqpd(8)](https://github.com/indimail/indimail-mta/wiki/qmail-qmqpd.8) service. On the client you just need to have indimail-mini / indimail-mta or qmta installed and configure sendmail/qmail-inject to use [qmail-qmqpc(8)](https://github.com/indimail/indimail-mta/wiki/qmail-qmqpc.8). If you install indimail-mini, the installation will configure sendmail/qmail-inject to use [qmail-qmqpc(8)](https://github.com/indimail/indimail-mta/wiki/qmail-qmqpc.8). If you have ezmlm, indimail-mta, qmta installed, you need to set **QMAILQUEUE** to use [qmail-qmqpc(8)](https://github.com/indimail/indimail-mta/wiki/qmail-qmqpc.8). You can refer to [Setting Environment Variables](#setting-environment-variables) to set your **QMAILQUEUE** variable. The process for setting up **QMQP** service is outlined in the next chapter.
 
 ![image](indimail_mini.png)
 
@@ -3611,7 +3611,7 @@ If you use a source installation, you can copy few binaries manually and run few
 
 You need to have at least one host on your network offering QMQP service to your clients. indimail-mta runs a QMQP service which handles incoming QMQP connections on port 628 using tcpserver. It uses [multilog(8)](https://github.com/indimail/indimail-mta/wiki/multilog.8) to store log messages under <u>/var/log/svc/qmqpd.628</u>. The QMQP service is actually provided by [qmail-qmqpd(8)](https://github.com/indimail/indimail-mta/wiki/qmail-qmqpd.8)
 
-If you have installed indimail-mta using the RPM, QMQP service is installed by default. However, you need to enable it.
+If you have installed indimail-mta using the RPM, **QMQP** service is installed by default. However, you need to enable it.
 
 ```
 $ sudo /bin/bash
@@ -3619,7 +3619,7 @@ $ sudo /bin/bash
 # /usr/bin/svc -u /service/qmail-qmqpd.628
 ```
 
-If you have installed indimail-mta using the source, you may create the QMQP service using the following command
+If you have installed indimail-mta using the source, you may create the **QMQP** service using the following command
 
 ```
 Create the service using svctool
@@ -3637,11 +3637,11 @@ or
 $ sudo svps -h
 ```
 
-The above command will create a supervised service which runs [qmail-qmqpd(8)](https://github.com/indimail/indimail-mta/wiki/qmail-qmqpd.8) under tcpserver. In case you are setting up this service to relay mails to outside world, you might want to also specify \-\-dkfilter, \-\-qhpsi, \-\-virus-filter, etc arguments to [svctool(8)](https://github.com/indimail/indimail-mta/wiki/svctool.8) so that tasks like virus scanning, dk, domainkey signing, etc is done by the QMQP service.
+The above command will create a supervised service which runs [qmail-qmqpd(8)](https://github.com/indimail/indimail-mta/wiki/qmail-qmqpd.8) under tcpserver. In case you are setting up this service to relay mails to outside world, you might want to also specify \-\-dkfilter, \-\-qhpsi, \-\-virus-filter, etc arguments to [svctool(8)](https://github.com/indimail/indimail-mta/wiki/svctool.8) so that tasks like virus scanning, dk, domainkey signing, etc is done by the **QMQP** service.
 
-Note: Some of the tasks like virus/spam filtering, dk, dkim signing, etc can be done either by the client (if <b>QMAILQUEUE</b>=<u>/usr/sbin/qmail-spamfilter</u>), or can be performed by QMQP service if **QMAILQUEUE** is defined as [qmail-qmqpc(8)](https://github.com/indimail/indimail-mta/wiki/qmail-qmqpc.8) in the service's variable directory.
+Note: Some of the tasks like virus/spam filtering, dk, dkim signing, etc can be done either by the client (if <b>QMAILQUEUE</b>=<u>/usr/sbin/qmail-spamfilter</u>), or can be performed by **QMQP** service if **QMAILQUEUE** is defined as [qmail-qmqpc(8)](https://github.com/indimail/indimail-mta/wiki/qmail-qmqpc.8) in the service's variable directory.
 
-A QMQP server shouldn't even have to glance at incoming messages; its only job is to queue them for [qmail-send(8)](https://github.com/indimail/indimail-mta/wiki/qmail-send.8). Hence you should allow access to QMQP service only from your authorized clients. You can edit the file <u>/etc/indimail/tcp/tcp.qmqp</u> to grant specific access to clients. Here's how to set up QMQP service to authorized client hosts on your indimail-mta server.
+A **QMQP** server shouldn't even have to glance at incoming messages; its only job is to queue them for [qmail-send(8)](https://github.com/indimail/indimail-mta/wiki/qmail-send.8). Hence you should allow access to **QMQP** service only from your authorized clients. You can edit the file <u>/etc/indimail/tcp/tcp.qmqp</u> to grant specific access to clients. Here's how to set up **QMQP** service to authorized client hosts on your indimail-mta server.
 
 first create <u>/etc/indimail/tcp/tcp.qmqp</u> in [tcprules(1)](https://github.com/indimail/indimail-mta/wiki/tcprules.1) format to allow queueing from the authorized hosts. make sure to deny connections from unauthorized hosts. for example, if queueing is allowed from 1.2.3.\*:
 
@@ -3675,7 +3675,7 @@ Installation and setup is trivial if you use the RPM package (See the chapter [I
 $ sudo dnf install indimail-mini
 ```
 
-If you are doing a source installation then you need to manually copy few binaries and few shared librareis. Here's what you do need if you want to setup QMQP on the client.
+If you are doing a source installation then you need to manually copy few binaries and few shared librareis. Here's what you do need if you want to setup **QMQP** on the client.
 
 * The following binaries are required in the path (for source installation only).
   [sendmail(1)](https://github.com/indimail/indimail-mta/wiki/sendmail.1)
@@ -3691,7 +3691,7 @@ If you are doing a source installation then you need to manually copy few binari
   [mini-smtpd(8)](https://github.com/indimail/indimail-mta/wiki/mini-smtpd.8)
 * shared libs that the above binaries reference. You can use the ldd command (or otool -L command on OSX) (for source installation only).
 * symbolic links to <u>/usr/bin/sendmail</u> from <u>/usr/sbin/sendmail</u> and <u>/usr/lib/sendmail</u> (for source installation only);
-* a list of IP addresses of QMQP servers, one per line, in <u>/etc/indimail/control/qmqpservers</u>;
+* a list of IP addresses of **QMQP** servers, one per line, in <u>/etc/indimail/control/qmqpservers</u>;
 * a copy of <u>/etc/indimail/control/me</u>, <u>/etc/indimail/control/defaultdomain</u>, and <u>/etc/indimail/control/plusdomain</u> from your central server, so that [qmail-inject(8)](https://github.com/indimail/indimail-mta/wiki/qmail-inject.8) uses appropriate host names in outgoing mail; and
 * this host's name in <u>/etc/indimail/control/idhost</u>, so that [qmail-inject(8)](https://github.com/indimail/indimail-mta/wiki/qmail-inject.8) generates Message-ID without any risk of collision. Everything can be shared across hosts except for <u>/etc/indimail/control/idhost</u>.
 * Setup **QMAILQUEUE** environment variable to have [qmail-qmqpc(8)](https://github.com/indimail/indimail-mta/wiki/qmail-qmqpc.8) called instead of [qmail-queue(8)](https://github.com/indimail/indimail-mta/wiki/qmail-queue.8) when any client injects mails in the queue (for source installation only).
@@ -3702,11 +3702,11 @@ If you are doing a source installation then you need to manually copy few binari
   ```
 * All manual pages for the above binaries (not a hard requirement but good for future reference) (for source installation only).
 
-Remember that users won't be able to send mail if all the QMQP servers are down. Most sites have two or three independent QMQP servers.
+Remember that users won't be able to send mail if all the **QMQP** servers are down. Most sites have two or three independent **QMQP** servers.
 
 Note that users can still use all the [qmail-inject(8)](https://github.com/indimail/indimail-mta/wiki/qmail-inject.8) environment variables to control the appearance of their outgoing messages. This will include environment variables in <u>$HOME/.defaultqueue directory</u>.
 
-If you want to setup a SMTP service, you can setup mini-smtpd service. In case you setup SMTP service, you may want to handle tasks is DKIM signing, virus and spam filtering. You can use **QHPSI** along with a virus scanner like clamav. You can also choose not to have these tasks done at the client end, but rather have it carried out by the QMQP service. For virus scanning refer to chapter [Virus Scanning using QHPSI](#virus-scanning-using-qhpsi). You can set **QMAILQUEUE** to [qmail-multi(8)](https://github.com/indimail/indimail-mta/wiki/qmail-multi.8), [qmail-dkim(8)](https://github.com/indimail/indimail-mta/wiki/qmail-dkim.8), etc. However, you must remember to have [qmail-qmqpc(8)](https://github.com/indimail/indimail-mta/wiki/qmail-qmqpc.8) called at the end in case you change **QMAILQUEUE** to something other than [qmail-qmqpc(8)](https://github.com/indimail/indimail-mta/wiki/qmail-qmqpc.8). If you need to setup [mini-smtpd(8)](https://github.com/indimail/indimail-mta/wiki/mini-smtpd.8), here can be an option
+If you want to setup a SMTP service, you can setup mini-smtpd service. In case you setup SMTP service, you may want to handle tasks is DKIM signing, virus and spam filtering. You can use **QHPSI** along with a virus scanner like clamav. You can also choose not to have these tasks done at the client end, but rather have it carried out by the **QMQP** service. For virus scanning refer to chapter [Virus Scanning using QHPSI](#virus-scanning-using-qhpsi). You can set **QMAILQUEUE** to [qmail-multi(8)](https://github.com/indimail/indimail-mta/wiki/qmail-multi.8), [qmail-dkim(8)](https://github.com/indimail/indimail-mta/wiki/qmail-dkim.8), etc. However, you must remember to have [qmail-qmqpc(8)](https://github.com/indimail/indimail-mta/wiki/qmail-qmqpc.8) called at the end in case you change **QMAILQUEUE** to something other than [qmail-qmqpc(8)](https://github.com/indimail/indimail-mta/wiki/qmail-qmqpc.8). If you need to setup [mini-smtpd(8)](https://github.com/indimail/indimail-mta/wiki/mini-smtpd.8), here can be an option
 
 ```
 sudo /usr/sbin/svctool --smtp=25 --servicedir=/service --skipsend --no-multi \
@@ -3718,7 +3718,7 @@ sudo /usr/sbin/svctool --smtp=25 --servicedir=/service --skipsend --no-multi \
 
 ## qmail-qmtpd - Provide QMTP service
 
-QMTP protocol is provided by [qmail-qmtpd(8)](https://github.com/indimail/indimail-mta/wiki/qmail-qmtpd.8). You can create a QMTP service by running svctool as below.
+**QMTP** protocol is provided by [qmail-qmtpd(8)](https://github.com/indimail/indimail-mta/wiki/qmail-qmtpd.8). You can create a **QMTP** service by running svctool as below.
 
 ```
 sudo /usr/sbin/svctool --qmtp="209" --servicedir="/service" \
@@ -3727,7 +3727,7 @@ sudo /usr/sbin/svctool --qmtp="209" --servicedir="/service" \
   --maxperip="25" --memory="104857600" --min-free="52428800"
 ```
 
-The above command will create a QMTP service with TCP access control rules file in <u>/etc/indimail/tcp/tcp.qmtp</u>. You need to edit this file to provide access to each client that needs access to the QMTP service. If this file is missing, first create <u>/etc/indimail/tcp/tcp.qmtp</u> in tcprules format to allow qccess from the authorized hosts. Make sure to deny connections from unauthorized hosts. for example, if access is allowed from 1.2.3.\*:
+The above command will create a **QMTP** service with TCP access control rules file in <u>/etc/indimail/tcp/tcp.qmtp</u>. You need to edit this file to provide access to each client that needs access to the **QMTP** service. If this file is missing, first create <u>/etc/indimail/tcp/tcp.qmtp</u> in tcprules format to allow qccess from the authorized hosts. Make sure to deny connections from unauthorized hosts. for example, if access is allowed from 1.2.3.\*:
 
 ```
 1.2.3.:allow
@@ -3741,13 +3741,13 @@ $ sudo qmailctl cdb
 building /etc/indimail/tcp/tcp.qmtp.cdb:                   [  OK  ]
 ```
 
-You can change <u>/etc/indimail/tcp/tcp.qmtp</u> and run tcprules again at any time. Once you have setup the QMTP service you can create the file <u>/etc/indimail/control/qmtproutes</u> on each client as below.
+You can change <u>/etc/indimail/tcp/tcp.qmtp</u> and run tcprules again at any time. Once you have setup the **QMTP** service you can create the file <u>/etc/indimail/control/qmtproutes</u> on each client as below.
 
-Here w.x.y.z is the IP of the server running [qmail-qmtpd(8)](https://github.com/indimail/indimail-mta/wiki/qmail-qmtpd.8) and example.com is the domain for which you want to deliver mails using QMTP.
+Here w.x.y.z is the IP of the server running [qmail-qmtpd(8)](https://github.com/indimail/indimail-mta/wiki/qmail-qmtpd.8) and example.com is the domain for which you want to deliver mails using **QMTP**.
 
 `example.com:w.x.y.z:209`
 
-Once you create the above file, [qmail-remote(8)](https://github.com/indimail/indimail-mta/wiki/qmail-remote.8) will use QMTP to deliver mails using QMTP to w.x.y.z using QMTP. If you have both <u>qmtproutes</u> and <u>smtproutes</u> files, <u>qmtproutes</u> takes precedence.
+Once you create the above file, [qmail-remote(8)](https://github.com/indimail/indimail-mta/wiki/qmail-remote.8) will use **QMTP** to deliver mails using **QMTP** to w.x.y.z using **QMTP**. If you have both <u>qmtproutes</u> and <u>smtproutes</u> files, <u>qmtproutes</u> takes precedence.
 
 ## qmta - Using a minimal standalone qmta-send MTA
 
@@ -5071,9 +5071,9 @@ session    include      postlogin
 
 # Maildir Quotas
 
-When mail is delivered to a virtual domain, [vdelivermail(8)](https://github.com/indimail/indimail-mta/wiki/vdelivermail.8) delivers it to the users home directory. [vdelivermail(8)](https://github.com/indimail/indimail-mta/wiki/vdelivermail.8) will enter the users Maildir and add up the sizes of all the files in these directories. If the size is greater than the quota set by the [vadduser(1)](https://github.com/indimail/indimail-mta/wiki/vadduser.1) command, the email is bounced back to the sender. The quota for a user can be changed by using the [vmoduser(1)](https://github.com/indimail/indimail-mta/wiki/vmoduser.1) command.
+When mail is delivered to a virtual domain, [vdelivermail(8)](https://github.com/indimail/indimail-mta/wiki/vdelivermail.8) delivers it to the user's home directory. [vdelivermail(8)](https://github.com/indimail/indimail-mta/wiki/vdelivermail.8) will enter the user's Maildir and add up the sizes of all the files in these directories. If the size is greater than the quota set by the [vadduser(1)](https://github.com/indimail/indimail-mta/wiki/vadduser.1) command, the email is bounced back to the sender. The quota for a user can be changed by using the [vmoduser(1)](https://github.com/indimail/indimail-mta/wiki/vmoduser.1) command.
 
-For new users when they are created by the [vadduser(1)](https://github.com/indimail/indimail-mta/wiki/vadduser.1) command, the default quota set is determinted by the compile **HARD_QUOTA** defition set by `./configure --enable-hardquota` option. You can override the the value set at configuration time by setting the environment variable **HARD_QUOTA** when running the [vadduser(1)](https://github.com/indimail/indimail-mta/wiki/vadduser.1) command. IndiMail uses maildir++ format which uses [maildirquotas(7)](https://github.com/indimail/indimail-mta/wiki/maildirquota.7).
+New users created by the [vadduser(1)](https://github.com/indimail/indimail-mta/wiki/vadduser.1) command, the default quota set is determinted by the compile **HARD_QUOTA** defition set by `./configure --enable-hardquota` option. You can override the the value set at configuration time by setting the environment variable **HARD_QUOTA** when running the [vadduser(1)](https://github.com/indimail/indimail-mta/wiki/vadduser.1) command. IndiMail uses maildir++ format which uses [maildirquotas(7)](https://github.com/indimail/indimail-mta/wiki/maildirquota.7).
 
 # Setting limits for your domain
 
@@ -5781,7 +5781,7 @@ namespace inbox {
 
 **What is DKIM**
 
-DomainKeys Identified Mail (DKIM) lets an organization take responsibility for a message while it is in transit. DKIM has been approved as a Proposed Standard by IETF and published it as RFC 4871, RFC 6376. There are number of vendors/software available which provide DKIM signing. IndiMail is one of them. You can see the full list [here](https://dkim.org/deploy). IndiMail supports RSA-SHA1, RSA-SHA256 and [Ed25519-SHA256](https://www.rfc-editor.org/rfc/rfc8463.html) Cryptographic signature methods for DKIM.
+**DomainKeys Identified Mail (DKIM)** lets an organization take responsibility for a message while it is in transit. DKIM has been approved as a Proposed Standard by IETF and published it as RFC 4871, RFC 6376. There are number of vendors/software available which provide DKIM signing. IndiMail is one of them. You can see the full list [here](https://dkim.org/deploy). IndiMail supports RSA-SHA1, RSA-SHA256 and [Ed25519-SHA256](https://www.rfc-editor.org/rfc/rfc8463.html) Cryptographic signature methods for DKIM.
 
 DKIM uses public-key cryptography to allow the sender to electronically sign legitimate emails in a way that can be verified by recipients. Prominent email service providers implementing DKIM (or its slightly different predecessor, DomainKeys) include Yahoo and Gmail. Any mail from these domains should carry a DKIM signature, and if the recipient knows this, they can discard mail that hasn't been signed, or has an invalid signature.
 
@@ -7318,7 +7318,7 @@ TMPDIR="/tmp/indimail"
 
 # Using Docker Engine to Run IndiMail / IndiMail-MTA
 
-IndiMail now has docker images. You can read about installing Docker [here](https://docs.docker.com/engine/install/ "Docker Installation"). Once you have installed docker-engine, you need to start it. Typically it would be
+IndiMail has docker images stored in the docker hub respository. You can read about installing Docker [here](https://docs.docker.com/engine/install/ "Docker Installation"). Once you have installed docker-engine, you need to start it. Typically it would be
 
 `$ sudo service docker start`
 
@@ -7480,8 +7480,8 @@ Currently, the list of supported distributions for IndiMail is
           o SUSE Linux Enterprise 15 SP6
 
     * Red Hat
-          o Fedora 39
-          o Fedora 40
+          o Fedora 49
+          o Fedora 41
           o Fedora Rawhide
           o Red Hat Enterprise Linux 7
           o Red Hat Enterprise Linux 8 +
