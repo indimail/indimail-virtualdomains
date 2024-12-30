@@ -3841,11 +3841,12 @@ Jul 16 21:31:27 argos.indimail.org qmta-send[258422]: 1626451287.567740 status: 
 Jul 16 21:31:27 argos.indimail.org qmta-send[258422]: 1626451287.573755 delivery 1: success: did_1+0+0/
 Jul 16 21:31:27 argos.indimail.org qmta-send[258422]: 1626451287.573809 status: local 0/10 remote 0/20
 Jul 16 21:31:27 argos.indimail.org qmta-send[258422]: 1626451287.573876 end msg 1049084
-$ You have mail in /home/mbhangui/Maildir
+```
 
-At anytime if you want to view the logs you can use the journalctl command
+At anytime if you want to view the logs you can use the journalctl command. Always remember to use --no-pager else journalctl does something as stupid as truncating few lines, which it things are too long. Sometimes I wonder if journcalctl was coded by someone who dabbled with windows.
 
-$ journalctl -u qmta-send
+```
+$ journalctl -u qmta-send --no-pager
 Dec 08 08:28:36 argos.indimail.org systemd[1]: Started qmta-send.service - qmta Mail Transport Agent.
 Dec 08 08:28:37 argos.indimail.org qmta-send[1197]: info: qmta-send: /var/indimail/queue/qmta: conf split=23, bigtodo=0
 Dec 08 08:28:37 argos.indimail.org qmta-send[1197]: status: local 0/10 remote 0/20
