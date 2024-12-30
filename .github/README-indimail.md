@@ -4009,7 +4009,7 @@ $ sudo /usr/sbin/alternatives --install \
 
 # Post Handle Scripts
 
-IndiMail provides a handle post successful operation of few programs. A post execution handle is a program with the same name as that of the calling program but in the directory <u>/usr/libexec/indimail</u>. On successful completion, such programs will execute the handle program and return the status of the called handle program.
+IndiMail provides a way to run scripts or programs post successful operation of few programs. A post execution handle is a program with the same name as that of the calling program but in the directory <u>/usr/libexec/indimail</u>. On successful completion, such programs will execute the handle program and return the status of the called handle program.
 
 In my experience of setting up mail servers in the corporate world, often it is required that users be added to external databases which could be part of some strange enterprise applications. It could be as simple as adding users to your ldap server when creating a mailbox on IndiMail. Sometimes it could be as bad as adding users to ADS (ugh).
 
