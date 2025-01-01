@@ -5807,7 +5807,7 @@ $ sudo /bin/bash
 # dknewkey -b 2048 /etc/indimail/control/domainkeys/default
 ```
 
-The private key <b>default</b> created by [dknewkey(7)](https://github.com/indimail/indimail-mta/wiki/dknewkey.7) can be read only by the <b>root</b> UNIX user or a user who is part of the <b>qcerts</b> UNIX group. This means that only the <b>root</b> user or users who are part of the <b>qcerts</b> group can sign messages to have a DKIM signature. This is required because you don't want someone else to send out emails with your signature using your private key. You are free to chose your own name for the private key instead of using the name <b>default</b>. You can also use the openssl command to create the public and private keys. Make sure that the private key has read access for the group <u>qcert</u>. The private key shouldn't be readable by others so that your private key cannot be stolen. If your private key is stolen anyone can sign forged emails from your domain with the correct DKIM signature. Also make sure that the users <u>qmaild</u>, <u>qmailr</u> and <u>qmails</u> are part of the <u>qcerts</u> group. e.g.
+The private key <b>default</b> created by [dknewkey(7)](https://github.com/indimail/indimail-mta/wiki/dknewkey.7) can be read only by the <b>root</b> UNIX user or a user who is part of the <b>qcerts</b> UNIX group. This means that only the <b>root</b> user or users who are part of the <b>qcerts</b> group can sign messages to have a DKIM signature. This is required because you don't want someone else to send out emails with your signature using your private key. You are free to chose your own name for the private key instead of using the name <b>default</b>. You can also use the openssl command to create the public and private keys. Make sure that the private key has read access for the group <u>qcert</u>. The private key shouldn't be readable by others so that your private key cannot be stolen. If your private key is stolen anyone can sign forged emails from your domain with the correct DKIM signature. Also make sure that the users <u>qmaild</u>, <u>qmailr</u> and <u>qmails</u> are part of the <u>qcerts</u> group. If you are using [RoundCubemail](https://roundcube.net/) with indimail, then you should also have <u>apache</u> user part of the <u>qcerts</u> group. e.g.
 
 ```
 $ ls -l /etc/indimail/control/domainkeys
@@ -5818,12 +5818,12 @@ total 6
 -rw-r--r--. 1 root qcerts  470 Oct  2  2022 private.pub
 
 $ sudo groupmems -g qcerts -l
-qmaild  qmailr  qmails
+qmaild  qmailr  qmails  apache
 
 or
 
 $ grep qcerts /etc/group
-qcerts:x:1004:qmaild,qmailr,qmails
+qcerts:x:1004:qmaild,qmailr,qmails,apache
 ```
 
 ## Create your DNS records
