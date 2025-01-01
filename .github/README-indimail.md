@@ -5807,7 +5807,16 @@ $ sudo /bin/bash
 # dknewkey -b 2048 /etc/indimail/control/domainkeys/default
 ```
 
-The private key <b>default</b> created by [dknewkey(7)](https://github.com/indimail/indimail-mta/wiki/dknewkey.7) can be read only by the <b>root</b> UNIX user or a user who is part of the <b>qcerts</b> UNIX group. This means that only the <b>root</b> user or users who are part of the <b>qcerts</b> group can sign messages to have a DKIM signature. This is required because you don't want someone else to send out emails with your signature using your private key. You are free to chose your own name for the private key instead of using the name <b>default</b>.
+The private key <b>default</b> created by [dknewkey(7)](https://github.com/indimail/indimail-mta/wiki/dknewkey.7) can be read only by the <b>root</b> UNIX user or a user who is part of the <b>qcerts</b> UNIX group. This means that only the <b>root</b> user or users who are part of the <b>qcerts</b> group can sign messages to have a DKIM signature. This is required because you don't want someone else to send out emails with your signature using your private key. You are free to chose your own name for the private key instead of using the name <b>default</b>. You can also use the openssl command to create the public and private keys. Make sure that the private key has read access for the group <u>qcert</u>. e.g.
+
+```
+$ ls -l /etc/indimail/control/domainkeys
+total 6
+-rw-r-----. 1 root qcerts  916 Oct  2  2022 default
+-rw-r--r--. 1 root qcerts  290 Oct  2  2022 default.pub
+-rw-r-----. 1 root qcerts 1704 Oct  2  2022 private
+-rw-r--r--. 1 root qcerts  470 Oct  2  2022 private.pub
+```
 
 ## Create your DNS records
 
