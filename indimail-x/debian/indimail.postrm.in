@@ -111,6 +111,7 @@ for port in 465 25 587
 do
 	> ${servicedir}/qmail-smtpd.$port/variables/VIRTUAL_PKG_LIB
 done
+> ${servicedir}/qmail-send.25/variables/VIRTUAL_PKG_LIB
 ${rm} -f ${sysconfdir}/indimail.mrtg.ok ${sysconfdir}/system.mrtg.ok
 log_it "removing startup services"
 

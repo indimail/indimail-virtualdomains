@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.148 2024-05-31 15:45:21+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.149 2025-01-01 21:48:22+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -1555,6 +1555,7 @@ for port in 465 25 587
 do
   > %{servicedir}/qmail-smtpd.$port/variables/VIRTUAL_PKG_LIB
 done
+> %{servicedir}/qmail-send.25/variables/VIRTUAL_PKG_LIB
 
 %{__rm} -f %{sysconfdir}/indimail.mrtg.ok %{sysconfdir}/system.mrtg.ok
 log_it "removing startup services"
