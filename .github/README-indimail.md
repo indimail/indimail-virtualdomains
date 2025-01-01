@@ -4354,6 +4354,8 @@ domain:relay:port:penalty:max_tolerance username password envstr
 :relay:port:penalty:max_tolerance username password envstr
 ```
 
+**NOTE**: When <u>penalty</u> and <u>max_tolerance</u> are omitted, the default value of 3600 seconds (1 hr) for <u>penalty</u> and 120 seconds for <u>max_tolerance</u> apply. Which means that if SMTP port <u>port</u> on <u>relay</u> is down for more than <u>max_tolerance</u> seconds, **qmail-remote** will not retry connection to <u>relay</u> for a minimum of <u>penalty</u> seconds. The man page for [qmail-remote(8)](https://github.com/indimail/indimail-mta/wiki/qmail-remote.8) explains this with vivid details.
+
 As an example, let us use the same password for the user `manny` that we set above
 
 ```
