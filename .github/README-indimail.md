@@ -5806,13 +5806,13 @@ $ sudo /bin/bash
 # chown root:qcerts /etc/indimail/control/domainkeys
 
 To generate RSA private/public key
-# dknewkey -e -b 2048 /etc/indimail/control/domainkeys/default
+# dknewkey -e -b 2048 /etc/indimail/control/domainkeys/private
 
 To generate ED25519 private/public key
 # dknewkey -e -t ed25519 /etc/indimail/control/domainkeys/ed25519
 ```
 
-The private key <b>default</b> created by [dknewkey(7)](https://github.com/indimail/indimail-mta/wiki/dknewkey.7) can be read only by the <b>root</b> UNIX user or a user who is part of the <b>qcerts</b> UNIX group. This means that only the <b>root</b> user or users who are part of the <b>qcerts</b> group can sign messages to have a DKIM signature. This is required because you don't want someone else to send out emails with your signature using your private key. If your private key is stolen anyone can sign forged emails from your domain with the correct DKIM signature. You are free to choose your own name for the private key instead of using the name <b>default</b>. You can also use the openssl commands to create the public and private keys. Make sure that the private key has read access for the group <u>qcert</u>. Also make sure that the users <u>qmaild</u>, <u>qmailr</u> and <u>qmails</u> are part of the <u>qcerts</u> group. If you are using [RoundCubemail](https://roundcube.net/) with indimail, then you should also have <u>apache</u> user part of the <u>qcerts</u> group. e.g.
+The private key <u>private</u> and <u>ed25519</u> created by [dknewkey(7)](https://github.com/indimail/indimail-mta/wiki/dknewkey.7) can be read only by the <b>root</b> UNIX user or a user who is part of the <b>qcerts</b> UNIX group. This means that only the <b>root</b> user or users who are part of the <b>qcerts</b> group can sign messages to have a DKIM signature. This is required because you don't want someone else to send out emails with your signature using your private key. If your private key is stolen anyone can sign forged emails from your domain with the correct DKIM signature. You are free to choose your own name for the private key instead of using the name <b>private</b>. You can also use the openssl commands to create the public and private keys. Make sure that the private key has read access for the group <u>qcert</u>. Also make sure that the users <b>qmaild</b>, <b>qmailr</b> and <b>qmails</b> are part of the <b>qcerts</b> group. If you are using [RoundCubemail](https://roundcube.net/) with indimail, then you should also have <b>apache</b> user part of the <b>qcerts</b> group. e.g.
 
 ```
 $ cd /etc/indimail/control/domainkeys
@@ -5854,21 +5854,34 @@ qcerts:x:1004:qmaild,qmailr,qmails,apache
 
 ## Create your DNS records
 
+If you have used [dknewkey(7)](https://github.com/indimail/indimail-mta/wiki/dknewkey.7), then you will have the text to be placed in your DNS text records in the file have <b>.pub</b> extension.
+
 ```
 $ cd /etc/indimail/control/domainkeys
-$ pubkey=$(openssl rsa -in default -pubout -outform PEM | grep -v '^--' | tr -d '\n')
+
+If using RSA key
+$ pubkey=$(openssl rsa -in private -pubout -outform PEM | grep -v '^--' | tr -d '\n')
+
+If using ED25519 key
+$ pubkey=$(openssl pkey -pubout -in $selector | openssl asn1parse -offset 12 -noout -out /dev/stdout | openssl base64)
+
 ```
 
-The next command will print the text that you need to put in your txt record for default.\_domainkey.indimail.org. Replace indimail.org with our FQDN.
+The next command will print the text that you need to put in your txt record for private.\_domainkey.indimail.org or ed25519.\_domainkey.indimail.org. Replace indimail.org with our FQDN. If you have used <b>dknewkey</b>, then you just need to copy paste data from your file with the <b>.pub</b> extension.
 
 ```
-$ printf "default._domainkey.indimail.org\tIN\tTXT\t\"v=DKIM1; k=rsa; p=%s\"\n" "$pubkey"
-default._domainkey.indimail.org IN      TXT     "v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC2dvktnCXRavyuuoy2NUcHWpMp/Ia7Y5Y9tTwjjby7hS9wIvgecBz6UEMunOJdAZ2RVvSXKxPlxO4/rUgW6ow7vlEPY3IKagy+VFW1oHmvj4WU+BxZTJA2d8VrW9S9O1JMuPGGwdeYOC/Gcle/EviQtGYsz3jL/HrJb9rXXl4/gwIDAQAB"
+If using RSA key
+$ printf "private._domainkey.indimail.org\tIN\tTXT\t\"v=DKIM1; k=rsa; p=%s\"\n" "$pubkey"
+private._domainkey.indimail.org IN      TXT     "v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC2dvktnCXRavyuuoy2NUcHWpMp/Ia7Y5Y9tTwjjby7hS9wIvgecBz6UEMunOJdAZ2RVvSXKxPlxO4/rUgW6ow7vlEPY3IKagy+VFW1oHmvj4WU+BxZTJA2d8VrW9S9O1JMuPGGwdeYOC/Gcle/EviQtGYsz3jL/HrJb9rXXl4/gwIDAQAB"
+
+If using ED25519 key
+$ printf "ed25519._domainkey.indimail.org\tIN\tTXT\t\"v=DKIM1; k=ed25519; p=%s\"\n" "$pubkey"
+ed25519._domainkey.indimail.org. IN TXT ("v=DKIM1; k=ed25519; p=5EPfR9Cxy2yPWHPTYZ7rHk5lIKNDVN6ttsS2Fnb1Q40=")
 ```
 
 choose the selector (e.g. my\_selector) and publish this into DNS TXT record for:
 
-`my_selector._domainkey.indimail.org` (e.g. selector can be named 'default')
+`my_selector._domainkey.indimail.org` (e.g. selector can be named 'private', 'ed25519', etc)
 
 Wait until it's on all DNS servers and that's it. If all your domains can use <b>my\_selector</b> you can set **DKIMSIGN** as <u>/etc/indimail/control/domainkeys/%/my\_selector</u>. More in **DKIMSIGN** environment variable later.
 
@@ -5906,11 +5919,11 @@ $ sudo /bin/bash
 $ sudo /bin/bash
 # cd /service/qmail-smtpd.25/variables
 # echo "/usr/bin/qmail-dkim"                      > QMAILQUEUE
-# echo "/etc/indimail/control/domainkeys/default" > DKIMSIGN
+# echo "/etc/indimail/control/domainkeys/private" > DKIMSIGN
 # svc -r /service/qmail-smtpd.25
 ```
 
-In the above example you can use <u>/etc/indimail/control/domainkeys/%/default</u> for <b>DKIMSIGN</b>. During signing the '%' in the <b>DKIMSIGN</b> variable gets replaced with the domain name, allowing you to have different private keys for each domain.
+In the above example you can use <u>/etc/indimail/control/domainkeys/%/private</u> for <b>DKIMSIGN</b>. During signing the '%' in the <b>DKIMSIGN</b> variable gets replaced with the domain name, allowing you to have different private keys for each domain.
 
 ## DKIM signing, verification during remote,local delivery
 
@@ -5924,12 +5937,12 @@ $ sudo /bin/bash
 # echo "/usr/bin/spawn-filter"                    > QMAILREMOTE
 # echo "/bin/cat"                                 > DKIMQUEUE
 # echo "/usr/sbin/qmail-dkim"                     > FILTERARGS
-# echo "/etc/indimail/control/domainkeys/default" > DKIMSIGN
+# echo "/etc/indimail/control/domainkeys/private" > DKIMSIGN
 # echo "-h"                                       > DKIMSIGNOPTIONS
 # svc -r /service/qmail-send.25
 ```
 
-In the above example you can use <u>/etc/indimail/control/domainkeys/%/default</u> for <b>DKIMSIGN</b>. During signing the '%' in the <b>DKIMSIGN</b> variable gets replaced with the domain name, allowing you to have different private keys for each domain.
+In the above example you can use <u>/etc/indimail/control/domainkeys/%/private</u> for <b>DKIMSIGN</b>. During signing the '%' in the <b>DKIMSIGN</b> variable gets replaced with the domain name, allowing you to have different private keys for each domain.
 
 ### Using filterargs control file
 
@@ -5943,13 +5956,13 @@ $ sudo /bin/bash
 
 # cat > /etc/indimail/control/filterargs <<EOF
 # Sign emails by inserting DKIM-Signature in the email during remote delivery
-*:remote:/usr/sbin/qmail-dkim:DKIMQUEUE=/usr/bin/qcat, DKIMSIGN=/etc/indimail/control/domainkeys/default,DKIMSIGNOPTIONS=-h
+*:remote:/usr/sbin/qmail-dkim:DKIMQUEUE=/usr/bin/qcat, DKIMSIGN=/etc/indimail/control/domainkeys/private,DKIMSIGNOPTIONS=-h
 # Verify DKIM-Signature and Insert DKIM-Status header for email during local delivery
 *:local:/usr/sbin/qmail-dkim:DKIMQUEUE=/usr/bin/qcat, DKIMVERIFY=FGHIKLMNOQRTUVWjp,DKIMSIGN=
 EOF
 ```
 
-In the above example you can use <u>/etc/indimail/control/domainkeys/%/default</u> for <b>DKIMSIGN</b>. During signing the '%' in the <b>DKIMSIGN</b> variable gets replaced with the domain name, allowing you to have different private keys for each domain.
+In the above example you can use <u>/etc/indimail/control/domainkeys/%/private</u> for <b>DKIMSIGN</b>. During signing the '%' in the <b>DKIMSIGN</b> variable gets replaced with the domain name, allowing you to have different private keys for each domain.
 
 ## DKIM signing during mail injection
 
@@ -5972,7 +5985,7 @@ If you want actual UNIX users who have shell access to the system, have the DKIM
 $ sudo /bin/bash
 # mkdir ~/domainkeys
 # chmod 700 ~/domainkeys
-# dknewkey -b 2048 ~/domainkeys/default
+# dknewkey -b 2048 ~/domainkeys/private
 ```
 
 Now to use the above DKIM key, we need to set few environment variables specific to <b>user1</b>. To do that we just use the envdir property of indimail-mta where any file in ~/.defaultqueue becomes an environment variable. This is done by programs like [qmail-inject(8)](https://github.com/indimail/indimail-mta/wiki/qmail-inject.8) and [sendmail(1)](https://github.com/indimail/indimail-mta/wiki/sendmail.1) amongst many other programs. Refer to point 3 in [Setting Environment Variables](#setting-environment-variables) for reference. Assuming <u>/home/user1</u> is the home directory for <b>user1</b>, we can create **DKIMSIGN** environment variable using the below steps.
@@ -5981,7 +5994,7 @@ Now to use the above DKIM key, we need to set few environment variables specific
 $ mkdir ~/.defaultqueue
 $ cd ~/.defaultqueue
 $ echo "/usr/sbin/qmail-dkim"           > QMAILQUEUE
-$ echo "/home/user1/domainkeys/default" > DKIMSIGN
+$ echo "/home/user1/domainkeys/private" > DKIMSIGN
 ```
 
 ## Moving mails to SPAM folder for failed DKIM verification
@@ -6067,7 +6080,7 @@ Bounces have NULL as the value for the <b>Return-Path</b> header. Due to this yo
 ```
 $ sudo bash
 $ cd /etc/indimail/control
-# echo "*:DKIMSIGN=/etc/indimail/control/domainkeys/default,BOUNCEQUEUE=/usr/sbin/qmail-dkim" > bounce.envrules
+# echo "*:DKIMSIGN=/etc/indimail/control/domainkeys/private,BOUNCEQUEUE=/usr/sbin/qmail-dkim" > bounce.envrules
 ```
 
 # svscan and supervise
