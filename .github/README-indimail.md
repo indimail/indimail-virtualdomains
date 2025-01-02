@@ -3292,7 +3292,7 @@ Applications may supply their own DH parameters instead of using the built-in va
 
 Some mail providers like hotmail, yahoo restrict the number of connections from a single IP and the number of mails that can be delivered in an hour from a single IP. To increase your ability to deliver large number of genuine emails from your users to such sites, you may want to send out mails from multiple IP addresses.
 
-IndiMail has the ability to call a custom program instead of [qmail-local(8)](https://github.com/indimail/indimail-mta/wiki/qmail-local.8) or [qmail-remote(8)](https://github.com/indimail/indimail-mta/wiki/qmail-remote.8). This is done by defining the environment variable **QMAILLOCAL** or **QMAILREMOTE**. [qmail-remote(8)](https://github.com/indimail/indimail-mta/wiki/qmail-remote.8) can use the environment variable **OUTGOINGIP** to set the IP address of the local interface when making outgoing connections. By writing a simple script and setting **QMAILREMOTE** environment variable pointing to this script, one can randomly chose an IP address from the control file <u>/etc/indimail/control/outgoingip</u>.
+IndiMail has the ability to call a custom program instead of [qmail-local(8)](https://github.com/indimail/indimail-mta/wiki/qmail-local.8) or [qmail-remote(8)](https://github.com/indimail/indimail-mta/wiki/qmail-remote.8). This is done by defining the environment variable **QMAILLOCAL** or **QMAILREMOTE**. [qmail-remote(8)](https://github.com/indimail/indimail-mta/wiki/qmail-remote.8) can use the environment variable **OUTGOINGIP** to set the IP address of the local interface when making outgoing connections. By writing a simple script and setting **QMAILREMOTE** environment variable pointing to this script, one can randomly choose an IP address from the control file <u>/etc/indimail/control/outgoingip</u>.
 
 The script below also allows you to define multiple outgoing IP addresses for a single host. e.g. you can create the control file <u>/etc/indimail/control/outgoingip.hotmail.com</u> to send out mails from multiple IPs only for the domain hotmail.com.
 
@@ -3349,7 +3349,7 @@ else
 fi
 IP_COUNT=${#IP[*]} # array size
 if [ $IP_COUNT -gt 1 ] ; then
-    i=`expr $RANDOM % $IP_COUNT` # chose an IP randomly
+    i=`expr $RANDOM % $IP_COUNT` # choose an IP randomly
     export OUTGOINGIP=${IP[$i]}
 fi
 exec -a qmail-remote $PROG "$host" "$sender" "$qqeh" $size $*
@@ -5804,18 +5804,44 @@ To able to sign emails with a DKIM signature, you need to create a private/publi
 $ sudo /bin/bash
 # mkdir -p /etcindimail/control/domainkeys
 # chown root:qcerts /etc/indimail/control/domainkeys
-# dknewkey -b 2048 /etc/indimail/control/domainkeys/default
+
+To generate RSA private/public key
+# dknewkey -e -b 2048 /etc/indimail/control/domainkeys/default
+
+To generate ED25519 private/public key
+# dknewkey -e -t ed25519 /etc/indimail/control/domainkeys/ed25519
 ```
 
-The private key <b>default</b> created by [dknewkey(7)](https://github.com/indimail/indimail-mta/wiki/dknewkey.7) can be read only by the <b>root</b> UNIX user or a user who is part of the <b>qcerts</b> UNIX group. This means that only the <b>root</b> user or users who are part of the <b>qcerts</b> group can sign messages to have a DKIM signature. This is required because you don't want someone else to send out emails with your signature using your private key. You are free to chose your own name for the private key instead of using the name <b>default</b>. You can also use the openssl command to create the public and private keys. Make sure that the private key has read access for the group <u>qcert</u>. The private key shouldn't be readable by others so that your private key cannot be stolen. If your private key is stolen anyone can sign forged emails from your domain with the correct DKIM signature. Also make sure that the users <u>qmaild</u>, <u>qmailr</u> and <u>qmails</u> are part of the <u>qcerts</u> group. If you are using [RoundCubemail](https://roundcube.net/) with indimail, then you should also have <u>apache</u> user part of the <u>qcerts</u> group. e.g.
+The private key <b>default</b> created by [dknewkey(7)](https://github.com/indimail/indimail-mta/wiki/dknewkey.7) can be read only by the <b>root</b> UNIX user or a user who is part of the <b>qcerts</b> UNIX group. This means that only the <b>root</b> user or users who are part of the <b>qcerts</b> group can sign messages to have a DKIM signature. This is required because you don't want someone else to send out emails with your signature using your private key. If your private key is stolen anyone can sign forged emails from your domain with the correct DKIM signature. You are free to choose your own name for the private key instead of using the name <b>default</b>. You can also use the openssl commands to create the public and private keys. Make sure that the private key has read access for the group <u>qcert</u>. Also make sure that the users <u>qmaild</u>, <u>qmailr</u> and <u>qmails</u> are part of the <u>qcerts</u> group. If you are using [RoundCubemail](https://roundcube.net/) with indimail, then you should also have <u>apache</u> user part of the <u>qcerts</u> group. e.g.
 
 ```
-$ ls -l /etc/indimail/control/domainkeys
-total 6
--rw-r-----. 1 root qcerts  916 Oct  2  2022 default
--rw-r--r--. 1 root qcerts  290 Oct  2  2022 default.pub
--rw-r-----. 1 root qcerts 1704 Oct  2  2022 private
--rw-r--r--. 1 root qcerts  470 Oct  2  2022 private.pub
+$ cd /etc/indimail/control/domainkeys
+
+To create RSA private key of size 2048 bits
+
+$ openssl genrsa -out private 2048
+
+Display the RSA public key
+$ openssl rsa -in private -out private.pub -pubout -outform PEM
+
+To create ED25519 private key
+
+$ openssl genpkey -algorithm ed25519 -out ed25519
+
+Display the ED25519 public key
+$ openssl pkey -pubout -in ed25519 | openssl asn1parse -offset 12 -noout -out /dev/stdout | openssl base64
+
+$ ls -l
+total 32
+-rw-r-----. 1 root qcerts  119 Feb  5  2023 ed25519
+-rw-r--r--. 1 root qcerts  117 Feb 13  2023 ed25519.pub
+-rw-r-----. 1 root qcerts 1704 Oct  2  2017 private
+-rw-r--r--. 1 root qcerts  470 Oct  2  2017 private.pub
+
+$ sudo usermod -aG qcerts qmaild
+$ sudo usermod -aG qcerts qmailr
+$ sudo usermod -aG qcerts qmails
+$ sudo usermod -aG qcerts apache
 
 $ sudo groupmems -g qcerts -l
 qmaild  qmailr  qmails  apache
@@ -6751,7 +6777,7 @@ Non SSL Version Install/Configuration
        SSLCertificateFile /etc/indimail/certs/servercert.pem
        ```
 
-       Now apache server needs access to servercert.pem. Add apache user to the qmail group. You can chose either of the below two options (Options 2 is less secure, as it gives httpd access to qmail files).
+       Now apache server needs access to servercert.pem. Add apache user to the qmail group. You can choose either of the below two options (Options 2 is less secure, as it gives httpd access to qmail files).
 
        * Option 1
 
@@ -8074,7 +8100,7 @@ This project has been built on the work of many. If I have missed out anyone, do
 
 Both indimail-mta and indimail-virtualdomains started in late 1999 as a combined package of unmodified qmail and modified [vpopmail](https://www.inter7.com/vpopmail-virtualized-email/).
 
-indimail-mta started as a unmodified qmail-1.03. This was when I was employed by an ISP in late 1999. The ISP was using [Critical Path's ISOCOR](https://www.wsj.com/articles/SB940514435217077581) for providing Free and Paid email service. Then the dot com burst happened and ISP didn't have money to spend on upgrading the E3500, E450 [Sun Enterprise servers](https://en.wikipedia.org/wiki/Sun_Enterprise). The mandate was to move to an OSS/FS solution. After evaluating sendmail, postfix and qmail, we chose qmail. During production deployment, qmail couldn't scale on these servers. The issue was the queue's todo count kept on increasing. We applied the [todo-proc(8)](https://github.com/indimail/indimail-mta/wiki/todo-proc.8) and the <b>big-todo</b> patch, but still we couldn't handle the incoming email rate. By now the customers were screaming, the corporate users were shooting out nasty emails. We tried a small hack which solved this problem. Compiled 20 different qmail setups, with conf-qmail as /var/qmail1, /var/qmail2, etc. Run [qmail-send(8)](https://github.com/indimail/indimail-mta/wiki/qmail-send.8) for each of these instance. A small shim was written which would get the current time and divide by 20. The remainder was used to do exec of /var/qmail1/bin/qmail-queue, /var/qmail2/bin/qmail-queue, etc. The shim was copied as /var/qmail/bin/qmail-queue. The IO problem got solved. But the problem with this solution was compiling the qmail source 20 times and copying the shim as [qmail-queue(8)](https://github.com/indimail/indimail-mta/wiki/qmail-queue.8). You couldn't compile qmail on one machine and use the backup of binaries on another machine. Things like uid, gid, the paths were all hardcoded in the source. That is how the base of indimail-mta took form by removing each and every hard coded uids, gids and paths. indimail-mta still does the same thing that was done in the year 2000. The installation creates multiple queues - /var/indimail/queue/queue1, /var/indimail/queue/queue2, etc. A new daemon named qscheduler uses **QUEUE_COUNT** env variable to run multiple [qmail-send(8)](https://github.com/indimail/indimail-mta/wiki/qmail-send.8) instances. Each [qmail-send(8)](https://github.com/indimail/indimail-mta/wiki/qmail-send.8) instance picks up mail from a particular queue. All client programs use [qmail-queue(8)](https://github.com/indimail/indimail-mta/wiki/qmail-queue.8) to load balance the incoming email across multiple queues. At one point of time in late 2000, indimail was handling 3.2 million users with two E450 server as relay servers (indimail-mta), one E3500 Sun Microsystem servers and 5 Compaq Proliant DL380 running indimail-virtualdomains.
+indimail-mta started as a unmodified qmail-1.03. This was when I was employed by an ISP in late 1999. The ISP was using [Critical Path's ISOCOR](https://www.wsj.com/articles/SB940514435217077581) for providing Free and Paid email service. Then the dot com burst happened and ISP didn't have money to spend on upgrading the E3500, E450 [Sun Enterprise servers](https://en.wikipedia.org/wiki/Sun_Enterprise). The mandate was to move to an OSS/FS solution. After evaluating sendmail, postfix and qmail, we choose qmail. During production deployment, qmail couldn't scale on these servers. The issue was the queue's todo count kept on increasing. We applied the [todo-proc(8)](https://github.com/indimail/indimail-mta/wiki/todo-proc.8) and the <b>big-todo</b> patch, but still we couldn't handle the incoming email rate. By now the customers were screaming, the corporate users were shooting out nasty emails. We tried a small hack which solved this problem. Compiled 20 different qmail setups, with conf-qmail as /var/qmail1, /var/qmail2, etc. Run [qmail-send(8)](https://github.com/indimail/indimail-mta/wiki/qmail-send.8) for each of these instance. A small shim was written which would get the current time and divide by 20. The remainder was used to do exec of /var/qmail1/bin/qmail-queue, /var/qmail2/bin/qmail-queue, etc. The shim was copied as /var/qmail/bin/qmail-queue. The IO problem got solved. But the problem with this solution was compiling the qmail source 20 times and copying the shim as [qmail-queue(8)](https://github.com/indimail/indimail-mta/wiki/qmail-queue.8). You couldn't compile qmail on one machine and use the backup of binaries on another machine. Things like uid, gid, the paths were all hardcoded in the source. That is how the base of indimail-mta took form by removing each and every hard coded uids, gids and paths. indimail-mta still does the same thing that was done in the year 2000. The installation creates multiple queues - /var/indimail/queue/queue1, /var/indimail/queue/queue2, etc. A new daemon named qscheduler uses **QUEUE_COUNT** env variable to run multiple [qmail-send(8)](https://github.com/indimail/indimail-mta/wiki/qmail-send.8) instances. Each [qmail-send(8)](https://github.com/indimail/indimail-mta/wiki/qmail-send.8) instance picks up mail from a particular queue. All client programs use [qmail-queue(8)](https://github.com/indimail/indimail-mta/wiki/qmail-queue.8) to load balance the incoming email across multiple queues. At one point of time in late 2000, indimail was handling 3.2 million users with two E450 server as relay servers (indimail-mta), one E3500 Sun Microsystem servers and 5 Compaq Proliant DL380 running indimail-virtualdomains.
 
 indimail-virtualdomain started with a modified vpopmail base that could handle a distributed setup - Same domain on multiple servers. Having this kind of setup made the control file smtproutes unviable. email would arrive at a relay server for user@domain. But the domain '@domain' was present on multiple hosts, with each host having it's own set of users. This required special routing and modification of qmail (especially [qmail-remote(8)](https://github.com/indimail/indimail-mta/wiki/qmail-remote.8) to route the traffic to the correct host. [vdelivermail(8)](https://github.com/indimail/indimail-mta/wiki/vdelivermail.8) to had to be written to deliver email for a local domain to a remote host, in case the user wasn't present on the current host. New MySQL tables were created to store the host information for a user. This table would be used by [qmail-local(8)](https://github.com/indimail/indimail-mta/wiki/qmail-local.8), [qmail-remote(8)](https://github.com/indimail/indimail-mta/wiki/qmail-remote.8), [vdelivermail(8)](https://github.com/indimail/indimail-mta/wiki/vdelivermail.8) to route the mail to the write host. All this complicated stuff had to be done because the ISP where I worked, had no money to buy/upgrade costly servers to cater to users, who were multiplying at an exponential rate. The govt had just opened the license for providing internet services to private players. These were Indians who were tasting internet and free email for the first time. So the solution we decided was to buy multiple intel servers [Compaq Proliant](https://en.wikipedia.org/wiki/ProLiant) running Linux and make the qmail/vpopmail solution horizontally scalable. This was the origin of indimail-1.x which borrowed code from vpopmail, modified it for a domain on multiple hosts. indimail-2.x was a complete rewrite using djb style, using [libqmail](https://github.com/indimail/libqmail) as the standard library for all basic operations. All functions were discarded because they used the standard C library. The problem with indimail-2.x was linking with MySQL libraries, which caused significant issues building binary packages on [openSUSE build service](https://build.opensuse.org/). Binaries got built with MySQL/MariaDB libraries pulled by OBS, but when installed on a target machine, the user would have a completely different MySQL/MariaDB setup. Hence a decision was taken to load the library at runtime using dlopen/dlsym. This was the start of indimail-3.x. The source was moved from sourceforge.net to github and the project renamed as indimail-virtualdomains from the original name IndiMail. The modified source code of qmail was moved to github as indimail-mta.
 
