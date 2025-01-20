@@ -44,7 +44,7 @@ if [ -f $name.packages ] ; then
       cd $stage/$pkg_name-$ver
       if [ -f default.configure -a ! -f ./configure -o ! -f ./Makefile ] ; then
         echo reconfiguring $pkg_name-$ver
-        ./default.configure >/dev/null 2>&1
+        ./default.configure 2>&1
       fi
       if [ -f Makefile ] ; then
         echo cleaning $pkg_name-$ver
@@ -73,7 +73,7 @@ fi
 cd $stage/$name-$version
 if [ -f default.configure -a ! -f ./configure -o ! -f ./Makefile ] ; then
   echo reconfiguring $name-$version
-  ./default.configure >/dev/null 2>&1
+  ./default.configure 2>&1
 fi
 
 if [ ! -f $name.changes ] ; then
