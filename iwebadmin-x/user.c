@@ -120,7 +120,7 @@ show_user_lines(const char *user, const char *dom, time_t mytime, const char *di
 		iclose();
 		iweb_exit(SYSTEM_FAILURE);
 	}
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	if (getln(&ssin, &line, &match, '\n') == -1) {
 		strerr_warn1("show_user_lines: read: .qmail-default: ", &strerr_sys);
 		out(html_text[144]);
@@ -672,7 +672,7 @@ call_hooks(const char *hook_type, const char *p1, const char *p2,
 	}
 	if ((fd = open_read(hooks_path.s)) == -1)
 		return (0);
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1) {
 			strerr_warn3("show_user_lines: read: ", hooks_path.s, ": ", &strerr_sys);
@@ -890,7 +890,7 @@ set_qmaildefault(char *opt)
 		iclose();
 		iweb_exit(SYSTEM_FAILURE);
 	}
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	if (getln(&ssin, &line, &match, '\n') == -1) {
 		strerr_warn1("set_qmaildefault: read: .qmail-default", &strerr_sys);
 		out(html_text[144]);
@@ -931,7 +931,7 @@ set_qmaildefault(char *opt)
 		iclose();
 		iweb_exit(SYSTEM_FAILURE);
 	} else {
-		substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
+		substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fd, outbuf, sizeof(outbuf));
 		if (substdio_put(&ssout, "| ", 2) ||
 				substdio_puts(&ssout, PREFIX) ||
 				substdio_put(&ssout, "/sbin/", 6) ||
@@ -1018,7 +1018,7 @@ get_catchall()
 		iclose();
 		iweb_exit(SYSTEM_FAILURE);
 	}
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	if (getln(&ssin, &line, &match, '\n') == -1) {
 		strerr_warn1("get_catchall: read: .qmail-default", &strerr_sys);
 		out(html_text[144]);
@@ -1202,7 +1202,7 @@ makeautoresp(substdio *out, char *dir)
 			die_nomem();
 		return 1;
 	}
-	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fd, outbuf, sizeof(outbuf));
 	if (substdio_put(&ssout, "Reference: ", 11) ||
 			substdio_put(&ssout, subject.s, subject.len) ||
 			substdio_put(&ssout, "\n", 1) ||
@@ -1459,7 +1459,7 @@ modusergo()
 		moduser();
 		return;
 	}
-	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fd, outbuf, sizeof(outbuf));
 	/*
 	 * Scan through old .qmail and write out any unrecognized program delivery
 	 * lines to the new .qmail file.
@@ -1621,7 +1621,7 @@ parse_users_dotqmail(char newchar)
 			/*- no .qmail file, standard delivery */
 			dotqmail_flags = DOTQMAIL_STANDARD;
 		else {
-			substdio_fdbuf(&ssin1, read, fd1, inbuf1, sizeof(inbuf1));
+			substdio_fdbuf(&ssin1, (ssize_t (*)(int,  char *, size_t)) read, fd1, inbuf1, sizeof(inbuf1));
 			for (;;) {
 				if (getln(&ssin1, &line, &match, '\n') == -1) {
 					strerr_warn3("parse_users_dotqmail: read: ", fn1.s, ": ", &strerr_sys);
@@ -1729,7 +1729,7 @@ parse_users_dotqmail(char newchar)
 		case '2': /* forwarding addresses */
 			if (fd1 != -1) {
 				lseek(fd1, 0, SEEK_SET);
-				substdio_fdbuf(&ssin1, read, fd1, inbuf1, sizeof(inbuf1));
+				substdio_fdbuf(&ssin1, (ssize_t (*)(int,  char *, size_t)) read, fd1, inbuf1, sizeof(inbuf1));
 				j = 0;
 				for (;;) {
 					if (getln(&ssin1, &line, &match, '\n') == -1) {
@@ -1781,7 +1781,7 @@ parse_users_dotqmail(char newchar)
 		case '5': /* autoresp subject */
 			if (fd2 != -1) {
 				lseek(fd2, 0, SEEK_SET);
-				substdio_fdbuf(&ssin2, read, fd2, inbuf2, sizeof(inbuf2));
+				substdio_fdbuf(&ssin2, (ssize_t (*)(int,  char *, size_t)) read, fd2, inbuf2, sizeof(inbuf2));
 				/*- scan headers for Subject */
 				for (;;) {
 					if (getln(&ssin2, &line, &match, '\n') == -1) {
@@ -1830,7 +1830,7 @@ parse_users_dotqmail(char newchar)
 		case '6': /* autoresp message */
 			if (fd2 != -1) {
 				lseek(fd2, 0, SEEK_SET);
-				substdio_fdbuf(&ssin2, read, fd2, inbuf2, sizeof(inbuf2));
+				substdio_fdbuf(&ssin2, (ssize_t (*)(int,  char *, size_t)) read, fd2, inbuf2, sizeof(inbuf2));
 				/* read from file, skipping headers (look for first blank line) */
 				for (inheader = 1;;) {
 					if (getln(&ssin2, &line, &match, '\n') == -1) {

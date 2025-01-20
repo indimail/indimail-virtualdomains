@@ -595,7 +595,7 @@ setdefaultaccount()
 		flush();
 		return;
 	}
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	if (getln(&ssin, &line, &match, '\n') == -1) {
 		strerr_warn1("setdefaultaccount: read: .qmail-default", &strerr_sys);
 		out(html_text[144]);
@@ -643,7 +643,7 @@ setdefaultaccount()
 			flush();
 			return;
 		} else {
-			substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
+			substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fd, outbuf, sizeof(outbuf));
 			if (substdio_put(&ssout, "| ", 2) ||
 					substdio_puts(&ssout, PREFIX) ||
 					substdio_put(&ssout, "/sbin/", 6) ||

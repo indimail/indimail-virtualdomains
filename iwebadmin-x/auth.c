@@ -83,7 +83,7 @@ auth_system(ip_addr, pw)
 		iclose();
 		iweb_exit(SESSION_FAILURE);
 	}
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	if (getln(&ssin, &line, &match, '\n') == -1) {
 		strerr_warn3("auth_system: read: ", TmpBuf.s, ": ", &strerr_sys);
 		copy_status_mesg(html_text[144]);
@@ -154,7 +154,7 @@ auth_user_domain(const char *ip_addr, struct passwd *pw)
 		iclose();
 		iweb_exit(SESSION_FAILURE);
 	}
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	if (getln(&ssin, &line, &match, '\n') == -1) {
 		strerr_warn3("auth_system: read: ", TmpBuf.s, ": ", &strerr_sys);
 		copy_status_mesg(html_text[144]);

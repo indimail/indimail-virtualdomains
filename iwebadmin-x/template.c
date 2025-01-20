@@ -112,7 +112,7 @@ send_template(const char *actualfile)
 			break;
 	}
 	close(pipe_fd[1]);
-	substdio_fdbuf(&ssin, read, pipe_fd[0], inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, pipe_fd[0], inbuf, sizeof(inbuf));
 	out("<footer align=\"center\">\n");
 	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1) {
@@ -209,7 +209,7 @@ send_template_now(const char *filename)
 		flush();
 		return 0;
 	}
-	substdio_fdbuf(&ssin1, read, fd1, inbuf1, sizeof(inbuf1));
+	substdio_fdbuf(&ssin1, (ssize_t (*)(int,  char *, size_t)) read, fd1, inbuf1, sizeof(inbuf1));
 	/* parse the template looking for "##" pattern */
 	for (;;) {
 		if ((inchar = getch(&ssin1)) == -1) {
@@ -340,7 +340,7 @@ send_template_now(const char *filename)
 						close(fd2);
 						ack("144", "read .autoresp.msg");
 					}
-					substdio_fdbuf(&ssin2, read, fd2, inbuf2, sizeof(inbuf2));
+					substdio_fdbuf(&ssin2, (ssize_t (*)(int,  char *, size_t)) read, fd2, inbuf2, sizeof(inbuf2));
 					/*- read Reference: and Subject: line */
 					for (i = 0; i < 2; i++) {
 						if (getln(&ssin2, &line, &match, '\n') == -1) {
@@ -1065,7 +1065,7 @@ get_calling_host()
 		flush();
 		return;
 	}
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	/*- read Reference: and Subject: line */
 	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1) {
@@ -1129,7 +1129,7 @@ get_session_val(const char *session_var)
 				strerr_warn3("get_session_val: open: ", TmpBuf.s, ": ", &strerr_sys);
 			return (retval);
 		}
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		if (getln(&ssin, &line, &match, '\n') == -1) {
 			strerr_warn3("get_session_val: read: ", TmpBuf.s, ": ", &strerr_sys);
 			close(fd);
