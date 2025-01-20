@@ -85,7 +85,7 @@ echo target_vendor  %_target_vendor
 echo Building %{name}-%{version}-%{release} Build %{_build} OS %{_os} lib=%{_lib} libdir=%{_libdir}
 echo "------------------------------------------------------"
 ) > %{name}-rpm.info
-%configure --prefix=%{_prefix}  \
+%configure --prefix=%{_prefix} --bindir=%{_prefix}/sbin \
   --sysconfdir=%{sysconfdir} \
   --mandir=%{mandir} \
   --datarootdir=%{_prefix}/share/indimail

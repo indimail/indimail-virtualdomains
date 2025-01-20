@@ -34,7 +34,7 @@ sig_handle_timer(uint timeout)
 void
 sig_init()
 {
-	signal(SIGALRM, (void (*)()) sig_handle_timer);
-	signal(SIGINT, (void (*)()) sig_handle_abort);
-	signal(SIGTERM, (void (*)()) sig_handle_abort);
+	signal(SIGALRM, (void (*)(int)) sig_handle_timer);
+	signal(SIGINT, (void (*)(int)) sig_handle_abort);
+	signal(SIGTERM, (void (*)(int)) sig_handle_abort);
 }

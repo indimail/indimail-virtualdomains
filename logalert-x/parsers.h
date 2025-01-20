@@ -76,7 +76,7 @@ struct entry_attribute {
 	const char     *a_name;
 	unsigned int    a_id;
 	int             a_nvalues;
-	                status_e(*a_parser) ();
+	                status_e(*a_parser) (struct entry_conf *);
 
 };
 

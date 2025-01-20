@@ -104,7 +104,7 @@ static stralloc line = {0}, rhost = {0}, statusfn = {0}, tmp = {0};
 unsigned long   dtimeout = 300;
 
 void
-SigTerm()
+SigTerm(int x)
 {
 	strerr_die2x(0, FATAL, "ARGH!! Committing suicide on SIGTERM");
 }
@@ -166,7 +166,7 @@ do_server(int verbose, char *statusdir)
 	char            inbuf[512];
 	substdio        ssin;
 
-	substdio_fdbuf(&ssin, read, 0, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, 0, inbuf, sizeof(inbuf));
 	if (getln(&ssin, &rhost, &match, '\0') == -1)
 		strerr_die2sys(111, FATAL, "read: socket: ");
 	if (!match)

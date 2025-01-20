@@ -168,7 +168,7 @@ IOplex()
 	static stralloc line = {0};
 
 	for (msgptr = msghd; msgptr->fd != -1; msgptr++) {
-		substdio_fdbuf(&ssin, read, msgptr->fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, msgptr->fd, inbuf, sizeof(inbuf));
 		if (msgptr->seek) {
 			if (lseek(msgptr->fd, msgptr->seek, SEEK_SET) == -1)
 				strerr_die4sys(111, FATAL, "unable to seek ", msgptr->fname, ": ");

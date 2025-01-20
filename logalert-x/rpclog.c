@@ -102,8 +102,8 @@ static int      socket_type;  /*- Whether Stream or Datagram ? */
 static int      rpcsvcdirty;  /*- Still serving ? */
 
 bool_t          pmap_unset(unsigned long, unsigned long);
-static void     rpclog_1();
-static int     *send_message_1();
+static void     rpclog_1(struct svc_req *, register SVCXPRT *);
+static int     *send_message_1(char **);
 
 int
 get_options(int argc, char **argv, int *background)
@@ -128,7 +128,7 @@ get_options(int argc, char **argv, int *background)
 }
 
 static void
-closedown()
+closedown(int x)
 {
 	if (rpcsvcdirty == 0) {
 		extern fd_set   svc_fdset;
@@ -148,31 +148,32 @@ closedown()
 }
 
 static void
-sigterm()
+sigterm(int x)
 {
 	svc_unregister(RPCLOG, LOGVERS);
-	closedown();
+	closedown(0);
 	_exit(0);
 }
 
 static void
-sigalarm()
+sigalarm(int x)
 {
 	signal(SIGALRM, closedown);
-	closedown();
+	closedown(0);
 	alarm(_RPCSVC_CLOSEDOWN);
 }
 
 static void
 rpclog_1(struct svc_req *rqstp, register SVCXPRT *transp)
 {
-	union
+	typedef union
 	{
 	char           *send_message_1_arg;
-	}               argument;
+	} myu;
+        myu             argument;
 	char           *result;
 	bool_t(*xdr_argument) (), (*xdr_result) ();
-	char           *(*local) ();
+	char           *(*local) (myu *, struct svc_req *);
 
 	rpcsvcdirty = 1;
 	switch (rqstp->rq_proc)
@@ -183,9 +184,9 @@ rpclog_1(struct svc_req *rqstp, register SVCXPRT *transp)
 		return;
 
 	case SEND_MESSAGE:
-		xdr_argument = xdr_wrapstring;
-		xdr_result = xdr_int;
-		local = (char *(*) ()) send_message_1;
+		xdr_argument = (bool_t (*)(void)) xdr_wrapstring;
+		xdr_result = (bool_t (*)(void)) xdr_int;
+		local = (char *(*) (myu *, struct svc_req *)) send_message_1;
 		break;
 
 	default:

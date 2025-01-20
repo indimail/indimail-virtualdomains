@@ -92,7 +92,7 @@ static char    *usage =
 	"  -v                - verbose output";
 
 static void
-sigterm()
+sigterm(int x)
 {
 	exitasap = 1;
 }
@@ -251,7 +251,7 @@ transmit_logs(char *lhost, char *remote, int sfd)
 		for (msgptr = msghd; !exitasap && msgptr->fd != -1; msgptr++) {
 			if (!FD_ISSET(msgptr->fd, &FdSet))
 				continue;
-			substdio_fdbuf(&ssin, read, msgptr->fd, inbuf, sizeof(inbuf));
+			substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, msgptr->fd, inbuf, sizeof(inbuf));
 			if (msgptr->seek) {
 				if (lseek(msgptr->fd, msgptr->seek, SEEK_SET) == -1) {
 					strerr_warn4(WARN, "unable to seek ", msgptr->fn, ": ", &strerr_sys);
