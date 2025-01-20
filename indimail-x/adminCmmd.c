@@ -148,7 +148,7 @@ IOPlex(int sockfd, int timeoutdata)
 	int             retval, retrycount, dataTimeout;
 	char           *ptr;
 	char            sockbuf[SOCKBUF + 1], strnum[FMT_ULONG];
-	void            (*pstat) ();
+	void            (*pstat) (int);
 
 	if ((pstat = signal(SIGPIPE, SIG_IGN)) == SIG_ERR)
 		return (-1);

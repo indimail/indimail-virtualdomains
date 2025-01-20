@@ -87,7 +87,7 @@ backfill(const char *username, const char *domain, const char *path, int operati
 				strerr_warn3("backfill: ", filename.s, ": ", &strerr_sys);
 			return ((char *) 0);
 		}
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		for (;;) {
 			if (getln(&ssin, &line, &match, '\n') == -1) {
 				strerr_warn3("backfill: read: ", filename.s, ": ", &strerr_sys);

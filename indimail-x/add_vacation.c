@@ -115,7 +115,7 @@ add_vacation(char *email, char *fname)
 		die_nomem();
 	if ((fd1 = open_trunc(tmpbuf.s)) == -1)
 		strerr_die3sys(111, "add_vacation: open_trunc: ", tmpbuf.s, ": ");
-	substdio_fdbuf(&ssout, write, fd1, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fd1, outbuf, sizeof(outbuf));
 	if (substdio_put(&ssout, "| ", 2) ||
 			substdio_puts(&ssout, PREFIX) ||
 			substdio_put(&ssout, "/bin/autoresponder -q ", 22) ||
@@ -191,8 +191,8 @@ add_vacation(char *email, char *fname)
 			unlink(tmpbuf.s);
 			return (1);
 		}
-		substdio_fdbuf(&ssin, read, fd1, inbuf, sizeof(inbuf));
-		substdio_fdbuf(&ssout, write, fd2, outbuf, sizeof(outbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd1, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fd2, outbuf, sizeof(outbuf));
 		for (;;) {
 			if (getln(&ssin, &line, &match, '\n') == -1) {
 				strerr_warn3("add_vacation: read: ", fd1 ? fname : "stdin", ": ", &strerr_sys);

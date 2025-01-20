@@ -79,7 +79,7 @@ monkey(char *host, char *servicename, char *startbuf, int skip_nl)
 	struct timeval  timeout;
 	time_t          idle_time, last_timeout;
 	char           *ptr, *cptr;
-	void            (*pstat) ();
+	void            (*pstat) (int);
 
 #ifdef SOLARIS
 #ifdef _SC_HOST_NAME_MAX

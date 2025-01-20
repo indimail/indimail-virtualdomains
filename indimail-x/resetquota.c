@@ -155,7 +155,7 @@ main(int argc, char **argv)
 				status = -1;
 				continue;
 			}
-			substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+			substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 			if (getln(&ssin, &line, &match, '\n') == -1) {
 				strerr_warn3("resetquota: read: ", filename.s, ": ", &strerr_sys);
 				close(fd);
@@ -217,7 +217,7 @@ main(int argc, char **argv)
 			status = -1;
 			continue;
 		}
-		substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
+		substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fd, outbuf, sizeof(outbuf));
 		strnum1[i = fmt_ulong(strnum1, (unsigned long) mailsize)] = 0;
 		strnum2[j = fmt_ulong(strnum2, (unsigned long) mailcount)] = 0;
 		if (substdio_puts(&ssout, quota) ||

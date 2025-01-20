@@ -108,7 +108,7 @@ main(int argc, char **argv)
 			strerr_die3sys(111, "updatefile: open: ", filename, ": ");
 			return (0);
 		}
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		for(;;) {
 			if (getln(&ssin, &line, &match, '\n') == -1)
 				strerr_die3sys(111, "udpatefile: read: ", filename, ": ");

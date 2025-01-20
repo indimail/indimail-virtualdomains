@@ -198,7 +198,7 @@ loadIgnoreList(char *fn)
 			strerr_die3sys(111, "spam: open: ", fn, ": ");
 		return (0);
 	}
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	for (status = 0;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1) {
 			strerr_warn3("spam: read: ", fn, ": ", &strerr_sys);
@@ -259,7 +259,7 @@ spamReport(int spamNumber, char *outfile)
 
 	if ((fd = open_append(outfile)) == -1)
 		strerr_die3sys(111, "spam: open: ", outfile, ": ");
-	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fd, outbuf, sizeof(outbuf));
 	subprintfe(subfderr, "spam", "%-40s Mail Count\n", "Spammer's Email Address");
 	errflush("spam");
 	if(!maxaddr) {
@@ -365,7 +365,7 @@ readLogFile(char *fn, int type, int count)
 				return (-1);
 			}
 		} else {
-			substdio_fdbuf(&ssin, read, keyfd, inbuf, sizeof(inbuf));
+			substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, keyfd, inbuf, sizeof(inbuf));
 			if (getln(&ssin, &line, &match, '\n') == -1) {
 				strerr_warn3("readLogFile: read: ", keyfile.s, ": ", &strerr_sys);
 				close(fd);
@@ -404,7 +404,7 @@ readLogFile(char *fn, int type, int count)
 		close(fd);
 		return (-1);
 	}
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	for (status = 0, seekPos = -1;;) {
 		seekPos = lseek(fd, (off_t) 0, SEEK_CUR);
 		switch (type)
@@ -428,7 +428,7 @@ readLogFile(char *fn, int type, int count)
 				close(fd);
 				return (-1);
 			}
-			substdio_fdbuf(&ssout, write, keyfd, outbuf, sizeof(outbuf));
+			substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, keyfd, outbuf, sizeof(outbuf));
 			if (substdio_put(&ssout, strnum, fmt_ulong(strnum, seekPos)) == -1 ||
 					substdio_put(&ssout, "\n", 1) == -1 ||
 					substdio_flush(&ssout) == -1) {

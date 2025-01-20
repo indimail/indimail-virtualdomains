@@ -94,7 +94,7 @@ static void    *element = 0;
 char            strnum[FMT_ULONG];
 static int      pwdCache; /*- for sighup to figure out if caching was selected on startup */
 char           *tcpserver;
-void            (*logfunc) ();
+void            (*logfunc) (const char *, const char *);
 
 /*-
 typedef struct
@@ -274,7 +274,7 @@ getTimeoutValues(int *readTimeout, int *writeTimeout, char *sysconfdir, char *co
 	if ((fd = open_read(tmpbuf.s)) == -1)
 		*readTimeout = 4;
 	else {
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			*readTimeout = 4;
 		else {
@@ -307,7 +307,7 @@ getTimeoutValues(int *readTimeout, int *writeTimeout, char *sysconfdir, char *co
 	if ((fd = open_read(tmpbuf.s)) == -1)
 		*writeTimeout = 4;
 	else {
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			*writeTimeout = 4;
 		else {
@@ -700,10 +700,7 @@ isig_term()
 }
 #else
 static void
-sig_hand(sig, code, scp, addr)
-	int             sig, code;
-	struct sigcontext *scp;
-	char           *addr;
+sig_hand(int sig)
 {
 	char           *fifo_path;
 	long            total_count;
@@ -850,7 +847,7 @@ sig_hand(sig, code, scp, addr)
 			close_db();
 		break;
 	} /*- switch (sig) */
-	signal(sig, (void(*)()) sig_hand);
+	signal(sig, (void(*)(int)) sig_hand);
 	errno = error_intr;
 	return;
 }
@@ -868,7 +865,7 @@ ProcessInFifo(int instNum)
 	char           *ptr, *fifoName, *fifo_path, *myFifo, *sysconfdir, *controldir,
 				   *QueryBuf, *email, *remoteip, *local_ip, *cntrl_host;
 	const char     *real_domain;
-	void            (*pstat) () = NULL;
+	void            (*pstat) (int) = NULL;
 	void           *(*search_func) (const void *key, void *const *rootp, int (*compar)(const void *, const void *));
 	time_t          prev_time = 0l;
 	substdio        ssin;
@@ -887,11 +884,11 @@ ProcessInFifo(int instNum)
 		signal(SIGHUP, (void(*)()) isig_hup);
 		signal(SIGINT, (void(*)()) isig_int);
 #else
-		signal(SIGTERM, (void(*)()) sig_hand);
-		signal(SIGUSR1, (void(*)()) sig_hand);
-		signal(SIGUSR2, (void(*)()) sig_hand);
-		signal(SIGHUP, (void(*)()) sig_hand);
-		signal(SIGINT, (void(*)()) sig_hand);
+		signal(SIGTERM, (void(*)(int)) sig_hand);
+		signal(SIGUSR1, (void(*)(int)) sig_hand);
+		signal(SIGUSR2, (void(*)(int)) sig_hand);
+		signal(SIGHUP, (void(*)(int)) sig_hand);
+		signal(SIGINT, (void(*)(int)) sig_hand);
 #endif
 	}
 	logfunc = tcpserver ? errout : out;
@@ -1046,7 +1043,7 @@ ProcessInFifo(int instNum)
 			cntrl_host = 0;
 			line.len = 0;
 		} else {
-			substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+			substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 			if (getln(&ssin, &line, &match, '\n') == -1) {
 				strerr_warn3("InLookup: read: ", host_path.s, ": ", &strerr_sys);
 				close(fd);

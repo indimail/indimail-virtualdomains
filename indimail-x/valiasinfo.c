@@ -108,7 +108,7 @@ valiasinfo(const char *user, const char *domain)
 				flag1 = 0;
 		}
 		if (fd != -1) {
-			substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+			substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 			for (flag1 = 0;;) {
 				if (getln(&ssin, &line, &match, '\n') == -1) {
 					strerr_warn3("valiasinfo: read: ", tmpbuf.s, ": ", &strerr_sys);
@@ -154,7 +154,7 @@ valiasinfo(const char *user, const char *domain)
 				}
 			}
 			if (fd != -1) {
-				substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+				substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 				for (;;) {
 					if (getln(&ssin, &line, &match, '\n') == -1) {
 						strerr_warn3("valiasinfo: read: ", tmpbuf.s, ": ", &strerr_sys);

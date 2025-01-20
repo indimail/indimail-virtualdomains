@@ -94,7 +94,7 @@ user_over_quota(char *Maildir, char *quota, int cur_msgsize)
 				return (0);
 			return (-1);
 		}
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		if (getln(&ssin, &line, &match, '\n') == -1) {
 			strerr_warn3("user_over_quota: read: ", tmpbuf.s, ": ", &strerr_sys);
 			close(fd);

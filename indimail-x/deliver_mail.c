@@ -110,7 +110,7 @@ getAlertConfig(char **mailalert_host, char **mailalert_port)
 			strerr_die3sys(111, "deliver_mail: open: ", tmpbuf.s, ": ");
 		return;
 	}
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1) {
 			strerr_warn3("deliver_mail: read: ", tmpbuf.s, ": ", &strerr_sys);
@@ -238,7 +238,7 @@ read_quota(char *Maildir)
 				return ("NOQUOTA");
 			strerr_die3sys(111, "deliver_mail: open: ", tmpbuf.s, ": ");
 		}
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		/*- get the first line */
 		if (getln(&ssin, &line, &match, '\n') == -1) {
 			strerr_warn3("deliver_mail: read: ", tmpbuf.s, ": ", 0);
@@ -341,8 +341,8 @@ recordMailcount(char *maildir, mdir_t curmsgsize, mdir_t *dailyMsgSize, mdir_t *
 #endif
 		return (-2);
 	}
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
-	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fd, outbuf, sizeof(outbuf));
 	/*
 	 * read lines with the following format
 	 * date total_mailcount total_mailsize
@@ -873,7 +873,7 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 				strerr_die3sys(111, "deliver_mail: open: ", tmpbuf.s, ": ");
 			return (-2);
 		}
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		if (getln(&ssin, &hostname, &match, '\n') == -1) {
 			strerr_warn2(tmpbuf.s, ": EOF. indimail (#5.1.2): ", &strerr_sys);
 			close(fd);
@@ -1074,7 +1074,7 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 					alert_port = env_get("MAILALERT_PORT");
 				if (alert_host && alert_port && *alert_host && *alert_port) {
 					if ((sfd = udpopen(alert_host, alert_port)) != -1) {
-						substdio_fdbuf(&ssout, write, sfd, outbuf, sizeof(outbuf));
+						substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, sfd, outbuf, sizeof(outbuf));
 						strnum1[i = fmt_ulong(strnum1, MsgSize)] = 0;
 						if (substdio_put(&ssout, user.s, user.len) ||
 								substdio_put(&ssout, "@", 1) ||
@@ -1109,7 +1109,7 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 					strerr_warn3("deliver_mail: open: ", local_file.s, ": ", &strerr_sys);
 				return (-2);
 			}
-			substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+			substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 			if (getln(&ssin, &date_dir, &match, '\n') == -1) {
 				strerr_warn2(local_file.s, ": EOF. indimail (#5.1.2): ", &strerr_sys);
 				close(fd);
@@ -1257,7 +1257,7 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 		close(write_fd);
 		return (-2);
 	}
-	substdio_fdbuf(&ssout, write, write_fd, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, write_fd, outbuf, sizeof(outbuf));
 	for (;;) {
 		if ((i = read(0, inbuf, sizeof(inbuf))) == -1) {
 			strerr_warn1("deliver_mail: read error: ", &strerr_sys);

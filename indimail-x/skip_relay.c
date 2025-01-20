@@ -55,7 +55,7 @@ skip_relay(char *ipaddr)
 		strerr_warn3("skip_relay: ", tcp_file, ": ", &strerr_sys);
 		return (1);
 	}
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	len = str_len(ipaddr);
 	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1) {

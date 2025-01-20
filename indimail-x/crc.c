@@ -531,9 +531,7 @@ usage(int exitval)
 	_exit(exitval);
 }
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 	int             statflag = 0, displayhex = 1;
 	unsigned long   linecount;

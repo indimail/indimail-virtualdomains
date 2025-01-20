@@ -77,7 +77,7 @@ isvirtualdomain(char *domain)
 		}
 		return (0);
 	}
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			strerr_die3sys(111, "isvirtualdomain: read: ", tmp.s, ": ");

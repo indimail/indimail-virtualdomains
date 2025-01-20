@@ -138,7 +138,7 @@ fork_child(char *infifo, int instNum)
 
 #ifdef DARWIN
 static void
-isig_usr1()
+isig_usr1(int x)
 {
 	int             idx;
 
@@ -153,7 +153,7 @@ isig_usr1()
 }
 
 static void
-isig_usr2()
+isig_usr2(int x)
 {
 	int             idx;
 
@@ -168,7 +168,7 @@ isig_usr2()
 }
 
 static void
-isig_hup()
+isig_hup(int x)
 {
 	int             idx;
 
@@ -183,7 +183,7 @@ isig_hup()
 }
 
 static void
-isig_int()
+isig_int(int x)
 {
 	int             idx;
 
@@ -212,7 +212,7 @@ isig_term()
 }
 #else
 static void
-sig_hand(int sig, int code, struct sigcontext *scp, char *addr)
+sig_hand(int sig)
 {
 	int             idx;
 
@@ -224,7 +224,7 @@ sig_hand(int sig, int code, struct sigcontext *scp, char *addr)
 		kill(pid_table[idx].pid, sig);
 	}
 	if (sig != SIGTERM) {
-		sig_catch(sig, (void(*)()) sig_hand);
+		sig_catch(sig, sig_hand);
 		errno = error_intr;
 		return;
 	} else

@@ -348,7 +348,7 @@ doAlias(char *dir, char *user, char *domain, mdir_t MsgSize)
 			strerr_die3sys(111, "vdelivermail: open: ", tmpbuf.s, ": ");
 		return (0);
 	}
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	/*- format a simple loop checker name */
 	if (!stralloc_copys(&tmp, user) ||
 			!stralloc_append(&tmp, "@") ||

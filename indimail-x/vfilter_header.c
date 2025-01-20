@@ -82,7 +82,7 @@ headerList()
 		strerr_warn3("vfilter_header: ", filename.s, ": ", &strerr_sys);
 		return ((char **) 0);
 	}
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	for (count = 0;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1) {
 			strerr_warn3("vfilter_header: read: ", filename.s, ": ", &strerr_sys);
@@ -114,7 +114,7 @@ headerList()
 		close(fd);
 		return ((char **) 0);
 	}
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	if (lseek(fd, 0, SEEK_SET) == -1) {
 		strerr_warn3("vfilter_header: lseek: ", filename.s, ": ", &strerr_sys);
 		close(fd);

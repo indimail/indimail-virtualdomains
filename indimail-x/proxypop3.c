@@ -49,7 +49,7 @@ static char     sccsid[] = "$Id: proxypop3.c,v 1.6 2023-03-20 10:16:55+05:30 Cpr
 #include "AuthModuser.h"
 #include "proxylogin.h"
 
-static void     bye();
+static void     bye(int);
 static char     strnum[FMT_ULONG + 11];
 
 static void
@@ -228,7 +228,7 @@ main(int argc, char **argv)
 	return (0);
 }
 
-static void bye()
+static void bye(int x)
 {
 	strerr_warn1("ERR: TIMEOUT", 0);
 	_exit(0);

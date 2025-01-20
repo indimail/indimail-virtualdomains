@@ -147,7 +147,7 @@ main(int argc, char **argv)
 		die_nomem();
 	if ((fd = open_read(tmpbuf.s)) == -1)
 		strerr_die4sys(111, FATAL, "open: ", tmpbuf.s, ": ");
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	/* id:sql|cmd:IGNORE Yes|NO:comment:sql_stmt */
 	for (u_count = 0;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1) {

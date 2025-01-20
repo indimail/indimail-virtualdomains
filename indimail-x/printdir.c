@@ -92,7 +92,7 @@ main(int argc, char **argv)
 			return (1);
 		}
 	} else {
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		if (getln(&ssin, &line, &match, '\n') == -1) {
 			strerr_warn3("printdir: read: ", tmpbuf.s, ": ", &strerr_sys);
 			return (1);

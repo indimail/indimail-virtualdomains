@@ -82,7 +82,7 @@ get_local_hostid()
 			die_nomem();
 		return (line.s);
 	} else
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			strerr_die3sys(111, "get_local_hostid: read: ", filename.s, ": ");

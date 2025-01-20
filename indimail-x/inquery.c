@@ -41,7 +41,7 @@ static char     sccsid[] = "$Id: inquery.c,v 1.13 2024-05-28 19:23:45+05:30 Cpro
 #define FATAL "inquery: fatal: "
 
 static void
-cleanup(int rfd, int wfd, void (*sig_pipe_save)(), char *fifo)
+cleanup(int rfd, int wfd, void (*sig_pipe_save)(int), char *fifo)
 {
 	int             tmperrno;
 
@@ -71,7 +71,7 @@ inquery(char query_type, const char *email, const char *ip)
 	char           *sysconfdir, *controldir, *infifo_dir, *infifo, *ptr, *tcpclient;
 	char            strnum[FMT_ULONG];
 	static char    *pwbuf;
-	void            (*sig_pipe_save) () = NULL;
+	void            (*sig_pipe_save) (int) = NULL;
 	static stralloc querybuf = { 0 };
 	static stralloc myfifo = { 0 };
 	static stralloc InFifo = { 0 };

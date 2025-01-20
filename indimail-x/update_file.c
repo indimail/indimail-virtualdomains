@@ -105,7 +105,7 @@ update_file(const char *filename, const char *update_line, mode_t mode)
 		unlink(fname.s);
 		return (-1);
 	}
-	substdio_fdbuf(&ssout, write, fd2, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fd2, outbuf, sizeof(outbuf));
 	if (access(filename, F_OK)) {
 		if (substdio_puts(&ssout, update_line) || substdio_put(&ssout, "\n", 1)) {
 			strerr_warn3("update_file: write error: ", fname.s, ": ", &strerr_sys);
@@ -149,7 +149,7 @@ update_file(const char *filename, const char *update_line, mode_t mode)
 		unlink(fname.s);
 		return (-1);
 	} else {
-		substdio_fdbuf(&ssin, read, fd1, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd1, inbuf, sizeof(inbuf));
 		for (found = 0;;) {
 			if (getln(&ssin, &line, &match, '\n') == -1) {
 				strerr_warn3("update_file: read: ", filename, ": ", &strerr_sys);

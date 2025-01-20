@@ -187,7 +187,7 @@ deldomain(const char *domain)
 		}
 	} else {
 		BasePath.len = 0;
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		if (getln(&ssin, &line, &match, '\n') == -1) {
 			strerr_warn3("deldomain: read: ", tmpbuf.s, ": ", &strerr_sys);
 			close(fd);
@@ -226,7 +226,7 @@ deldomain(const char *domain)
 				out("deldomain", "\n");
 				flush("deldomain");
 			}
-			substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+			substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 			for(;;) {
 				if (getln(&ssin, &line, &match, '\n') == -1) {
 					strerr_warn3("deldomain: read: ", tmpbuf.s, ": ", &strerr_sys);

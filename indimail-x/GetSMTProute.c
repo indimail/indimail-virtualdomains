@@ -65,7 +65,7 @@ get_smtp_qmtp_port(const char *file, const char *domain, int default_port)
 		}
 	}
 	len = str_len(domain);
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	for(;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1) {
 			strerr_warn3("GetSMTProute: read: ", file, ": ", &strerr_sys);

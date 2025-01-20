@@ -57,7 +57,7 @@ maildir_to_domain(char *maildir)
 			strerr_warn3("maildir_to_domain: ", filename.s, ": ", &strerr_sys);
 		return ((char *) 0);
 	}
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	if (getln(&ssin, &line, &match, '\n') == -1) {
 		strerr_warn3("maildir_to_domain: read: ", filename.s, ": ", &strerr_sys);
 		close(fd);

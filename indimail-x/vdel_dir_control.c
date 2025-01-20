@@ -68,7 +68,7 @@ vdel_dir_control(const char *domain)
 		}
 		return (0);
 	}
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	for(;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1) {
 			strerr_warn3("vdel_dir_control: read: ", tmpbuf.s, ": ", &strerr_sys);

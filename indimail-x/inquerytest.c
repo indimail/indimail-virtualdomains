@@ -78,7 +78,7 @@ die_nomem()
 no_return
 #endif
 void
-SigChild()
+SigChild(int x)
 {
 	int             status;
 

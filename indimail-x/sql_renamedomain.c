@@ -151,7 +151,7 @@ sql_renamedomain(char *OldDomain, char *NewDomain, char *domdir)
 			strerr_warn3("vrenamedomain: open: ", tmp1.s, ": ", &strerr_sys);
 		return (-1);
 	}
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1) {
 			strerr_warn3("vrenamedomain: read: ", tmp1.s, ": ", &strerr_sys);

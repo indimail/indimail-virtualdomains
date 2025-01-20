@@ -167,7 +167,7 @@ process_file(char *file_name, char type, char inquery_type)
 		strerr_warn4(WARN, "error opening file ", file_name, "for reading: ", &strerr_sys);
 		return;
 	}
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1) {
 			strerr_warn4(WARN, "read: ", file_name, ": ", &strerr_sys);

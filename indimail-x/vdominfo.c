@@ -278,7 +278,7 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid, int DisplayName,
 				getEnvConfigStr(&base_path, "BASE_PATH", BASE_PATH);
 				subprintfe(subfdout, "vdominfo", "  Base Dir: %s\n", base_path);
 			} else {
-				substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+				substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 				if (getln(&ssin, &line, &match, '\n') == -1) {
 					strerr_warn3("vdominfo: read: ", tmpbuf.s, ": ", &strerr_sys);
 					return;
@@ -303,7 +303,7 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid, int DisplayName,
 				if (errno != error_noent)
 					strerr_die3sys(111, "vdominfo: open: ", tmpbuf.s, ": ");
 			} else {
-				substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+				substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 				if (getln(&ssin, &line, &match, '\n') == -1) {
 					strerr_warn3("vdominfo: read: ", tmpbuf.s, ": ", &strerr_sys);
 					return;
@@ -342,7 +342,7 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid, int DisplayName,
 				if (errno != error_noent)
 					strerr_die3sys(111, "vdominfo: open: ", tmpbuf.s, ": ");
 			} else {
-				substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+				substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 				for (i = 0;;) {
 					if (getln(&ssin, &line, &match, '\n') == -1) {
 						strerr_warn3("vdominfo: read: ", tmpbuf.s, ": ", &strerr_sys);
@@ -431,7 +431,7 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid, int DisplayName,
 					getEnvConfigStr(&base_path, "BASE_PATH", BASE_PATH);
 					subprintfe(subfdout, "vdominfo", "  Base Dir: %s\n", base_path);
 				} else {
-					substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+					substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 					if (getln(&ssin, &line, &match, '\n') == -1) {
 						strerr_warn3("vdominfo: read: ", tmpbuf.s, ": ", &strerr_sys);
 						return;
@@ -457,7 +457,7 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid, int DisplayName,
 					if (errno != error_noent)
 						strerr_die3sys(111, "vdominfo: open: ", tmpbuf.s, ": ");
 				} else {
-					substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+					substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 					if (getln(&ssin, &line, &match, '\n') == -1) {
 						strerr_warn3("vdominfo: read: ", tmpbuf.s, ": ", &strerr_sys);
 						return;
@@ -494,7 +494,7 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid, int DisplayName,
 					if (errno != error_noent)
 						strerr_die3sys(111, "vdominfo: open: ", tmpbuf.s, ": ");
 				} else {
-					substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+					substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 					for (i = 0;;) {
 						if (getln(&ssin, &line, &match, '\n') == -1) {
 							strerr_warn3("vdominfo: read: ", tmpbuf.s, ": ", &strerr_sys);
@@ -551,7 +551,7 @@ display_all_domains(stralloc *Domain, stralloc *Dir, int DisplayName, int Displa
 		strerr_warn1("vdominfo: no domains found", 0);
 		return;
 	}
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	/*- +example.com-:example.com:555:555:/var/indimail/domains/example.com:-:: */
 	for (;;) {
 		if (getln(&ssin, &_domline, &match, '\n') == -1) {

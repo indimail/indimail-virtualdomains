@@ -120,7 +120,7 @@ mdir_t check_quota(char *Maildir)
 #ifdef USE_MAILDIRQUOTA
 	if (total)
 		*total = 0;
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	for (mail_size = 0;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1) {
 			strerr_warn3("check_quota: read: ", tmpbuf.s, ": ", &strerr_sys);

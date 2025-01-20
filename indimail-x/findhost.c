@@ -172,7 +172,7 @@ open_central_db(const char *dbhost)
 	if (!cntrl_host.len && !access(host_path.s, F_OK)) {
 		if ((fd = open_read(host_path.s)) == -1)
 			strerr_die3sys(111, "open_central_db: open: ", host_path.s, ": ");
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		if (getln(&ssin, &cntrl_host, &match, '\n') == -1)
 			strerr_die3sys(111, "open_central_db: read: ", host_path.s, ": ");
 		close(fd);

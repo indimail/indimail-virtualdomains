@@ -177,7 +177,7 @@ writemcdinfo(DBINFO **rhostsptr, time_t mtime)
 		return (1);
 	if ((fd = open(mcdFile.s, O_CREAT|O_WRONLY, INDIMAIL_QMAIL_MODE)) == -1)
 		strerr_die3sys(111, "LoadDbInfo: open-write: ", mcdFile.s, ": ");
-	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fd, outbuf, sizeof(outbuf));
 	if (indimailuid == -1 || indimailgid == -1)
 		get_indimailuidgid(&indimailuid, &indimailgid);
 	uid = indimailuid;
@@ -559,7 +559,7 @@ loadMCDInfo(int *total)
 		else
 			return (localDbInfo(total, &relayhosts));
 	}
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	/*-
 	 * get count of dbinfo records each
 	 * dbinfo record has a 'server line
@@ -766,7 +766,7 @@ localDbInfo(int *total, DBINFO ***rhosts)
 		else
 			return ((DBINFO **) 0);
 	}
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	/*- +indimail.org-:indimail.org:508:508:/var/indimail/domains/indimail.org:-:: -*/
 	for (count = 0;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1)
@@ -833,7 +833,7 @@ localDbInfo(int *total, DBINFO ***rhosts)
 		if ((mfd = open_read(host_path.s)) == -1)
 			strerr_die2sys(111, host_path.s, ": ");
 		else {
-			substdio_fdbuf(&ssin, read, mfd, inbuf, sizeof(inbuf));
+			substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, mfd, inbuf, sizeof(inbuf));
 			if (getln(&ssin, &line, &match, '\n') == -1)
 				strerr_die3sys(111, "read: ", host_path.s, ": ");
 			close(mfd);
@@ -900,7 +900,7 @@ localDbInfo(int *total, DBINFO ***rhosts)
 			 * The new allocated becomes total + 1 plus 1 for the last NULL dbinfo structure
 			 * The old total was total + 1 and the new total becomes total + 2
 			 */
-			alloc_re((char *) &relayhosts, sizeof(DBINFO *) * (*total + 1), sizeof(DBINFO *) * (*total + 2));
+			alloc_re((void *) &relayhosts, sizeof(DBINFO *) * (*total + 1), sizeof(DBINFO *) * (*total + 2));
 			rhostsptr = relayhosts + *total;
 			for (tmpPtr = rhostsptr;tmpPtr < relayhosts + *total + 2;tmpPtr++)
 				*tmpPtr = (DBINFO *) 0;
@@ -936,7 +936,7 @@ localDbInfo(int *total, DBINFO ***rhosts)
 	}
 	if (*total) { /*- non-empty mcdinfo file */
 		/*- +ve count indicates that we found domains in the assign file */
-		alloc_re((char *) &relayhosts, sizeof(DBINFO *) * *total, sizeof(DBINFO *) * (*total + count + 1));
+		alloc_re((void *) &relayhosts, sizeof(DBINFO *) * *total, sizeof(DBINFO *) * (*total + count + 1));
 		rhostsptr = relayhosts + *total;
 		for (tmpPtr = rhostsptr;tmpPtr < relayhosts + *total + count + 1;tmpPtr++)
 			*tmpPtr = (DBINFO *) 0;
@@ -950,7 +950,7 @@ localDbInfo(int *total, DBINFO ***rhosts)
 	}
 	if (!relayhosts)
 		die_nomem();
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	if (lseek(fd, 0, SEEK_SET) == -1)
 		strerr_die3sys(111, "LoadDbInfo: lseek: ", filename.s, ": ");
 	ssin.p = 0; /*- reset position to beginning of file */

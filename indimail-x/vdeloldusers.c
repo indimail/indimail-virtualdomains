@@ -70,7 +70,7 @@ static char     sccsid[] = "$Id: vdeloldusers.c,v 1.7 2024-05-17 16:25:48+05:30 
 #define DEFAULT_AGE      60
 #define DEFAULTMAIL_AGE  30
 
-void            SigExit();
+void            SigExit(int);
 
 char          **skipGecos, **mailboxArr;
 int             shouldexit;
@@ -134,7 +134,7 @@ get_options(int argc, char **argv, char **Domain, int *Age, int *mailAge,
 			*Domain = optarg;
 			break;
 		case 's':
-			if (!alloc_re(gecosarr, gecoslen, (len = str_len(optarg)) + 1 + gecoslen))
+			if (!alloc_re((void **) gecosarr, gecoslen, (len = str_len(optarg)) + 1 + gecoslen))
 				die_nomem();
 			gecosCount++;
 			str_copy(gecosarr + gecoslen, optarg);
@@ -150,7 +150,7 @@ get_options(int argc, char **argv, char **Domain, int *Age, int *mailAge,
 			scan_int(optarg, trashAge);
 			break;
 		case 'm':
-			if (!alloc_re((char *) mailboxarr, mailboxlen, (len = str_len(optarg)) + 2 + mailboxlen))
+			if (!alloc_re((void *) mailboxarr, mailboxlen, (len = str_len(optarg)) + 2 + mailboxlen))
 				die_nomem();
 			mailboxCount++;
 			mailboxarr[mailboxlen] = '.';
@@ -225,10 +225,7 @@ get_options(int argc, char **argv, char **Domain, int *Age, int *mailAge,
 }
 
 int
-LocateUser(Table, username, init_flag)
-	char          **Table;
-	char           *username;
-	int             init_flag;
+LocateUser(char **Table, char *username, int init_flag)
 {
 	static char   **Table_ptr, **ptr;
 	int             ret;
@@ -455,7 +452,7 @@ trash_clean:
 }
 
 void
-SigExit()
+SigExit(int x)
 {
 	shouldexit = 1;
 	signal(SIGUSR1, SigExit);

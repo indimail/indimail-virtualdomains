@@ -166,7 +166,7 @@ main(int argc, char **argv)
 		strerr_warn3("vreorg: open: ", listfile, ": ", &strerr_sys);
 		return (1);
 	}
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	out("vreorg", "Working on users ");
 	flush("vreorg");
 	for(count = 0;;count++) {

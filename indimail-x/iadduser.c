@@ -211,7 +211,7 @@ iadduser(const char *username, const char *domain, const char *mdahost, const ch
 	if (fd == -1)
 		u_level = 0;
 	else {
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			strerr_die3sys(111, "iadduser: read: ", tmpbuf.s, ": ");
 		close(fd);

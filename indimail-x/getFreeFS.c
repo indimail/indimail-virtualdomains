@@ -78,7 +78,7 @@ getLastFstab()
 #endif
 		return ((char *) 0);
 	}
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	if (getln(&ssin, &line, &match, '\n') == -1) {
 		strerr_warn3("getFreeFS: read: ", tmpbuf.s, ": ", &strerr_sys);
 #ifdef FILE_LOCKING
@@ -138,7 +138,7 @@ putLastFstab(char *filesystem)
 #endif
 		return (-1);
 	}
-	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fd, outbuf, sizeof(outbuf));
 	if (substdio_puts(&ssout, filesystem) ||
 			substdio_put(&ssout, "\n", 1) ||
 			substdio_flush(&ssout))

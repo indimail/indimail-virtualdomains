@@ -98,7 +98,7 @@ getTimeoutValues(int *readTimeout, int *writeTimeout, char *sysconfdir, char *co
 	if ((fd = open_read(tmpbuf.s)) == -1)
 		*readTimeout = 4;
 	else {
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			*readTimeout = 4;
 		else {
@@ -131,7 +131,7 @@ getTimeoutValues(int *readTimeout, int *writeTimeout, char *sysconfdir, char *co
 	if ((fd = open_read(tmpbuf.s)) == -1)
 		*writeTimeout = 4;
 	else {
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			*writeTimeout = 4;
 		else {
@@ -152,7 +152,7 @@ getTimeoutValues(int *readTimeout, int *writeTimeout, char *sysconfdir, char *co
 }
 
 static void
-cleanup(int rfd, int wfd, void (*sig_pipe_save)(), char *fifo)
+cleanup(int rfd, int wfd, void (*sig_pipe_save)(int), char *fifo)
 {
 	int             tmperrno;
 
@@ -241,7 +241,7 @@ tcplookup(int argc, char **argv, char **envp)
 	char            tmp[FMT_ULONG], inbuf[512];
 	static stralloc querybuf = { 0 };
 	static stralloc myfifo = { 0 };
-	void            (*sig_pipe_save) () = NULL;
+	void            (*sig_pipe_save) (int) = NULL;
 
 #ifndef MAIN
 	environ = envp;

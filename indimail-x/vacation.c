@@ -292,9 +292,9 @@ main(int argc, char **argv)
 			_exit(111);
 		}
 	}
-	substdio_fdbuf(&ssout, write, wfd, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, wfd, outbuf, sizeof(outbuf));
 	if (rfd != -1)
-		substdio_fdbuf(&ssin, read, rfd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, rfd, inbuf, sizeof(inbuf));
 	if (substdio_put(&ssout, "To: ", 4) ||
 			substdio_put(&ssout, toid.s, toid.len) ||
 			substdio_put(&ssout, "\n", 1) ||

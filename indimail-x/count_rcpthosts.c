@@ -75,7 +75,7 @@ count_rcpthosts()
 			strerr_die3sys(111, "count_rcpthosts: open: ", filename.s, ": ");
 		return (0);
 	}
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	for (count = 0;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1) {
 			strerr_warn3("count_rcpthosts: read: ", filename.s, ": ", &strerr_sys);

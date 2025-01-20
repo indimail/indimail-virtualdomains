@@ -249,7 +249,7 @@ in_exclude_list(char *excludeFile, int fdx, char *user, char *domain)
 		die_nomem();
 	if (lseek(fdx, 0, SEEK_SET) != 0)
 		strerr_die1sys(111, "vbulletin: lseek error: ");
-	substdio_fdbuf(&ssin, read, fdx, inbuf, sizeof (inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fdx, inbuf, sizeof (inbuf));
 	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			strerr_die3sys(111, "vbulletin: read: ", excludeFile, ": ");
@@ -294,7 +294,7 @@ copy_email(char *emailFile, int fdi, char *name, char *domain, struct passwd *pw
 			strerr_warn3("vbulletin: open: ", tmpbuf.s, ": ", &strerr_sys);
 			return (1);
 		}
-		substdio_fdbuf(&ssout, write, fdw, outbuf, sizeof(outbuf));
+		substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fdw, outbuf, sizeof(outbuf));
 		if (substdio_put(&ssout, "To: ", 4) ||
 				substdio_puts(&ssout, pwent->pw_name) ||
 				substdio_put(&ssout, "@", 1) ||
@@ -307,7 +307,7 @@ copy_email(char *emailFile, int fdi, char *name, char *domain, struct passwd *pw
 		}
 		if (lseek(fdi, 0, SEEK_SET) != 0)
 			strerr_die1sys(111, "vbulletin: lseek error: ");
-		substdio_fdbuf(&ssin, read, fdi, inbuf, sizeof (inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fdi, inbuf, sizeof (inbuf));
 		switch (substdio_copy(&ssout, &ssin))
 		{
 		case -2: /*- read error */

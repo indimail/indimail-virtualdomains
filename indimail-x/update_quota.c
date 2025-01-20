@@ -116,7 +116,7 @@ update_quota(char *Maildir, mdir_t new_size)
 		close(fd);
 		return (-1);
 	}
-	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fd, outbuf, sizeof(outbuf));
 #ifdef USE_MAILDIRQUOTA
 	strnum[i = fmt_ulonglong(strnum, new_size)] = 0;
 	if (substdio_put(&ssout, strnum, i) ||

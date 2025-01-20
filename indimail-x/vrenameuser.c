@@ -113,7 +113,7 @@ set_basepath(char *domain_dir)
 		if (errno != error_noent)
 			strerr_die3sys(111, "vrenameuser: open: ", tmpbuf.s, ": ");
 	} else {
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			strerr_die3sys(111, "vrenameuser: read: ", tmpbuf.s, ": ");
 		close(fd);

@@ -62,7 +62,7 @@ maildir_to_email(char *maildir, char *domain)
 			strerr_die3sys(111, "maildir_to_email: open: ", tmpbuf.s, ": ");
 	}
 	if (fd != -1) {
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		if (getln(&ssin, &email, &match, '\n') == -1) {
 			strerr_warn3("maildir_to_email: read: ", tmpbuf.s, ": ", &strerr_sys);
 			close(fd);
@@ -114,7 +114,7 @@ maildir_to_email(char *maildir, char *domain)
 				strerr_die3sys(111, "maildir_to_email: open: ", tmpbuf.s, ": ");
 		}
 		if (fd != -1) {
-			substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+			substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 			if (getln(&ssin, &line, &match, '\n') == -1) {
 				strerr_warn3("maildir_to_email: read: ", tmpbuf.s, ": ", &strerr_sys);
 				close(fd);

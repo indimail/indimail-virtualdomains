@@ -68,8 +68,7 @@ die_nomem()
 }
 
 static int
-getch(ch)
-	char           *ch;
+getch(char *ch)
 {
 	int             r;
 

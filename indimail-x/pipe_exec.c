@@ -33,7 +33,7 @@ int
 pipe_exec(char **argv, char *tmpbuf, int len)
 {
 	int             pipe_fd[2];
-	void            (*pstat) ();
+	void            (*pstat) (int);
 	char            strnum[FMT_ULONG];
 
 	if (env_get("DEBUG")) {

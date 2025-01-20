@@ -156,7 +156,7 @@ storeSql(int *more, int num, MYSQL_RES *res)
 		onum = 0;
 		return (0);
 	}
-	if (num + 1 > onum && !alloc_re((char *) &SqlPtr, sizeof(struct passwd *) * onum, sizeof(struct passwd *) * (num + 1))) {
+	if (num + 1 > onum && !alloc_re((void *) &SqlPtr, sizeof(struct passwd *) * onum, sizeof(struct passwd *) * (num + 1))) {
 		strerr_warn1("sql_getall: alloc_re: ", &strerr_sys);
 		return (1);
 	}

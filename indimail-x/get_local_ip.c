@@ -100,7 +100,7 @@ get_local_ip(int family)
 		strerr_die3sys(111, "get_local_ip: ", TmpBuf.s, ": ");
 	} else
 	if (fd > -1) {
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			strerr_die3sys(111, "get_local_ip: read: ", TmpBuf.s, ": ");
 		close(fd);

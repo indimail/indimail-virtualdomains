@@ -353,7 +353,7 @@ LoadBMF(int *total, char *bmf)
 			in_mysql_free_result(res);
 			return ((char **) 0);
 		}
-		substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
+		substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fd, outbuf, sizeof(outbuf));
 		in_mysql_data_seek(res, 0);
 		for (;(row = in_mysql_fetch_row(res));) {
 			if (badmail_flag) {
@@ -436,7 +436,7 @@ LoadBMF_internal(int *total, char *bmf)
 			strerr_die3sys(111, "LoadBMF: open: ", badmailfrom.s, ": ");
 		return ((char **) 0);
 	}
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	for (count = 0;;count++) {
 		if (getln(&ssin, &line, &match, '\n') == -1) {
 			strerr_warn3("LoadBMF: read: ", badmailfrom.s, ": ", &strerr_sys);

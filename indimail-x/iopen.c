@@ -128,7 +128,7 @@ iopen(char *dbhost)
 	if (!mysql_host.len && !access(host_path.s, F_OK)) {
 		if ((fd = open_read(host_path.s)) == -1)
 			strerr_die3sys(111, "iopen: ", host_path.s, ": ");
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		if (getln(&ssin, &mysql_host, &match, '\n') == -1)
 			strerr_die3sys(111, "iopen: read: ", host_path.s, ": ");
 		close(fd);

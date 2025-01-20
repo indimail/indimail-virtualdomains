@@ -111,7 +111,7 @@ update_rules(int lock)
 		close(fdm);
 		return (-1);
 	}
-	substdio_fdbuf(&ssin, read, tcpfd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, tcpfd, inbuf, sizeof(inbuf));
 	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1) {
 			strerr_warn3("update_rules: read: ", tcp_file, ": ", &strerr_sys);

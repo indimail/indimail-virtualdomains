@@ -152,7 +152,7 @@ main(int argc, char **argv)
 			strerr_warn3("vtable: open: ", *fptr, ": ", &strerr_sys);
 			return (-1);
 		}
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		mysql_stack("create table IF NOT EXISTS ");
 		for(;;) {
 			if (getln(&ssin, &line, &match, '\n') == -1) {

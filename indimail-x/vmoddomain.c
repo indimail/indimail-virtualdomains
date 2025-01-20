@@ -282,7 +282,7 @@ set_handler(char *dir, char *handler, uid_t uid, gid_t gid, int use_vfilter)
 #endif
 		return (1);
 	}
-	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fd, outbuf, sizeof(outbuf));
 #ifdef VFILTER
 	if (use_vfilter == 1) {
 		if (substdio_put(&ssout, "| ", 2) ||
@@ -407,7 +407,7 @@ set_hash_method(char *dir, uid_t uid, gid_t gid, int hash_method)
 		unlink(tmpbuf.s);
 		return (1);
 	}
-	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fd, outbuf, sizeof(outbuf));
 	switch (hash_method)
 	{
 		case DES_HASH:

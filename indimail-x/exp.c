@@ -155,11 +155,7 @@ reg_match(char *target, char *pattern)
 }
 
 void
-insert_alias(alias, argc, argv)
-	char           *alias;
-	int            *argc;
-	char           *argv[MAXARG + 1];
-
+insert_alias(char *alias, int argc, char *argv[MAXARG + 1])
 {
 	char           *x;
 	char           *alias2 = (char *) malloc(strlen(alias) + 1);
@@ -170,14 +166,14 @@ insert_alias(alias, argc, argv)
 	{
 		if ((x = (char *) strchr(alias2, ' ')) == NULL)
 		{
-			argv[*argc] = (char *) malloc(strlen(alias2) + 1);
-			strcpy(argv[(*argc)++], alias2);
+			argv[argc] = (char *) malloc(strlen(alias2) + 1);
+			strcpy(argv[(argc)++], alias2);
 			done = 1;
 		} else
 		{
 			*x = '\0';
-			argv[*argc] = (char *) malloc(strlen(alias2) + 1);
-			strcpy(argv[(*argc)++], alias2);
+			argv[argc] = (char *) malloc(strlen(alias2) + 1);
+			strcpy(argv[(argc)++], alias2);
 			x++;
 			alias2 = x;
 		}
@@ -200,7 +196,7 @@ expand(char *argv[MAXARG + 1], int *argc, char *word)
 		for (i = 0; i < AliasCounter; i++)
 			if (!strcmp(AliasList[i].cmd, word))
 			{
-				insert_alias(AliasList[i].alias, argc, argv);
+				insert_alias(AliasList[i].alias, *argc, argv);
 				aliased = 1;
 				break;
 			}

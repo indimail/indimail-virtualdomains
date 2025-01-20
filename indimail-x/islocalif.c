@@ -150,7 +150,7 @@ islocalif(char *hostptr)
 		strerr_die3sys(111, "islocalif", filename.s, ": ");
 	else
 	if (fd > -1) {
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			strerr_die3sys(111, "islocalif: read: ", filename.s, ": ");
 		close(fd);

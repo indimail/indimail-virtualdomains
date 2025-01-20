@@ -194,7 +194,7 @@ main(int argc, char **argv)
 		return (1);
 	}
 	if (fd != -1) {
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		subprintfe(subfdout, "vrenamedomain", "Relinking domains aliased to %s\n", argv[1]);
 		substdio_flush(subfdout);
 		for (;;) {
@@ -281,7 +281,7 @@ main(int argc, char **argv)
 			strerr_warn4(WARN, "open_trunc: ", tmpbuf.s, ": ", &strerr_sys);
 			continue;
 		}
-		substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
+		substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fd, outbuf, sizeof(outbuf));
 		if (substdio_puts(&ssout, argv[1]) ||
 				substdio_put(&ssout, "\n", 1) ||
 				substdio_flush(&ssout)) {

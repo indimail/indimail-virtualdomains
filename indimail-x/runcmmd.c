@@ -52,7 +52,7 @@ runcmmd(char *cmmd, int useP)
 	int             status, i, retval;
 	pid_t           pid;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
-	void            (*pstat[2]) ();
+	void            (*pstat[2]) (int);
 
 	switch ((pid = fork()))
 	{

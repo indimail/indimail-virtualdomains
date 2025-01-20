@@ -59,7 +59,7 @@ update_local_hostid(char *hostid)
 	}
 	if ((fd = open_trunc(filename.s)) == -1)
 		strerr_die3sys(111, "update_local_hostid: open: ", filename.s, ": ");
-	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fd, outbuf, sizeof(outbuf));
 	if (substdio_puts(&ssout, hostid) || substdio_flush(&ssout))
 		strerr_die3sys(111, "update_local_hostid: write: ", filename.s, ": ");
 	return (close(fd));

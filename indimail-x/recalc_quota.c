@@ -181,7 +181,7 @@ mdir_t recalc_quota(char *Maildir, int force_flag)
 		close(fd);
 		return (-1);
 	}
-	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fd, outbuf, sizeof(outbuf));
 #ifdef USE_MAILDIRQUOTA
 	if (count_limit) {
 		strnum1[i = fmt_ulonglong(strnum1, size_limit)] = 0;

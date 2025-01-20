@@ -126,7 +126,7 @@ main(int argc, char **argv)
 			iclose();
 			return (-1);
 		}
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		for (err = 0, flag = 0;;flag++) {
 			if (getln(&ssin, &line, &match, '\n') == -1) {
 				strerr_warn3("vcalias: read: ", dp->d_name, ": ", &strerr_sys);

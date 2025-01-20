@@ -48,7 +48,7 @@ print_control(char *filename, char *domain, int max_users_per_level, int silent)
 		return (0);
 	}
 	users_per_level = max_users_per_level ? max_users_per_level : MAX_USERS_PER_LEVEL;
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1) {
 			strerr_warn3("print_control: read: ", filename, ": ", &strerr_sys);

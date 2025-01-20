@@ -109,8 +109,8 @@ remove_line_int(const char *template, const char *filename, int once_only, mode_
 #endif
 		unlink(fname.s);
 	}
-	substdio_fdbuf(&ssin, read, fd1, inbuf, sizeof(inbuf));
-	substdio_fdbuf(&ssout, write, fd2, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd1, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fd2, outbuf, sizeof(outbuf));
 	/*- pound away on the files run the search algorithm */
 	if (partial)
 		tlen = str_len(template);

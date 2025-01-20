@@ -66,7 +66,7 @@ is_already_running(char *pgname)
 			strerr_die3sys(111, "is_already_running: open: ", filename.s, ": ");
 		return (0);
 	}
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	if (getln(&ssin, &line, &match, '\n') == -1)
 		strerr_die3sys(111, "is_already_running: read: ", filename.s, ": ");
 	close(fd);
@@ -87,7 +87,7 @@ is_already_running(char *pgname)
 		return (pid);
 	if ((fd = open_trunc(filename.s)) == -1)
 		strerr_die3sys(111, "is_already_running: open_trunc: ", filename.s, ": ");
-	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fd, outbuf, sizeof(outbuf));
 	strnum[i = fmt_ulonglong(strnum, getpid())] = 0;
 	if (substdio_put(&ssout, strnum, i) ||
 			substdio_put(&ssout, "\n", 1) ||
