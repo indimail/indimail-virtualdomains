@@ -1,44 +1,5 @@
 /*
- * $Log: load_mysql.c,v $
- * Revision 1.13  2022-11-23 15:49:46+05:30  Cprogrammer
- * renamed mysql_lib to libmysql
- *
- * Revision 1.12  2020-10-05 18:42:36+05:30  Cprogrammer
- * fixed compilation warning on Darwin
- *
- * Revision 1.11  2020-09-23 11:00:40+05:30  Cprogrammer
- * fold braces for code readability
- *
- * Revision 1.10  2020-06-08 23:43:18+05:30  Cprogrammer
- * quench compiler warning
- *
- * Revision 1.9  2019-07-03 19:37:17+05:30  Cprogrammer
- * added getversion_load_mysql_c()
- *
- * Revision 1.8  2019-06-13 19:14:35+05:30  Cprogrammer
- * added wrappers for mysql_next_result(), mysql_fetch_lengths(), mysql_num_fields()
- *
- * Revision 1.7  2019-06-09 17:39:16+05:30  Cprogrammer
- * conditional compilation of bool typedef
- *
- * Revision 1.6  2019-06-08 18:10:50+05:30  Cprogrammer
- * define bool unconditionally as older mariadb devel package don't have #ifdef LIBMARIADB
- *
- * Revision 1.5  2019-06-07 19:22:07+05:30  Cprogrammer
- * treat missing libmysqlclient as error
- *
- * Revision 1.4  2019-06-07 17:31:29+05:30  Cprogrammer
- * changed scope of closeLibrary() to global
- *
- * Revision 1.3  2019-06-07 16:07:56+05:30  Cprogrammer
- * fix for missing mysql_get_option() in new versions of libmariadb
- *
- * Revision 1.2  2019-06-03 06:50:56+05:30  Cprogrammer
- * use RTLD_NODELETE
- *
- * Revision 1.1  2019-05-28 16:17:27+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -107,8 +68,7 @@ static stralloc libfn = { 0 };
 static char     inbuf[2048];
 
 static void
-striptrailingwhitespace(sa)
-	stralloc       *sa;
+striptrailingwhitespace(stralloc *sa)
 {
 	while (sa->len > 0) {
 		switch (sa->s[sa->len - 1])
@@ -125,9 +85,7 @@ striptrailingwhitespace(sa)
 }
 
 static int
-control_readline(sa, fn)
-	stralloc       *sa;
-	char           *fn;
+control_readline(stralloc *sa, char *fn)
 {
 	substdio        ss;
 	int             fd, match;
@@ -154,7 +112,7 @@ control_readline(sa, fn)
 			return 0;
 		return -1;
 	}
-	substdio_fdbuf(&ss, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ss, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	if (getln(&ss, sa, &match, '\n') == -1) {
 		close(fd);
 		return -1;
@@ -584,3 +542,46 @@ getversion_load_mysql_c()
 	if (write(1, sccsid, 0) == -1)
 		;
 }
+
+/*
+ * $Log: load_mysql.c,v $
+ * Revision 1.13  2022-11-23 15:49:46+05:30  Cprogrammer
+ * renamed mysql_lib to libmysql
+ *
+ * Revision 1.12  2020-10-05 18:42:36+05:30  Cprogrammer
+ * fixed compilation warning on Darwin
+ *
+ * Revision 1.11  2020-09-23 11:00:40+05:30  Cprogrammer
+ * fold braces for code readability
+ *
+ * Revision 1.10  2020-06-08 23:43:18+05:30  Cprogrammer
+ * quench compiler warning
+ *
+ * Revision 1.9  2019-07-03 19:37:17+05:30  Cprogrammer
+ * added getversion_load_mysql_c()
+ *
+ * Revision 1.8  2019-06-13 19:14:35+05:30  Cprogrammer
+ * added wrappers for mysql_next_result(), mysql_fetch_lengths(), mysql_num_fields()
+ *
+ * Revision 1.7  2019-06-09 17:39:16+05:30  Cprogrammer
+ * conditional compilation of bool typedef
+ *
+ * Revision 1.6  2019-06-08 18:10:50+05:30  Cprogrammer
+ * define bool unconditionally as older mariadb devel package don't have #ifdef LIBMARIADB
+ *
+ * Revision 1.5  2019-06-07 19:22:07+05:30  Cprogrammer
+ * treat missing libmysqlclient as error
+ *
+ * Revision 1.4  2019-06-07 17:31:29+05:30  Cprogrammer
+ * changed scope of closeLibrary() to global
+ *
+ * Revision 1.3  2019-06-07 16:07:56+05:30  Cprogrammer
+ * fix for missing mysql_get_option() in new versions of libmariadb
+ *
+ * Revision 1.2  2019-06-03 06:50:56+05:30  Cprogrammer
+ * use RTLD_NODELETE
+ *
+ * Revision 1.1  2019-05-28 16:17:27+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

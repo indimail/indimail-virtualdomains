@@ -1,49 +1,5 @@
 /*
- * $Log: pam-checkpwd.c,v $
- * Revision 1.14  2021-01-27 18:47:28+05:30  Cprogrammer
- * renamed use_dovecot to native_checkpassword
- *
- * Revision 1.13  2021-01-27 16:51:36+05:30  Cprogrammer
- * set HOME for dovecot
- *
- * Revision 1.12  2021-01-27 13:28:02+05:30  Cprogrammer
- * dovecot support added
- *
- * Revision 1.11  2020-09-28 13:33:09+05:30  Cprogrammer
- * added pid in debug statements
- *
- * Revision 1.10  2020-09-28 12:46:38+05:30  Cprogrammer
- * put authmodule name in error logs
- *
- * Revision 1.9  2018-09-12 21:14:32+05:30  Cprogrammer
- * call initialize post successful auth
- *
- * Revision 1.8  2018-09-12 18:50:30+05:30  Cprogrammer
- * coded indented
- *
- * Revision 1.7  2018-09-11 10:14:14+05:30  Cprogrammer
- * fixed compiler warning
- *
- * Revision 1.6  2010-05-05 20:13:23+05:30  Cprogrammer
- * added -i option to added service identifier
- *
- * Revision 1.5  2009-10-11 09:38:31+05:30  Cprogrammer
- * added comments
- *
- * Revision 1.4  2009-10-07 22:56:59+05:30  Cprogrammer
- * removed --stdout option
- *
- * Revision 1.3  2009-10-07 10:18:26+05:30  Cprogrammer
- * added initialize() routine
- *
- * Revision 1.2  2009-10-07 09:57:37+05:30  Cprogrammer
- * removed indimail dependency
- *
- * Revision 1.1  2009-10-06 13:50:14+05:30  Cprogrammer
- * Initial revision
- *
- * This version of pam-checkpwd was written by hacking checkpassword-pam
- * written by Alexey Mahotkin <alexm@hsys\&.msk\&.ru>
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -268,7 +224,7 @@ runcmmd(char *cmmd, int useP, int debug)
 	char          **argv;
 	int             status, i, retval;
 	pid_t           pid;
-	void            (*pstat[2]) ();
+	void            (*pstat[2]) (int);
 
 	switch ((pid = fork()))
 	{
@@ -503,3 +459,51 @@ getversion_checkpassword_pam_c()
 {
 	printf("%s\n", sccsid);
 }
+
+/*
+ * $Log: pam-checkpwd.c,v $
+ * Revision 1.14  2021-01-27 18:47:28+05:30  Cprogrammer
+ * renamed use_dovecot to native_checkpassword
+ *
+ * Revision 1.13  2021-01-27 16:51:36+05:30  Cprogrammer
+ * set HOME for dovecot
+ *
+ * Revision 1.12  2021-01-27 13:28:02+05:30  Cprogrammer
+ * dovecot support added
+ *
+ * Revision 1.11  2020-09-28 13:33:09+05:30  Cprogrammer
+ * added pid in debug statements
+ *
+ * Revision 1.10  2020-09-28 12:46:38+05:30  Cprogrammer
+ * put authmodule name in error logs
+ *
+ * Revision 1.9  2018-09-12 21:14:32+05:30  Cprogrammer
+ * call initialize post successful auth
+ *
+ * Revision 1.8  2018-09-12 18:50:30+05:30  Cprogrammer
+ * coded indented
+ *
+ * Revision 1.7  2018-09-11 10:14:14+05:30  Cprogrammer
+ * fixed compiler warning
+ *
+ * Revision 1.6  2010-05-05 20:13:23+05:30  Cprogrammer
+ * added -i option to added service identifier
+ *
+ * Revision 1.5  2009-10-11 09:38:31+05:30  Cprogrammer
+ * added comments
+ *
+ * Revision 1.4  2009-10-07 22:56:59+05:30  Cprogrammer
+ * removed --stdout option
+ *
+ * Revision 1.3  2009-10-07 10:18:26+05:30  Cprogrammer
+ * added initialize() routine
+ *
+ * Revision 1.2  2009-10-07 09:57:37+05:30  Cprogrammer
+ * removed indimail dependency
+ *
+ * Revision 1.1  2009-10-06 13:50:14+05:30  Cprogrammer
+ * Initial revision
+ *
+ * This version of pam-checkpwd was written by hacking checkpassword-pam
+ * written by Alexey Mahotkin <alexm@hsys\&.msk\&.ru>
+ */

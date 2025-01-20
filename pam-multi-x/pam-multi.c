@@ -162,9 +162,7 @@ _pam_log(int err, const char *fmt, ...)
 }
 
 int
-wait_pid(wstat, pid)
-	int            *wstat;
-	int             pid;
+wait_pid(int *wstat, int pid)
 {
 	int             r;
 
