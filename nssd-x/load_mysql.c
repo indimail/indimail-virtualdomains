@@ -77,8 +77,7 @@ static stralloc libfn = { 0 };
 static char     inbuf[2048];
 
 static void
-striptrailingwhitespace(sa)
-	stralloc       *sa;
+striptrailingwhitespace(stralloc *sa)
 {
 	while (sa->len > 0)
 	{
@@ -96,9 +95,7 @@ striptrailingwhitespace(sa)
 }
 
 static int
-control_readline(sa, fn)
-	stralloc       *sa;
-	char           *fn;
+control_readline(stralloc *sa, char *fn)
 {
 	substdio        ss;
 	int             fd, match;
@@ -125,7 +122,7 @@ control_readline(sa, fn)
 			return 0;
 		return -1;
 	}
-	substdio_fdbuf(&ss, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ss, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	if (getln(&ss, sa, &match, '\n') == -1) {
 		close(fd);
 		return -1;
