@@ -174,7 +174,8 @@ if [ -d nssd-%{nssd_version} ] ; then
   else
     nssd_sock=/tmp/pwdlookup/nssd.sock
   fi
-  %configure --prefix=%{_prefix} --libexecdir=%{libexecdir} --sysconfdir=%{sysconfdir} \
+  %configure --prefix=%{_prefix} --sbindir=%{_prefix}/sbin \
+  --libexecdir=%{libexecdir} --sysconfdir=%{sysconfdir} \
   --mandir=%{mandir} --libdir=%{_libdir} --datarootdir=%{shareddir} \
   --enable-nssd-socket=$nssd_sock \
   --enable-nssd-config-path=%{sysconfdir}/nssd.conf \
@@ -186,7 +187,8 @@ fi
 #### pam-multi ######################
 if [ -d pam-multi-%{pam_multi_version} ] ; then
   cd pam-multi-%{pam_multi_version}
-  %configure --prefix=%{_prefix} --datarootdir=%{shareddir} \
+  %configure --prefix=%{_prefix} --sbindir=%{_prefix}/sbin \
+  --datarootdir=%{shareddir} \
   --mandir=%{mandir} --enable-moduledir=%{pam_moduledir} \
   --enable-controldir=%{sysconfdir}/control \
   --enable-pamconfdir=%{pam_confdir} \
