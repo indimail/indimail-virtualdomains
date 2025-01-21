@@ -160,7 +160,7 @@ HOME='.';export HOME
   --datarootdir=%{shareddir} --enable-indimail \
   --with-charset=utf-8
 %else
-%configure --prefix=%{_prefix} --libexecdir=%{libexecdir} \
+%configure --prefix=%{_prefix} --sbindir=%{_prefix}/sbin --libexecdir=%{libexecdir} \
   --sysconfdir=%{sysconfdir} --mandir=%{mandir} \
   --datarootdir=%{shareddir} --enable-indimail
 %endif
