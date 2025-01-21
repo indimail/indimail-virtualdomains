@@ -25,7 +25,7 @@ jobs:
     - name: extra_packages
       run: |
         if [ "${OS}" = "macos-latest" ] ; then brew install automake autoconf libtool pkgconfig openssl mysql; fi
-        if [ "${OS}" = "ubuntu-latest" ] ; then sudo apt-get install gcc g++ automake autoconf libtool libssl-dev libmysqlclient-dev libncurses5-dev; fi
+        if [ "${OS}" = "ubuntu-latest" ] ; then sudo apt-get install gcc g++ automake autoconf libtool libssl-dev libmysqlclient-dev libncurses5-dev libtirpc-dev; fi
       env:
         OS: ${{ matrix.host }}
 
@@ -43,4 +43,4 @@ jobs:
     - name: install_qmail
       run: cd libqmail;env CPPFLAGS="-I/opt/homebrew/Cellar/openssl@3/3.4.0/include" LDFLAGS="-L/opt/homebrew/Cellar/openssl@3/3.4.0/lib" ./default.configure; env CPPFLAGS="-I/opt/homebrew/Cellar/openssl@3/3.4.0/include" LDFLAGS="-L/opt/homebrew/Cellar/openssl@3/3.4.0/lib" make; sudo make install-strip
     - name: build logalert
-      run: cd main/procmail-x; ./default.configure; make
+      run: cd main/logalert-x; ./default.configure; make
