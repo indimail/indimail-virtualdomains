@@ -51,8 +51,6 @@
 
 #define MAXADDRESS 100
 
-extern char    *getenv();
-
 extern int      errno;
 extern int      optind;
 extern char    *optarg;
