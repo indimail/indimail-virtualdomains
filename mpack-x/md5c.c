@@ -176,7 +176,7 @@ MD5Update(MD5_CTX *context, unsigned char *input, unsigned int inputLen)
  * context 
  */
 void
-MD5Final(unsigned char *digest, MD5_CTX * context)
+MD5Final(unsigned char digest[16], MD5_CTX * context)
 {
 	unsigned char   bits[8];
 	unsigned int    index, padLen;
@@ -213,7 +213,7 @@ MD5Final(unsigned char *digest, MD5_CTX * context)
  * MD5 basic transformation. Transforms state based on block.
  */
 static void
-MD5Transform(UINT4 * state, unsigned char *block)
+MD5Transform(UINT4 state[4], unsigned char block[64])
 {
 	UINT4           a = state[0], b = state[1], c = state[2], d = state[3], x[16];
 

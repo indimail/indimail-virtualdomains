@@ -1310,7 +1310,7 @@ from64(struct part *inpart, FILE * outfile, char **digestp, int suppressCR)
 {
 	int             c1, c2, c3, c4;
 	int             DataDone = 0;
-	char            buf[3];
+	unsigned char   buf[3];
 	MD5_CTX         context;
 
 	if (digestp)
@@ -1408,7 +1408,7 @@ fromqp(struct part *inpart, FILE * outfile, char **digestp)
 				if (c != '\r')
 					putc(c, outfile);
 				if (digestp)
-					MD5Update(&context, &c, 1);
+					MD5Update(&context, (unsigned char *) &c, 1);
 			}
 		} else
 		{
@@ -1416,11 +1416,11 @@ fromqp(struct part *inpart, FILE * outfile, char **digestp)
 			if (c1 == '\n')
 			{
 				if (digestp)
-					MD5Update(&context, "\r", 1);
+					MD5Update(&context, (unsigned char *) "\r", 1);
 			}
 			c = c1;
 			if (digestp)
-				MD5Update(&context, &c, 1);
+				MD5Update(&context, (unsigned char *) &c, 1);
 		}
 	}
 	if (digestp)
@@ -1431,7 +1431,7 @@ void
 fromnone(struct part *inpart, FILE * outfile, char **digestp)
 {
 	int             c;
-	char            ch;
+	unsigned char   ch;
 	MD5_CTX         context;
 
 	if (digestp)
@@ -1443,7 +1443,7 @@ fromnone(struct part *inpart, FILE * outfile, char **digestp)
 		if (c == '\n')
 		{
 			if (digestp)
-				MD5Update(&context, "\r", 1);
+				MD5Update(&context, (unsigned char *) "\r", 1);
 		}
 		ch = c;
 		if (digestp)
