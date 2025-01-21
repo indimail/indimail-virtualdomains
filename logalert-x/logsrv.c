@@ -268,6 +268,7 @@ main(int argc, char **argv)
 }
 
 #ifndef	lint
+#include <stdio.h>
 void
 getversion_logsrv_c()
 {
