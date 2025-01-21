@@ -374,7 +374,7 @@ consclnt(char *remote, char **argv, char *clientcert, char *cafile, char *crlfil
 		if (stat(msgptr->fn, &st) == -1)
 			strerr_die4sys(111, FATAL, "stat: ", msgptr->fn, ": ");
 		msgptr->inum = st.st_ino;
-		if (qsprintf(&seekfile, "%s/%ld.seek", seekdir, msgptr->inum) == -1)
+		if (qsprintf(&seekfile, "%s/%lu.seek", seekdir, msgptr->inum) == -1)
 			strerr_die2x(111, FATAL, "out of memory");
 		if ((msgptr->fd = open_read(msgptr->fn)) == -1)
 			strerr_die4sys(111, FATAL, "open: ", msgptr->fn, ": ");
@@ -541,6 +541,7 @@ main(int argc, char **argv)
 }
 
 #ifndef	lint
+#include <stdio.h>
 void
 getversion_logclient_c()
 {
