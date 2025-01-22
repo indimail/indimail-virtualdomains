@@ -1,14 +1,5 @@
 /*
- * $Log: count_rcpthosts.c,v $
- * Revision 1.3  2023-03-20 09:51:06+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.2  2020-04-01 18:53:40+05:30  Cprogrammer
- * moved authentication functions to libqmail
- *
- * Revision 1.1  2019-04-18 08:22:40+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -75,7 +66,7 @@ count_rcpthosts()
 			strerr_die3sys(111, "count_rcpthosts: open: ", filename.s, ": ");
 		return (0);
 	}
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	for (count = 0;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1) {
 			strerr_warn3("count_rcpthosts: read: ", filename.s, ": ", &strerr_sys);
@@ -105,3 +96,15 @@ count_rcpthosts()
 	close(fd);
 	return (count);
 }
+/*
+ * $Log: count_rcpthosts.c,v $
+ * Revision 1.3  2023-03-20 09:51:06+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.2  2020-04-01 18:53:40+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
+ * Revision 1.1  2019-04-18 08:22:40+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

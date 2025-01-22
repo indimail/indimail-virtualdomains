@@ -22,15 +22,15 @@ static FILE    *yyin;
 
 
 static const struct entry_attribute entry_attributes[] = {
-		{"match", A_MATCH, 1, (status_e(*)())regex_parser},
-		{"exec", A_EXEC, 1, (status_e(*)())exec_parser},
-		{"match_sleep", A_MATCHSLEEP, 1, (status_e(*)())matchsleep_parser},
-		{"match_count", A_MATCHCOUNT, 1, (status_e(*)())matchcount_parser},
-		{"retry", A_RETRY, 1, (status_e(*)())retry_parser},
-		{"user", A_USER, 1, (status_e(*)())user_parser},
-		{"readall", A_READALL, 0, (status_e(*)())readall_parser},
-		{"verbose", A_VERBOSE, 0, (status_e(*)())verbose_parser},
-		{NULL, 0, 0, (status_e(*)())0},
+		{"match", A_MATCH, 1, (status_e(*)(struct entry_conf *))regex_parser},
+		{"exec", A_EXEC, 1, (status_e(*)(struct entry_conf *))exec_parser},
+		{"match_sleep", A_MATCHSLEEP, 1, (status_e(*)(struct entry_conf *))matchsleep_parser},
+		{"match_count", A_MATCHCOUNT, 1, (status_e(*)(struct entry_conf *))matchcount_parser},
+		{"retry", A_RETRY, 1, (status_e(*)(struct entry_conf *))retry_parser},
+		{"user", A_USER, 1, (status_e(*)(struct entry_conf *))user_parser},
+		{"readall", A_READALL, 0, (status_e(*)(struct entry_conf *))readall_parser},
+		{"verbose", A_VERBOSE, 0, (status_e(*)(struct entry_conf *))verbose_parser},
+		{NULL, 0, 0, (status_e(*)(struct entry_conf *))0},
 };
 
 
@@ -158,7 +158,7 @@ handle_entry_args(unsigned int a_id, char *value)
 		yyerror("null value for %s parameter", pa->a_name);
 
 	// start the specific parser
-	if ((!(*pa->a_parser) (conf_table[cur_pconf], fixed_val)) == OK)
+	if ((!(*pa->a_parser) (conf_table[cur_pconf])) == OK)
 		yyerror("Error while parsing function %s", pa->a_name);
 
 	return;

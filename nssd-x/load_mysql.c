@@ -1,14 +1,5 @@
 /*
- * $Log: load_mysql.c,v $
- * Revision 1.3  2023-04-01 19:49:39+05:30  Cprogrammer
- * refactored getlibObject function
- *
- * Revision 1.2  2022-11-23 15:49:21+05:30  Cprogrammer
- * renamed mysql_lib to libmysql
- *
- * Revision 1.1  2019-06-13 21:21:26+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: load_mysql.c,v 1.4 2025-01-22 16:03:11+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -20,7 +11,7 @@
 #include <mysqld_error.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: load_mysql.c,v 1.3 2023-04-01 19:49:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: load_mysql.c,v 1.4 2025-01-22 16:03:11+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef DLOPEN_LIBMYSQLCLIENT
@@ -77,8 +68,7 @@ static stralloc libfn = { 0 };
 static char     inbuf[2048];
 
 static void
-striptrailingwhitespace(sa)
-	stralloc       *sa;
+striptrailingwhitespace(stralloc *sa)
 {
 	while (sa->len > 0)
 	{
@@ -96,9 +86,7 @@ striptrailingwhitespace(sa)
 }
 
 static int
-control_readline(sa, fn)
-	stralloc       *sa;
-	char           *fn;
+control_readline(stralloc *sa, char *fn)
 {
 	substdio        ss;
 	int             fd, match;
@@ -125,7 +113,7 @@ control_readline(sa, fn)
 			return 0;
 		return -1;
 	}
-	substdio_fdbuf(&ss, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ss, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	if (getln(&ss, sa, &match, '\n') == -1) {
 		close(fd);
 		return -1;
@@ -542,3 +530,18 @@ const char     *in_mysql_get_client_info(void)
 	return (mysql_get_client_info());
 }
 #endif /*- #ifdef DLOPEN_LIBMYSQLCLIENT */
+/*
+ * $Log: load_mysql.c,v $
+ * Revision 1.4  2025-01-22 16:03:11+05:30  Cprogrammer
+ * fix gcc14 errors
+ *
+ * Revision 1.3  2023-04-01 19:49:39+05:30  Cprogrammer
+ * refactored getlibObject function
+ *
+ * Revision 1.2  2022-11-23 15:49:21+05:30  Cprogrammer
+ * renamed mysql_lib to libmysql
+ *
+ * Revision 1.1  2019-06-13 21:21:26+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

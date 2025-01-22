@@ -75,13 +75,9 @@ die_nomem()
 }
 
 int
-userinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid,
-		DisplayGid, DisplayComment, DisplayDir, DisplayQuota,
-		DisplayLastAuth, DisplayFilter, DisplayAll)
-	char           *Email, *User, *Domain;
-	int             DisplayName, DisplayPasswd, DisplayUid, DisplayGid,
-					DisplayComment, DisplayDir, DisplayQuota,
-					DisplayLastAuth, DisplayFilter, DisplayAll;
+userinfo(char *Email, char *User, char *Domain, int DisplayName, int DisplayPasswd, int DisplayUid,
+		int DisplayGid, int DisplayComment, int DisplayDir, int DisplayQuota,
+		int DisplayLastAuth, int DisplayFilter, int DisplayAll)
 {
 	struct passwd  *mypw;
 	char           *ptr, *mailstore, *sysconfdir, *controldir;
@@ -132,7 +128,7 @@ userinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid,
 			strerr_warn3("userinfo: ", tmpbuf.s, ": ", &strerr_sys);
 			return (1);
 		}
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		for(;;) {
 			if (getln(&ssin, &line, &match, '\n') == -1) {
 				strerr_warn3("userinfo: read: ", tmpbuf.s, ": ", &strerr_sys);
@@ -472,7 +468,7 @@ userinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid,
 				!stralloc_0(&tmpbuf))
 			die_nomem();
 		if ((fd = open_read(tmpbuf.s)) != -1) {
-			substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+			substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 			for(;;) {
 				if (getln(&ssin, &line, &match, '\n') == -1) {
 					strerr_warn3("userinfo: read: ", tmpbuf.s, ": ", &strerr_sys);

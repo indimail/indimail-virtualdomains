@@ -1,14 +1,5 @@
 /*
- * $Log: open_master.c,v $
- * Revision 1.3  2023-03-20 10:15:21+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.2  2020-04-01 18:57:22+05:30  Cprogrammer
- * moved authentication functions to libqmail
- *
- * Revision 1.1  2019-04-14 18:34:39+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -79,7 +70,7 @@ open_master()
 		} else
 			strerr_die3sys(111, "open_master: open: ", host_path.s, ": ");
 	}
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	if (getln(&ssin, &line, &match, '\n') == -1)
 		strerr_die3sys(111, "read: ", host_path.s, ": ");
 	close(fd);
@@ -98,3 +89,15 @@ open_master()
 	return (open_central_db(line.s));
 }
 #endif
+/*
+ * $Log: open_master.c,v $
+ * Revision 1.3  2023-03-20 10:15:21+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.2  2020-04-01 18:57:22+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
+ * Revision 1.1  2019-04-14 18:34:39+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

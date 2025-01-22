@@ -1,26 +1,5 @@
 /*
- * $Log: vdeloldusers.c,v $
- * Revision 1.7  2024-05-17 16:25:48+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.6  2023-01-22 10:40:03+05:30  Cprogrammer
- * replaced qprintf with subprintf
- *
- * Revision 1.5  2022-10-20 11:58:41+05:30  Cprogrammer
- * converted function prototype to ansic
- *
- * Revision 1.4  2021-05-03 12:48:00+05:30  Cprogrammer
- * fix compiler warnings
- *
- * Revision 1.3  2020-10-01 18:31:05+05:30  Cprogrammer
- * initialize activecount variable
- *
- * Revision 1.2  2019-06-07 15:53:48+05:30  mbhangui
- * use sgetopt library for getopt()
- *
- * Revision 1.1  2019-04-18 08:39:54+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -70,7 +49,7 @@ static char     sccsid[] = "$Id: vdeloldusers.c,v 1.7 2024-05-17 16:25:48+05:30 
 #define DEFAULT_AGE      60
 #define DEFAULTMAIL_AGE  30
 
-void            SigExit();
+void            SigExit(int);
 
 char          **skipGecos, **mailboxArr;
 int             shouldexit;
@@ -134,7 +113,7 @@ get_options(int argc, char **argv, char **Domain, int *Age, int *mailAge,
 			*Domain = optarg;
 			break;
 		case 's':
-			if (!alloc_re(gecosarr, gecoslen, (len = str_len(optarg)) + 1 + gecoslen))
+			if (!alloc_re((void **) gecosarr, gecoslen, (len = str_len(optarg)) + 1 + gecoslen))
 				die_nomem();
 			gecosCount++;
 			str_copy(gecosarr + gecoslen, optarg);
@@ -150,7 +129,7 @@ get_options(int argc, char **argv, char **Domain, int *Age, int *mailAge,
 			scan_int(optarg, trashAge);
 			break;
 		case 'm':
-			if (!alloc_re((char *) mailboxarr, mailboxlen, (len = str_len(optarg)) + 2 + mailboxlen))
+			if (!alloc_re((void *) mailboxarr, mailboxlen, (len = str_len(optarg)) + 2 + mailboxlen))
 				die_nomem();
 			mailboxCount++;
 			mailboxarr[mailboxlen] = '.';
@@ -225,10 +204,7 @@ get_options(int argc, char **argv, char **Domain, int *Age, int *mailAge,
 }
 
 int
-LocateUser(Table, username, init_flag)
-	char          **Table;
-	char           *username;
-	int             init_flag;
+LocateUser(char **Table, char *username, int init_flag)
 {
 	static char   **Table_ptr, **ptr;
 	int             ret;
@@ -455,7 +431,7 @@ trash_clean:
 }
 
 void
-SigExit()
+SigExit(int x)
 {
 	shouldexit = 1;
 	signal(SIGUSR1, SigExit);
@@ -469,3 +445,27 @@ main()
 	return (1);
 }
 #endif
+/*
+ * $Log: vdeloldusers.c,v $
+ * Revision 1.7  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.6  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
+ * Revision 1.5  2022-10-20 11:58:41+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
+ * Revision 1.4  2021-05-03 12:48:00+05:30  Cprogrammer
+ * fix compiler warnings
+ *
+ * Revision 1.3  2020-10-01 18:31:05+05:30  Cprogrammer
+ * initialize activecount variable
+ *
+ * Revision 1.2  2019-06-07 15:53:48+05:30  mbhangui
+ * use sgetopt library for getopt()
+ *
+ * Revision 1.1  2019-04-18 08:39:54+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

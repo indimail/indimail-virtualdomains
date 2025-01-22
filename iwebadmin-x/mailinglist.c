@@ -192,7 +192,7 @@ show_mailing_list_line(const char *user, const char *dom, time_t mytime, const c
 				out("</td></tr>\n");
 				continue;
 			}
-			substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+			substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 			if (getln(&ssin, &line, &match, '\n') == -1) {
 				if (ezmlm_idx)
 					out("<tr><td colspan=12>");
@@ -249,7 +249,7 @@ show_mailing_list_line(const char *user, const char *dom, time_t mytime, const c
 			qmail_button(addr, "showlistmod", user, dom, mytime, "delete.png");
 
 			if (!ok && (fd = open_read(testfn.s)) != -1) {
-				substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+				substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 				if (getln(&ssin, &line, &match, '\n') == -1)
 					ok = 0;
 				else
@@ -327,7 +327,7 @@ show_mailing_list_line2(const char *user, const char *dom, time_t mytime, const 
 				out("<br>\n");
 				continue;
 			}
-			substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+			substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 			if (getln(&ssin, &line, &match, '\n') == -1) {
 				if (ezmlm_idx)
 					out("<tr><td colspan=12>");
@@ -542,9 +542,9 @@ ezmlm_setreplyto(const char *filename, const char *newtext)
 		die_nomem();
 	if ((tmp_fd = open_trunc(tempfn.s)) == -1)
 		return;
-	substdio_fdbuf(&ssout, write, tmp_fd, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, tmp_fd, outbuf, sizeof(outbuf));
 	if ((hfd = open_read(realfn.s)) != -1) {
-		substdio_fdbuf(&ssin, read, hfd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, hfd, inbuf, sizeof(inbuf));
 		for (;;) {
 			if (getln(&ssin, &line, &match, '\n') == -1) {
 				strerr_warn3("ezmlm_setreplyto: read: ", realfn.s, ": ", &strerr_sys);
@@ -610,7 +610,7 @@ write_mysql(const char *mysql_host, const char *mysql_socket,
 	}
 	if ((fd = open_trunc(TmpBuf.s)) == -1)
 		return;
-	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fd, outbuf, sizeof(outbuf));
 	if (substdio_puts(&ssout, mysql_host) || substdio_put(&ssout, ":", 1) ||
 			substdio_puts(&ssout, mysql_socket) || substdio_put(&ssout, ":", 1) ||
 			substdio_puts(&ssout, mysql_user) || substdio_put(&ssout, ":", 1) ||
@@ -840,7 +840,7 @@ ezmlmMake(int newlist)
 	if (str_len(s) > 0) {
 		if ((fd = open_trunc(tmp2.s)) == -1)
 			return;
-		substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
+		substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fd, outbuf, sizeof(outbuf));
 		if (substdio_put(&ssout, "[", 1) ||
 				substdio_puts(&ssout, s) ||
 				substdio_put(&ssout, "]", 1) ||
@@ -885,7 +885,7 @@ ezmlmMake(int newlist)
 		strerr_warn3("ezmlmMake: open_trunc: ", tmp1.s,  ": ", &strerr_sys);
 		return;
 	}
-	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fd, outbuf, sizeof(outbuf));
 	if (substdio_put(&ssout, Domain.s, Domain.len) ||
 			substdio_put(&ssout, "-", 1) ||
 			substdio_put(&ssout, ActionUser.s, ActionUser.len) ||
@@ -1012,7 +1012,7 @@ show_list_group_now(int mod)
 		exit(127);
 	} else {
 		close(handles[1]);
-		substdio_fdbuf(&ssin, read, handles[0], inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, handles[0], inbuf, sizeof(inbuf));
 		sort_init();
 		/*- Load subscriber/moderator list */
 		for (;;) {
@@ -1402,7 +1402,7 @@ count_mailinglists()
 				out(" 1<BR>\n");
 				continue;
 			}
-			substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+			substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 			if (getln(&ssin, &line, &match, '\n') == -1) {
 				strerr_warn1("count_mailinglists: read: ", &strerr_sys);
 				out(html_text[144]);
@@ -1454,7 +1454,7 @@ modmailinglist()
 			!stralloc_0(&TmpBuf))
 		die_nomem();
 	if ((fd = open_read(TmpBuf.s)) != -1) {
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		if (getln(&ssin, &line, &match, '\n') == -1) {
 			strerr_warn3("modmailinglist: read: ", TmpBuf.s, ": ", &strerr_sys);
 			out(html_text[144]);
@@ -1489,7 +1489,7 @@ modmailinglist()
 		die_nomem();
 	/*- get the Reply-To setting for the list */
 	if ((fd = open_read(TmpBuf.s)) != -1) {
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		for (;;) {
 			if (getln(&ssin, &line, &match, '\n') == -1) {
 				strerr_warn3("modmailinglist: read: ", TmpBuf.s, ": ", &strerr_sys);
@@ -1781,7 +1781,7 @@ set_options()
 			!stralloc_0(&TmpBuf))
 		die_nomem();
 	if ((fd = open_read(TmpBuf.s)) != -1) {
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		for (;;) {
 			if (getln(&ssin, &line, &match, '\n') == -1) {
 				strerr_warn3("set_options: read: ", TmpBuf.s, ": ", &strerr_sys);
@@ -1829,7 +1829,7 @@ set_options()
 			!stralloc_0(&TmpBuf))
 		die_nomem();
 	if ((fd = open_read(TmpBuf.s)) != -1) {
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		for (;;) {
 			if (getln(&ssin, &line, &match, '\n') == -1) {
 				strerr_warn3("set_options: read: ", TmpBuf.s, ": ", &strerr_sys);
@@ -2116,7 +2116,7 @@ show_current_list_values()
 			!stralloc_0(&TmpBuf))
 		die_nomem();
 	if ((fd = open_read(TmpBuf.s)) != -1) {
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		checked = 1;
 		if (getln(&ssin, &line1, &match, '\n') == -1) {
 			strerr_warn3("show_current_list_values: read: ", TmpBuf.s, ": ", &strerr_sys);
@@ -2157,7 +2157,7 @@ show_current_list_values()
 			!stralloc_0(&TmpBuf))
 		die_nomem();
 	if ((fd = open_read(TmpBuf.s)) != -1) {
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		if (getln(&ssin, &line2, &match, '\n') == -1) {
 			strerr_warn3("show_current_list_values: read: ", TmpBuf.s, ": ", &strerr_sys);
 			out(html_text[144]);
@@ -2395,7 +2395,7 @@ get_mailinglist_prefix(stralloc *prefix)
 			!stralloc_0(&TmpBuf))
 		die_nomem();
 	if ((fd = open_read(TmpBuf.s)) != -1) {
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		if (getln(&ssin, &line, &match, '\n') == -1) {
 			strerr_warn3("get_mailinglist_prefix: read: ", TmpBuf.s, ": ", &strerr_sys);
 			out(html_text[144]);

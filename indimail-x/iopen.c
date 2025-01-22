@@ -1,38 +1,5 @@
 /*
- * $Log: iopen.c,v $
- * Revision 1.11  2023-04-01 13:29:23+05:30  Cprogrammer
- * display mysql error for mysql_options()
- *
- * Revision 1.10  2023-03-20 10:07:51+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.9  2020-04-01 18:56:00+05:30  Cprogrammer
- * moved authentication functions to libqmail
- *
- * Revision 1.8  2019-06-30 10:14:25+05:30  Cprogrammer
- * seperate fields in error string by commas
- *
- * Revision 1.7  2019-06-27 20:00:29+05:30  Cprogrammer
- * provide default cnf file and group to set_mysql_options
- *
- * Revision 1.6  2019-06-27 10:45:41+05:30  Cprogrammer
- * display ssl setting for mysql_real_connect() error
- *
- * Revision 1.5  2019-05-28 23:28:23+05:30  Cprogrammer
- * fixed error message for mysql_real_connect failure
- *
- * Revision 1.4  2019-05-28 17:40:41+05:30  Cprogrammer
- * added load_mysql.h for mysql interceptor function prototypes
- *
- * Revision 1.3  2019-04-22 23:12:41+05:30  Cprogrammer
- * added stdlib.h
- *
- * Revision 1.2  2019-04-17 17:46:50+05:30  Cprogrammer
- * fixed formatting for mysql_real_connect error message
- *
- * Revision 1.1  2019-04-14 18:29:41+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -128,7 +95,7 @@ iopen(char *dbhost)
 	if (!mysql_host.len && !access(host_path.s, F_OK)) {
 		if ((fd = open_read(host_path.s)) == -1)
 			strerr_die3sys(111, "iopen: ", host_path.s, ": ");
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		if (getln(&ssin, &mysql_host, &match, '\n') == -1)
 			strerr_die3sys(111, "iopen: read: ", host_path.s, ": ");
 		close(fd);
@@ -270,3 +237,39 @@ iopen(char *dbhost)
 #endif
 	return (0);
 }
+/*
+ * $Log: iopen.c,v $
+ * Revision 1.11  2023-04-01 13:29:23+05:30  Cprogrammer
+ * display mysql error for mysql_options()
+ *
+ * Revision 1.10  2023-03-20 10:07:51+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.9  2020-04-01 18:56:00+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
+ * Revision 1.8  2019-06-30 10:14:25+05:30  Cprogrammer
+ * seperate fields in error string by commas
+ *
+ * Revision 1.7  2019-06-27 20:00:29+05:30  Cprogrammer
+ * provide default cnf file and group to set_mysql_options
+ *
+ * Revision 1.6  2019-06-27 10:45:41+05:30  Cprogrammer
+ * display ssl setting for mysql_real_connect() error
+ *
+ * Revision 1.5  2019-05-28 23:28:23+05:30  Cprogrammer
+ * fixed error message for mysql_real_connect failure
+ *
+ * Revision 1.4  2019-05-28 17:40:41+05:30  Cprogrammer
+ * added load_mysql.h for mysql interceptor function prototypes
+ *
+ * Revision 1.3  2019-04-22 23:12:41+05:30  Cprogrammer
+ * added stdlib.h
+ *
+ * Revision 1.2  2019-04-17 17:46:50+05:30  Cprogrammer
+ * fixed formatting for mysql_real_connect error message
+ *
+ * Revision 1.1  2019-04-14 18:29:41+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

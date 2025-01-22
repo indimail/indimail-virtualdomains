@@ -1,5 +1,5 @@
 /*
- * $id: $
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -78,7 +78,7 @@ die_nomem()
 no_return
 #endif
 void
-SigChild()
+SigChild(int x)
 {
 	int             status;
 

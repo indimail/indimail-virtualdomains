@@ -1,14 +1,5 @@
 /*
- * $Log: vdel_dir_control.c,v $
- * Revision 1.3  2024-05-17 16:25:48+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.2  2023-03-20 10:33:37+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.1  2019-04-15 12:40:49+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -68,7 +59,7 @@ vdel_dir_control(const char *domain)
 		}
 		return (0);
 	}
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	for(;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1) {
 			strerr_warn3("vdel_dir_control: read: ", tmpbuf.s, ": ", &strerr_sys);
@@ -101,3 +92,15 @@ vdel_dir_control(const char *domain)
 	close(fd);
 	return (0);
 }
+/*
+ * $Log: vdel_dir_control.c,v $
+ * Revision 1.3  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.2  2023-03-20 10:33:37+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.1  2019-04-15 12:40:49+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

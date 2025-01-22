@@ -1,17 +1,5 @@
 /*
- * $Log: printdir.c,v $
- * Revision 1.4  2023-03-20 10:15:51+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.3  2021-07-08 11:44:23+05:30  Cprogrammer
- * add check for misconfigured assign file
- *
- * Revision 1.2  2020-06-16 17:55:46+05:30  Cprogrammer
- * moved setuserid function to libqmail
- *
- * Revision 1.1  2019-04-14 21:03:42+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -92,7 +80,7 @@ main(int argc, char **argv)
 			return (1);
 		}
 	} else {
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		if (getln(&ssin, &line, &match, '\n') == -1) {
 			strerr_warn3("printdir: read: ", tmpbuf.s, ": ", &strerr_sys);
 			return (1);
@@ -123,3 +111,18 @@ main(int argc, char **argv)
 	print_control(tmpbuf.s, argv[1], users_per_level, 0);
 	return (0);
 }
+/*
+ * $Log: printdir.c,v $
+ * Revision 1.4  2023-03-20 10:15:51+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.3  2021-07-08 11:44:23+05:30  Cprogrammer
+ * add check for misconfigured assign file
+ *
+ * Revision 1.2  2020-06-16 17:55:46+05:30  Cprogrammer
+ * moved setuserid function to libqmail
+ *
+ * Revision 1.1  2019-04-14 21:03:42+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

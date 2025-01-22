@@ -261,7 +261,7 @@ check_indimail_alias(const char *addr, stralloc *dest)
 		strerr_warn3("check_indimail_alias: ", TmpBuf.s, ": ", &strerr_sys);
 		return -1;
 	}
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	for(;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1) {
 			close(fd);
@@ -483,7 +483,7 @@ get_color_text(const char *index)
 	if (color_table == -1)
 		return ("");
 	lseek(color_table, 0, SEEK_SET);
-	substdio_fdbuf(&ssin, read, color_table, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, color_table, inbuf, sizeof(inbuf));
 	ssin.p = 0;
 	ssin.n = sizeof(inbuf);
 	for (;;) {

@@ -1,20 +1,5 @@
 /*
- * $Log: user_over_quota.c,v $
- * Revision 1.5  2023-03-20 10:20:48+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.4  2019-07-26 09:41:45+05:30  Cprogrammer
- * added FAST_QUOTA env variable to avoid costly disk read for quota calculations
- *
- * Revision 1.3  2019-04-22 23:16:08+05:30  Cprogrammer
- * replaced atol() with scan_ulong()
- *
- * Revision 1.2  2019-04-21 16:14:36+05:30  Cprogrammer
- * remove '/' from the end
- *
- * Revision 1.1  2019-04-18 08:33:52+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -94,7 +79,7 @@ user_over_quota(char *Maildir, char *quota, int cur_msgsize)
 				return (0);
 			return (-1);
 		}
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		if (getln(&ssin, &line, &match, '\n') == -1) {
 			strerr_warn3("user_over_quota: read: ", tmpbuf.s, ": ", &strerr_sys);
 			close(fd);
@@ -185,3 +170,21 @@ user_over_quota(char *Maildir, char *quota, int cur_msgsize)
 #endif
 	return (0);
 }
+/*
+ * $Log: user_over_quota.c,v $
+ * Revision 1.5  2023-03-20 10:20:48+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.4  2019-07-26 09:41:45+05:30  Cprogrammer
+ * added FAST_QUOTA env variable to avoid costly disk read for quota calculations
+ *
+ * Revision 1.3  2019-04-22 23:16:08+05:30  Cprogrammer
+ * replaced atol() with scan_ulong()
+ *
+ * Revision 1.2  2019-04-21 16:14:36+05:30  Cprogrammer
+ * remove '/' from the end
+ *
+ * Revision 1.1  2019-04-18 08:33:52+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

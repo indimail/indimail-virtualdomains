@@ -1,14 +1,5 @@
-/*-
- * $Log: xmalloc.c,v $
- * Revision 1.3  2008-05-21 18:45:11+05:30  Cprogrammer
- * fixed compilation warnings
- *
- * Revision 1.2  2004-01-06 14:56:00+05:30  Manny
- * fixed compilation warnings
- *
- * Revision 1.1  2004-01-06 12:44:23+05:30  Manny
- * Initial revision
- *
+/*
+ * $Id: xmalloc.c,v 1.4 2025-01-22 15:52:05+05:30 Cprogrammer Exp mbhangui $
  *
  * (C) Copyright 1993,1994 by Carnegie Mellon University
  * All Rights Reserved.
@@ -37,7 +28,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-extern void    *malloc(), *realloc();
 
 char           *
 xmalloc(int size)
@@ -74,3 +64,18 @@ strsave(char *str)
 	strcpy(p, str);
 	return p;
 }
+/*-
+ * $Log: xmalloc.c,v $
+ * Revision 1.4  2025-01-22 15:52:05+05:30  Cprogrammer
+ * fix gcc14 errors
+ *
+ * Revision 1.3  2008-05-21 18:45:11+05:30  Cprogrammer
+ * fixed compilation warnings
+ *
+ * Revision 1.2  2004-01-06 14:56:00+05:30  Manny
+ * fixed compilation warnings
+ *
+ * Revision 1.1  2004-01-06 12:44:23+05:30  Manny
+ * Initial revision
+ *
+ */

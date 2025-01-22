@@ -1,26 +1,5 @@
 /*
- * $Log: spam.c,v $
- * Revision 1.7  2024-05-23 17:23:15+05:30  Cprogrammer
- * moved wildmat.h to libqmail
- *
- * Revision 1.6  2023-09-05 21:47:40+05:30  Cprogrammer
- * use matchregex from libqmail
- *
- * Revision 1.5  2023-03-20 10:18:16+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.4  2023-01-22 10:40:03+05:30  Cprogrammer
- * replaced qprintf with subprintf
- *
- * Revision 1.3  2020-10-01 18:29:19+05:30  Cprogrammer
- * initialize pos variable
- *
- * Revision 1.2  2020-04-01 18:57:58+05:30  Cprogrammer
- * moved authentication functions to libqmail
- *
- * Revision 1.1  2019-04-18 08:37:53+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -198,7 +177,7 @@ loadIgnoreList(char *fn)
 			strerr_die3sys(111, "spam: open: ", fn, ": ");
 		return (0);
 	}
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	for (status = 0;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1) {
 			strerr_warn3("spam: read: ", fn, ": ", &strerr_sys);
@@ -259,7 +238,7 @@ spamReport(int spamNumber, char *outfile)
 
 	if ((fd = open_append(outfile)) == -1)
 		strerr_die3sys(111, "spam: open: ", outfile, ": ");
-	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fd, outbuf, sizeof(outbuf));
 	subprintfe(subfderr, "spam", "%-40s Mail Count\n", "Spammer's Email Address");
 	errflush("spam");
 	if(!maxaddr) {
@@ -365,7 +344,7 @@ readLogFile(char *fn, int type, int count)
 				return (-1);
 			}
 		} else {
-			substdio_fdbuf(&ssin, read, keyfd, inbuf, sizeof(inbuf));
+			substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, keyfd, inbuf, sizeof(inbuf));
 			if (getln(&ssin, &line, &match, '\n') == -1) {
 				strerr_warn3("readLogFile: read: ", keyfile.s, ": ", &strerr_sys);
 				close(fd);
@@ -404,7 +383,7 @@ readLogFile(char *fn, int type, int count)
 		close(fd);
 		return (-1);
 	}
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	for (status = 0, seekPos = -1;;) {
 		seekPos = lseek(fd, (off_t) 0, SEEK_CUR);
 		switch (type)
@@ -428,7 +407,7 @@ readLogFile(char *fn, int type, int count)
 				close(fd);
 				return (-1);
 			}
-			substdio_fdbuf(&ssout, write, keyfd, outbuf, sizeof(outbuf));
+			substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, keyfd, outbuf, sizeof(outbuf));
 			if (substdio_put(&ssout, strnum, fmt_ulong(strnum, seekPos)) == -1 ||
 					substdio_put(&ssout, "\n", 1) == -1 ||
 					substdio_flush(&ssout) == -1) {
@@ -612,3 +591,27 @@ insertAddr(int ht, char *email)
 	hash_tab[h] = sym;
 	return sym;
 }
+/*
+ * $Log: spam.c,v $
+ * Revision 1.7  2024-05-23 17:23:15+05:30  Cprogrammer
+ * moved wildmat.h to libqmail
+ *
+ * Revision 1.6  2023-09-05 21:47:40+05:30  Cprogrammer
+ * use matchregex from libqmail
+ *
+ * Revision 1.5  2023-03-20 10:18:16+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.4  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
+ * Revision 1.3  2020-10-01 18:29:19+05:30  Cprogrammer
+ * initialize pos variable
+ *
+ * Revision 1.2  2020-04-01 18:57:58+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
+ * Revision 1.1  2019-04-18 08:37:53+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

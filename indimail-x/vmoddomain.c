@@ -1,23 +1,5 @@
 /*
- * $Log: vmoddomain.c,v $
- * Revision 1.6  2024-05-28 21:20:22+05:30  Cprogrammer
- * added -H option to configure hash method for a domain
- *
- * Revision 1.5  2024-05-17 16:24:31+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.4  2023-03-22 09:46:49+05:30  Cprogrammer
- * updated error messages
- *
- * Revision 1.3  2023-01-22 10:32:00+05:30  Cprogrammer
- * reformatted error message strings
- *
- * Revision 1.2  2019-06-07 15:45:51+05:30  Cprogrammer
- * use sgetopt library for getopt()
- *
- * Revision 1.1  2019-04-18 08:34:04+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -282,7 +264,7 @@ set_handler(char *dir, char *handler, uid_t uid, gid_t gid, int use_vfilter)
 #endif
 		return (1);
 	}
-	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fd, outbuf, sizeof(outbuf));
 #ifdef VFILTER
 	if (use_vfilter == 1) {
 		if (substdio_put(&ssout, "| ", 2) ||
@@ -407,7 +389,7 @@ set_hash_method(char *dir, uid_t uid, gid_t gid, int hash_method)
 		unlink(tmpbuf.s);
 		return (1);
 	}
-	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fd, outbuf, sizeof(outbuf));
 	switch (hash_method)
 	{
 		case DES_HASH:
@@ -452,3 +434,24 @@ set_hash_method(char *dir, uid_t uid, gid_t gid, int hash_method)
 #endif
 	return (0);
 }
+/*
+ * $Log: vmoddomain.c,v $
+ * Revision 1.6  2024-05-28 21:20:22+05:30  Cprogrammer
+ * added -H option to configure hash method for a domain
+ *
+ * Revision 1.5  2024-05-17 16:24:31+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.4  2023-03-22 09:46:49+05:30  Cprogrammer
+ * updated error messages
+ *
+ * Revision 1.3  2023-01-22 10:32:00+05:30  Cprogrammer
+ * reformatted error message strings
+ *
+ * Revision 1.2  2019-06-07 15:45:51+05:30  Cprogrammer
+ * use sgetopt library for getopt()
+ *
+ * Revision 1.1  2019-04-18 08:34:04+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

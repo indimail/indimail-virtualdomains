@@ -1,11 +1,5 @@
-/*-
- * $Log: storeHeader.c,v $
- * Revision 1.2  2023-08-31 22:37:07+05:30  Cprogrammer
- * return error if parseAddress is unsuccessful
- *
- * Revision 1.1  2019-04-18 08:36:27+05:30  Cprogrammer
- * Initial revision
- *
+/*
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -94,7 +88,7 @@ storeHeader(struct header ***Hptr, struct header_t *h)
 		}
 	}
 	if (found) {
-		if (!alloc_re((char *) &(ptr[idx]->data), sizeof(char *) * (ptr[idx]->data_items + 1), sizeof(char *) * (ptr[idx]->data_items + 2)))
+		if (!alloc_re((void *) &(ptr[idx]->data), sizeof(char *) * (ptr[idx]->data_items + 1), sizeof(char *) * (ptr[idx]->data_items + 2)))
 			die_nomem();
 		for (i = 0; i_headers[i]; i++) {
 			if (!case_diffs(i_headers[i], (char *) h->name)) {
@@ -113,7 +107,7 @@ storeHeader(struct header ***Hptr, struct header_t *h)
 		str_copyb(ptr[idx]->data[ptr[idx]->data_items++], i_headers[i] ? tmp.s : (char *) h->data, len);
 		ptr[idx]->data[ptr[idx]->data_items] = (char *) 0;
 	} else {
-		if (!alloc_re((char *) &hptr, sizeof(struct header *) * (count + 1), sizeof(struct header *) * (count + 2)))
+		if (!alloc_re((void *) &hptr, sizeof(struct header *) * (count + 1), sizeof(struct header *) * (count + 2)))
 			die_nomem();
 		else
 			*Hptr = hptr;
@@ -146,3 +140,12 @@ storeHeader(struct header ***Hptr, struct header_t *h)
 	return(0);
 }
 #endif
+/*-
+ * $Log: storeHeader.c,v $
+ * Revision 1.2  2023-08-31 22:37:07+05:30  Cprogrammer
+ * return error if parseAddress is unsuccessful
+ *
+ * Revision 1.1  2019-04-18 08:36:27+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

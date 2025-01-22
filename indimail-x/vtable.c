@@ -1,20 +1,5 @@
 /*
- * $Log: vtable.c,v $
- * Revision 1.5  2023-03-20 10:40:19+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.4  2023-01-22 10:40:03+05:30  Cprogrammer
- * replaced qprintf with subprintf
- *
- * Revision 1.3  2019-06-07 15:40:14+05:30  Cprogrammer
- * use sgetopt library for getopt()
- *
- * Revision 1.2  2019-05-28 17:42:54+05:30  Cprogrammer
- * added load_mysql.h for mysql interceptor function prototypes
- *
- * Revision 1.1  2019-04-14 21:13:20+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -152,7 +137,7 @@ main(int argc, char **argv)
 			strerr_warn3("vtable: open: ", *fptr, ": ", &strerr_sys);
 			return (-1);
 		}
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		mysql_stack("create table IF NOT EXISTS ");
 		for(;;) {
 			if (getln(&ssin, &line, &match, '\n') == -1) {
@@ -195,3 +180,21 @@ main(int argc, char **argv)
 	in_mysql_close(&vmysql);
 	return (errors);
 }
+/*
+ * $Log: vtable.c,v $
+ * Revision 1.5  2023-03-20 10:40:19+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.4  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
+ * Revision 1.3  2019-06-07 15:40:14+05:30  Cprogrammer
+ * use sgetopt library for getopt()
+ *
+ * Revision 1.2  2019-05-28 17:42:54+05:30  Cprogrammer
+ * added load_mysql.h for mysql interceptor function prototypes
+ *
+ * Revision 1.1  2019-04-14 21:13:20+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

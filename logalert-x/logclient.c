@@ -1,3 +1,6 @@
+/*
+ * $Id: logclient.c,v 1.17 2025-01-22 15:58:08+05:30 Cprogrammer Exp mbhangui $
+ */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -53,7 +56,7 @@
 #define FATAL   "logclient: fatal: " 
 
 #ifndef	lint
-static char     sccsid[] = "$Id: logclient.c,v 1.16 2024-05-31 09:01:34+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: logclient.c,v 1.17 2025-01-22 15:58:08+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 
@@ -92,7 +95,7 @@ static char    *usage =
 	"  -v                - verbose output";
 
 static void
-sigterm()
+sigterm(int x)
 {
 	exitasap = 1;
 }
@@ -251,7 +254,7 @@ transmit_logs(char *lhost, char *remote, int sfd)
 		for (msgptr = msghd; !exitasap && msgptr->fd != -1; msgptr++) {
 			if (!FD_ISSET(msgptr->fd, &FdSet))
 				continue;
-			substdio_fdbuf(&ssin, read, msgptr->fd, inbuf, sizeof(inbuf));
+			substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, msgptr->fd, inbuf, sizeof(inbuf));
 			if (msgptr->seek) {
 				if (lseek(msgptr->fd, msgptr->seek, SEEK_SET) == -1) {
 					strerr_warn4(WARN, "unable to seek ", msgptr->fn, ": ", &strerr_sys);
@@ -374,7 +377,7 @@ consclnt(char *remote, char **argv, char *clientcert, char *cafile, char *crlfil
 		if (stat(msgptr->fn, &st) == -1)
 			strerr_die4sys(111, FATAL, "stat: ", msgptr->fn, ": ");
 		msgptr->inum = st.st_ino;
-		if (qsprintf(&seekfile, "%s/%ld.seek", seekdir, msgptr->inum) == -1)
+		if (qsprintf(&seekfile, "%s/%lu.seek", seekdir, msgptr->inum) == -1)
 			strerr_die2x(111, FATAL, "out of memory");
 		if ((msgptr->fd = open_read(msgptr->fn)) == -1)
 			strerr_die4sys(111, FATAL, "open: ", msgptr->fn, ": ");
@@ -541,6 +544,7 @@ main(int argc, char **argv)
 }
 
 #ifndef	lint
+#include <stdio.h>
 void
 getversion_logclient_c()
 {
@@ -550,6 +554,9 @@ getversion_logclient_c()
 
 /*
  * $Log: logclient.c,v $
+ * Revision 1.17  2025-01-22 15:58:08+05:30  Cprogrammer
+ * fix gcc14 errors
+ *
  * Revision 1.16  2024-05-31 09:01:34+05:30  Cprogrammer
  * replaced perror with strerr_die2sys
  *

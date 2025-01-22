@@ -5867,7 +5867,7 @@ $ pubkey=$(openssl pkey -pubout -in $selector | openssl asn1parse -offset 12 -no
 
 ```
 
-The next command will print the text that you need to put in your txt record for private.\_domainkey.indimail.org or ed25519.\_domainkey.indimail.org. Replace indimail.org with our FQDN. If you have used <b>dknewkey</b>, then you just need to copy paste data from your file with the <b>.pub</b> extension.
+The next command will print the text that you need to put in your txt record for private.\_domainkey.indimail.org or ed25519.\_domainkey.indimail.org. Replace indimail.org with your FQDN. If you have used <b>dknewkey</b>, then you just need to copy paste data from your file with the <b>.pub</b> extension.
 
 ```
 If using RSA key
@@ -5881,7 +5881,7 @@ ed25519._domainkey.indimail.org. IN TXT ("v=DKIM1; k=ed25519; p=5EPfR9Cxy2yPWHPT
 
 choose the selector (e.g. my\_selector) and publish this into DNS TXT record for:
 
-`my_selector._domainkey.indimail.org` (e.g. selector can be named 'private', 'ed25519', etc)
+`my_selector._domainkey.indimail.org` (e.g. my_selector can be named 'private', 'ed25519', etc)
 
 Wait until it's on all DNS servers and that's it. If all your domains can use <b>my\_selector</b> you can set **DKIMSIGN** as <u>/etc/indimail/control/domainkeys/%/my\_selector</u>. More in **DKIMSIGN** environment variable later.
 

@@ -1,23 +1,5 @@
 /*
- * $Log: get_real_domain.c,v $
- * Revision 1.6  2024-05-17 16:25:48+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.5  2023-03-25 16:33:11+05:30  Cprogrammer
- * refactored code
- *
- * Revision 1.4  2023-03-20 10:02:10+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.3  2021-09-11 13:36:34+05:30  Cprogrammer
- * corrected wrong variable used for domain directory
- *
- * Revision 1.2  2020-04-01 18:54:59+05:30  Cprogrammer
- * moved authentication functions to libqmail
- *
- * Revision 1.1  2019-04-18 15:41:02+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -95,7 +77,7 @@ is_in_rcpthosts(const char *domain)
 		if (errno != error_noent)
 			strerr_die3sys(111, "get_real_domain: ", filename.s, ": ");
 	} else {
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		for (;;) {
 			if (getln(&ssin, &line, &match, '\n') == -1)
 				strerr_die3sys(111, "get_real_domain: read: ", filename.s, ": ");
@@ -148,7 +130,7 @@ is_in_rcpthosts(const char *domain)
 			strerr_die3sys(111, "get_real_domain: ", filename.s, ": ");
 		return ((char *) 0);
 	} else {
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		for (;;) {
 			if (getln(&ssin, &line, &match, '\n') == -1)
 				strerr_die3sys(111, "get_real_domain: read: ", filename.s, ": ");
@@ -340,3 +322,24 @@ get_real_domain_cache(char cache_switch)
 	return;
 }
 #endif
+/*
+ * $Log: get_real_domain.c,v $
+ * Revision 1.6  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.5  2023-03-25 16:33:11+05:30  Cprogrammer
+ * refactored code
+ *
+ * Revision 1.4  2023-03-20 10:02:10+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.3  2021-09-11 13:36:34+05:30  Cprogrammer
+ * corrected wrong variable used for domain directory
+ *
+ * Revision 1.2  2020-04-01 18:54:59+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
+ * Revision 1.1  2019-04-18 15:41:02+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

@@ -1,17 +1,5 @@
 /*
- * $Log: vfilter_header.c,v $
- * Revision 1.4  2023-09-05 21:50:44+05:30  Cprogrammer
- * added headerNumber function to convert textual header name to number
- *
- * Revision 1.3  2023-03-20 10:36:29+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.2  2020-04-01 18:58:46+05:30  Cprogrammer
- * moved authentication functions to libqmail
- *
- * Revision 1.1  2019-04-18 08:33:58+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -82,7 +70,7 @@ headerList()
 		strerr_warn3("vfilter_header: ", filename.s, ": ", &strerr_sys);
 		return ((char **) 0);
 	}
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	for (count = 0;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1) {
 			strerr_warn3("vfilter_header: read: ", filename.s, ": ", &strerr_sys);
@@ -114,7 +102,7 @@ headerList()
 		close(fd);
 		return ((char **) 0);
 	}
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	if (lseek(fd, 0, SEEK_SET) == -1) {
 		strerr_warn3("vfilter_header: lseek: ", filename.s, ": ", &strerr_sys);
 		close(fd);
@@ -155,3 +143,18 @@ headerList()
 	return (hptr);
 }
 #endif
+/*
+ * $Log: vfilter_header.c,v $
+ * Revision 1.4  2023-09-05 21:50:44+05:30  Cprogrammer
+ * added headerNumber function to convert textual header name to number
+ *
+ * Revision 1.3  2023-03-20 10:36:29+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.2  2020-04-01 18:58:46+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
+ * Revision 1.1  2019-04-18 08:33:58+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

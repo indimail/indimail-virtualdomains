@@ -1,35 +1,5 @@
 /*
- * $Log: vbulletin.c,v $
- * Revision 1.10  2024-05-17 16:25:48+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.9  2023-03-26 00:33:27+05:30  Cprogrammer
- * fixed code using wait_handler
- *
- * Revision 1.8  2023-03-24 12:59:25+05:30  Cprogrammer
- * fork and run bulletin for all domains with domain uid
- *
- * Revision 1.7  2023-03-20 10:33:13+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.6  2022-10-20 11:58:36+05:30  Cprogrammer
- * converted function prototype to ansic
- *
- * Revision 1.5  2021-07-08 11:47:41+05:30  Cprogrammer
- * add check for misconfigured assign file
- *
- * Revision 1.4  2020-10-19 12:47:03+05:30  Cprogrammer
- * use /var/indomain/domains for domain/bulk_mail
- *
- * Revision 1.3  2020-06-16 17:56:15+05:30  Cprogrammer
- * moved setuserid function to libqmail
- *
- * Revision 1.2  2019-06-07 15:54:44+05:30  mbhangui
- * use sgetopt library for getopt()
- *
- * Revision 1.1  2019-04-18 08:38:42+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -249,7 +219,7 @@ in_exclude_list(char *excludeFile, int fdx, char *user, char *domain)
 		die_nomem();
 	if (lseek(fdx, 0, SEEK_SET) != 0)
 		strerr_die1sys(111, "vbulletin: lseek error: ");
-	substdio_fdbuf(&ssin, read, fdx, inbuf, sizeof (inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fdx, inbuf, sizeof (inbuf));
 	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			strerr_die3sys(111, "vbulletin: read: ", excludeFile, ": ");
@@ -294,7 +264,7 @@ copy_email(char *emailFile, int fdi, char *name, char *domain, struct passwd *pw
 			strerr_warn3("vbulletin: open: ", tmpbuf.s, ": ", &strerr_sys);
 			return (1);
 		}
-		substdio_fdbuf(&ssout, write, fdw, outbuf, sizeof(outbuf));
+		substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fdw, outbuf, sizeof(outbuf));
 		if (substdio_put(&ssout, "To: ", 4) ||
 				substdio_puts(&ssout, pwent->pw_name) ||
 				substdio_put(&ssout, "@", 1) ||
@@ -307,7 +277,7 @@ copy_email(char *emailFile, int fdi, char *name, char *domain, struct passwd *pw
 		}
 		if (lseek(fdi, 0, SEEK_SET) != 0)
 			strerr_die1sys(111, "vbulletin: lseek error: ");
-		substdio_fdbuf(&ssin, read, fdi, inbuf, sizeof (inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fdi, inbuf, sizeof (inbuf));
 		switch (substdio_copy(&ssout, &ssin))
 		{
 		case -2: /*- read error */
@@ -621,3 +591,36 @@ main(int argc, char **argv)
 	iclose();
 	return (status);
 }
+/*
+ * $Log: vbulletin.c,v $
+ * Revision 1.10  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.9  2023-03-26 00:33:27+05:30  Cprogrammer
+ * fixed code using wait_handler
+ *
+ * Revision 1.8  2023-03-24 12:59:25+05:30  Cprogrammer
+ * fork and run bulletin for all domains with domain uid
+ *
+ * Revision 1.7  2023-03-20 10:33:13+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.6  2022-10-20 11:58:36+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
+ * Revision 1.5  2021-07-08 11:47:41+05:30  Cprogrammer
+ * add check for misconfigured assign file
+ *
+ * Revision 1.4  2020-10-19 12:47:03+05:30  Cprogrammer
+ * use /var/indomain/domains for domain/bulk_mail
+ *
+ * Revision 1.3  2020-06-16 17:56:15+05:30  Cprogrammer
+ * moved setuserid function to libqmail
+ *
+ * Revision 1.2  2019-06-07 15:54:44+05:30  mbhangui
+ * use sgetopt library for getopt()
+ *
+ * Revision 1.1  2019-04-18 08:38:42+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

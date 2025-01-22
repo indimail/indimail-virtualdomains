@@ -256,7 +256,7 @@ exec_local(char **argv, const char *userid, const char *TheDomain, struct passwd
 					if ((fd = open_read(ptr)) == -1)
 						strerr_warn4(FATAL, "open: ", ptr, ": ", &strerr_sys);
 					else {
-						substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+						substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 						for (;;) {
 							if (getln(&ssin, &line, &match, '\n') == -1) {
 								strerr_warn4(FATAL, "read: ", ptr, ": ", &strerr_sys);

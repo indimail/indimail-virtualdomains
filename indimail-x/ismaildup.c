@@ -118,8 +118,8 @@ duplicateMD5(char *fileName, char *md5val)
 		remove_lock(fileName, fd, lockfd);
 		return -1;
 	}
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
-	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fd, outbuf, sizeof(outbuf));
 	getEnvConfigStr(&ptr, "ELIMINATE_DUPS_INT", "900");
 	scan_ulong(ptr, &interval);
 	for (size = 0, flag = 0;;) {

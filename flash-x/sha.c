@@ -1,14 +1,5 @@
 /*
- * $Log: sha.c,v $
- * Revision 1.3  2020-06-02 18:55:42+05:30  Cprogrammer
- * increased size of crypted_buffer
- *
- * Revision 1.2  2008-07-17 21:39:09+05:30  Cprogrammer
- * fixed compile warnings on mac
- *
- * Revision 1.1  2002-12-16 01:55:20+05:30  Manny
- * Initial revision
- *
+ * $Id: sha.c,v 1.4 2025-01-22 15:37:42+05:30 Cprogrammer Exp mbhangui $
  *
  * Implementation of NIST's Secure Hash Algorithm (FIPS 180)
  * Lightly bummed for execution efficiency.
@@ -87,11 +78,11 @@
 #define SUCCESS 0
 #define FAILURE -1
 
-int             sha_file();		/*- External entries */
-void            sha_stream(), sha_memory();
+int             sha_file(char *, unsigned long *); /*- Hash a file */
+void            sha_memory(char *, unsigned long, unsigned long *);
+void            sha_stream(FILE *, unsigned long *);
 char           *shacrypt(char *key, char *salt);
-
-static void     nist_guts();
+static void     nist_guts(int, FILE *, char *, unsigned long, unsigned long *);
 
 char            crypted_buffer[56];
 
@@ -103,22 +94,28 @@ char            crypted_buffer[56];
 
 #ifdef O_WRAP					/*- Using just the hash routine itself */
 
-main(argc, argv)
-	int             argc;
-	char          **argv;
+int
+main(int argc, char **argv)
 {
 	char           *prog = *argv;
+	char           *ptr;
 
 	argc--, argv++;
 
 	if (argc > 1)
 	{
-		if (strlen(*(argv + 1)) != 3)
+		if (strlen(*(argv + 1)) != 3) {
 			printf("Salt must be 3 characters\n");
-		else
-			printf("%s\n", shacrypt(*argv, *(argv + 1)));
-	} else
+			exit(1);
+		} else
+			printf("%s\n", ptr = shacrypt(*argv, *(argv + 1)));
+	} else {
 		printf("Usage: %s key salt\n", prog);
+		exit(1);
+	}
+	if (ptr)
+		exit(0);
+	exit(1);
 }
 
 #endif	/* O_WRAP */
@@ -206,9 +203,7 @@ union longbyte
 };
 
 int
-sha_file(filename, buffer)		/*- Hash a file */
-	char           *filename;
-	unsigned long  *buffer;
+sha_file(char *filename, unsigned long *buffer)		/*- Hash a file */
 {
 	FILE           *infile;
 
@@ -226,18 +221,13 @@ sha_file(filename, buffer)		/*- Hash a file */
 }
 
 void
-sha_memory(mem, length, buffer)	/*- Hash a memory block */
-	char           *mem;
-	unsigned long   length;
-	unsigned long  *buffer;
+sha_memory(char *mem, unsigned long length, unsigned long *buffer)	/*- Hash a memory block */
 {
 	nist_guts(FALSE, (FILE *) NULL, mem, length, buffer);
 }
 
 void
-sha_stream(stream, buffer)
-	FILE           *stream;
-	unsigned long  *buffer;
+sha_stream(FILE *stream, unsigned long *buffer)
 {
 	nist_guts(TRUE, stream, (char *) NULL, 0l, buffer);
 }
@@ -285,12 +275,7 @@ sha_stream(stream, buffer)
 #endif
 
 static void
-nist_guts(file_flag, stream, mem, length, buf)
-	int             file_flag;	/*- Input from memory, or from stream?  */
-	FILE           *stream;
-	char           *mem;
-	unsigned long   length;
-	unsigned long  *buf;
+nist_guts(int file_flag, FILE *stream, char *mem, unsigned long length, unsigned long *buf)
 {
 	int             i, nread, nbits;
 	union longbyte  d;
@@ -471,3 +456,18 @@ nist_guts(file_flag, stream, mem, length, buf)
 	buf[3] = h3;
 	buf[4] = h4;
 }
+/*
+ * $Log: sha.c,v $
+ * Revision 1.4  2025-01-22 15:37:42+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
+ * Revision 1.3  2020-06-02 18:55:42+05:30  Cprogrammer
+ * increased size of crypted_buffer
+ *
+ * Revision 1.2  2008-07-17 21:39:09+05:30  Cprogrammer
+ * fixed compile warnings on mac
+ *
+ * Revision 1.1  2002-12-16 01:55:20+05:30  Manny
+ * Initial revision
+ *
+ */

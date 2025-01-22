@@ -1,15 +1,5 @@
 /*
- * $Log: ischema.c,v $
- * Revision 1.3  2023-03-20 10:08:51+05:30  Cprogrammer
- * use SYSCONFDIR env variable for indimail.schema
- * standardize getln handling
- *
- * Revision 1.2  2023-01-22 10:40:03+05:30  Cprogrammer
- * replaced qprintf with subprintf
- *
- * Revision 1.1  2022-08-05 19:23:26+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #include <stdio.h>
 #ifdef HAVE_CONFIG_H
@@ -147,7 +137,7 @@ main(int argc, char **argv)
 		die_nomem();
 	if ((fd = open_read(tmpbuf.s)) == -1)
 		strerr_die4sys(111, FATAL, "open: ", tmpbuf.s, ": ");
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	/* id:sql|cmd:IGNORE Yes|NO:comment:sql_stmt */
 	for (u_count = 0;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1) {
@@ -245,3 +235,16 @@ main(int argc, char **argv)
 	}
 	return 0;
 }
+/*
+ * $Log: ischema.c,v $
+ * Revision 1.3  2023-03-20 10:08:51+05:30  Cprogrammer
+ * use SYSCONFDIR env variable for indimail.schema
+ * standardize getln handling
+ *
+ * Revision 1.2  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
+ * Revision 1.1  2022-08-05 19:23:26+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

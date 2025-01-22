@@ -1,20 +1,5 @@
 /*
- * $Log: check_quota.c,v $
- * Revision 1.5  2023-03-20 09:50:46+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.4  2020-10-01 18:22:00+05:30  Cprogrammer
- * fixed compiler warnings
- *
- * Revision 1.3  2019-04-22 23:09:35+05:30  Cprogrammer
- * replaced atol() with scan_ulong()
- *
- * Revision 1.2  2019-04-21 16:13:29+05:30  Cprogrammer
- * remove '/' from the end
- *
- * Revision 1.1  2019-04-18 08:25:23+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -120,7 +105,7 @@ mdir_t check_quota(char *Maildir)
 #ifdef USE_MAILDIRQUOTA
 	if (total)
 		*total = 0;
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	for (mail_size = 0;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1) {
 			strerr_warn3("check_quota: read: ", tmpbuf.s, ": ", &strerr_sys);
@@ -173,3 +158,21 @@ mdir_t check_quota(char *Maildir)
 #endif
 	return (mail_size);
 }
+/*
+ * $Log: check_quota.c,v $
+ * Revision 1.5  2023-03-20 09:50:46+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.4  2020-10-01 18:22:00+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
+ * Revision 1.3  2019-04-22 23:09:35+05:30  Cprogrammer
+ * replaced atol() with scan_ulong()
+ *
+ * Revision 1.2  2019-04-21 16:13:29+05:30  Cprogrammer
+ * remove '/' from the end
+ *
+ * Revision 1.1  2019-04-18 08:25:23+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

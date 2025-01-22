@@ -1,21 +1,5 @@
 /*
- * $Log: adminCmmd.c,v $
- * Revision 1.5  2023-08-08 00:34:55+05:30  Cprogrammer
- * use strerr_tls for reporting tls error
- *
- * Revision 1.4  2023-01-03 21:04:50+05:30  Cprogrammer
- * renamed ADMIN_TIMEOUT to TIMEOUTDATA
- * replaced safewrite, saferead with tlswrite, tlsread from tls library in libqmail
- *
- * Revision 1.3  2021-07-21 14:04:21+05:30  Cprogrammer
- * conditional compilation (alpine linux)
- *
- * Revision 1.2  2020-04-01 18:52:41+05:30  Cprogrammer
- * moved getEnvConfig to libqmail
- *
- * Revision 1.1  2019-04-18 08:39:47+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -148,7 +132,7 @@ IOPlex(int sockfd, int timeoutdata)
 	int             retval, retrycount, dataTimeout;
 	char           *ptr;
 	char            sockbuf[SOCKBUF + 1], strnum[FMT_ULONG];
-	void            (*pstat) ();
+	void            (*pstat) (int);
 
 	if ((pstat = signal(SIGPIPE, SIG_IGN)) == SIG_ERR)
 		return (-1);
@@ -255,3 +239,22 @@ IOPlex(int sockfd, int timeoutdata)
 	signal(SIGPIPE, pstat);
 	return (0);
 }
+/*
+ * $Log: adminCmmd.c,v $
+ * Revision 1.5  2023-08-08 00:34:55+05:30  Cprogrammer
+ * use strerr_tls for reporting tls error
+ *
+ * Revision 1.4  2023-01-03 21:04:50+05:30  Cprogrammer
+ * renamed ADMIN_TIMEOUT to TIMEOUTDATA
+ * replaced safewrite, saferead with tlswrite, tlsread from tls library in libqmail
+ *
+ * Revision 1.3  2021-07-21 14:04:21+05:30  Cprogrammer
+ * conditional compilation (alpine linux)
+ *
+ * Revision 1.2  2020-04-01 18:52:41+05:30  Cprogrammer
+ * moved getEnvConfig to libqmail
+ *
+ * Revision 1.1  2019-04-18 08:39:47+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

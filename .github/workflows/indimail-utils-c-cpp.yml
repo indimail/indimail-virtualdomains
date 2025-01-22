@@ -28,7 +28,7 @@ jobs:
     - name: extra_packages
       run: |
         if [ "${OS}" = "macos-latest" ] ; then brew install automake autoconf libtool pkgconfig ; fi
-        if [ "${OS}" = "ubuntu-latest" ] ; then sudo apt-get install gcc g++ automake autoconf libtool libncurses5 libncurses5-dev; fi
+        if [ "${OS}" = "ubuntu-latest" ] ; then sudo apt-get install gcc g++ automake autoconf libtool libncurses5-dev; fi
       env:
         OS: ${{ matrix.host }}
 

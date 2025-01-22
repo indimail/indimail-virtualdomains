@@ -1,17 +1,5 @@
 /*
- * $Log: osh.h,v $
- * Revision 1.3  2021-09-01 18:41:48+05:30  Cprogrammer
- * reverted return type of i_exit to int
- *
- * Revision 1.2  2021-09-01 18:29:59+05:30  Cprogrammer
- * updated function prototyps
- *
- * Revision 1.1  2019-04-13 23:39:27+05:30  Cprogrammer
- * osh.h
- *
- * Revision 2.1  2004-09-05 00:53:13+05:30  Cprogrammer
- * operator shell header file
- *
+ * $Id: $
  */
 #ifndef OSH_H
 #define OSH_H
@@ -84,38 +72,38 @@
 #define OPER_GROUP "operator"
 
 /* Handler prototypes */
-int i_alias();
-int i_more();
-int i_cd(); 
-int i_pwd();
-void i_done();
-int i_cp();
-int i_rm();
-int i_vi();
-int i_help();
-int i_ldcache();
-int execute();
-int i_mount();
-int i_test();
-int i_exit();
+int i_alias(int, char **);
+int i_more(int, char **);
+int i_cd(int, char **); 
+int i_pwd(int, char **);
+void i_done(int, char **);
+int i_cp(int, char **);
+int i_rm(int, char **);
+int i_vi(int, char **);
+int i_help(int, char **);
+int i_ldcache(int, char **);
+int execute(int, char **);
+int i_mount(int, char **);
+int i_test(int, char **);
+int i_exit(int, char **);
 void fatal(char *);
 
 struct entry {
    char *prog_name;	/* Name which parser will accept */
-   int (*handler)();    /* Routine to call if internal */
+   int (*handler)(int, char **);    /* Routine to call if internal */
    char *path;		/* Path to program-we don't want to use execvp
 			   because of search path insecurity */
-   };
+};
 
 struct hand {
    char *prog_name;
-   int (*handler)();
-   };
+   int (*handler)(int, char **);
+};
 
 struct alias {
    char *cmd;
    char *alias;
-   };
+};
 
 
 #ifdef COMPILE_TABLE
@@ -166,10 +154,10 @@ static int NUMENTRY=16; /* Number of entries listed in the compiled table */
 
 typedef enum {TWORD,TPIPE,TAMP,TDOLLAR,TSEMI,TGT,TGTGT,TLT,TNL,TEOF} TOKEN;
 
-extern int writeable();
-extern int instring();
-extern char *expand();
-extern int check_access();
+extern int writeable(char *);
+extern int instring(char *, char *);
+extern char *expand(char *argv[MAXARG + 1], int *, char *);
+extern int check_access(int, char **);
 extern int NUMENTRY;
 extern struct entry Table[];
 extern struct alias AliasList[];
@@ -179,3 +167,18 @@ extern char **environ;
 extern void logit(char);
 void logout();
 #endif
+/*
+ * $Log: osh.h,v $
+ * Revision 1.3  2021-09-01 18:41:48+05:30  Cprogrammer
+ * reverted return type of i_exit to int
+ *
+ * Revision 1.2  2021-09-01 18:29:59+05:30  Cprogrammer
+ * updated function prototyps
+ *
+ * Revision 1.1  2019-04-13 23:39:27+05:30  Cprogrammer
+ * osh.h
+ *
+ * Revision 2.1  2004-09-05 00:53:13+05:30  Cprogrammer
+ * operator shell header file
+ *
+ */

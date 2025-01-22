@@ -1,14 +1,5 @@
 /*
- * $Log: maildir_to_domain.c,v $
- * Revision 1.3  2023-03-20 10:12:40+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.2  2019-04-21 16:15:54+05:30  Cprogrammer
- * remove '/' from the end
- *
- * Revision 1.1  2019-04-18 08:27:57+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -57,7 +48,7 @@ maildir_to_domain(char *maildir)
 			strerr_warn3("maildir_to_domain: ", filename.s, ": ", &strerr_sys);
 		return ((char *) 0);
 	}
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	if (getln(&ssin, &line, &match, '\n') == -1) {
 		strerr_warn3("maildir_to_domain: read: ", filename.s, ": ", &strerr_sys);
 		close(fd);
@@ -82,3 +73,15 @@ maildir_to_domain(char *maildir)
 	}
 	return (line.s);
 }
+/*
+ * $Log: maildir_to_domain.c,v $
+ * Revision 1.3  2023-03-20 10:12:40+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.2  2019-04-21 16:15:54+05:30  Cprogrammer
+ * remove '/' from the end
+ *
+ * Revision 1.1  2019-04-18 08:27:57+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

@@ -1,14 +1,5 @@
 /*
- * $Log: pipe_exec.c,v $
- * Revision 1.3  2020-09-28 13:28:20+05:30  Cprogrammer
- * added pid in debug statements
- *
- * Revision 1.2  2020-09-28 12:49:06+05:30  Cprogrammer
- * display authmodule being executed in debug statements
- *
- * Revision 1.1  2019-04-18 08:16:08+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -33,7 +24,7 @@ int
 pipe_exec(char **argv, char *tmpbuf, int len)
 {
 	int             pipe_fd[2];
-	void            (*pstat) ();
+	void            (*pstat) (int);
 	char            strnum[FMT_ULONG];
 
 	if (env_get("DEBUG")) {
@@ -69,3 +60,15 @@ pipe_exec(char **argv, char *tmpbuf, int len)
 	strerr_warn3("pipe_exec: ", argv[1], ": ", &strerr_sys);
 	return (-1);
 }
+/*
+ * $Log: pipe_exec.c,v $
+ * Revision 1.3  2020-09-28 13:28:20+05:30  Cprogrammer
+ * added pid in debug statements
+ *
+ * Revision 1.2  2020-09-28 12:49:06+05:30  Cprogrammer
+ * display authmodule being executed in debug statements
+ *
+ * Revision 1.1  2019-04-18 08:16:08+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

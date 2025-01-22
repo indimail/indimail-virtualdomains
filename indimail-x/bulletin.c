@@ -1,23 +1,5 @@
 /*
- * $Log: bulletin.c,v $
- * Revision 1.6  2023-03-20 09:50:06+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.5  2021-01-26 00:27:45+05:30  Cprogrammer
- * renamed sql_init() to in_sql_init() to avoid clash with dovecot sql authentication driver
- *
- * Revision 1.4  2020-10-19 12:46:06+05:30  Cprogrammer
- * use /var/indomain/domains for domain/bulk_mail
- *
- * Revision 1.3  2020-10-01 18:20:40+05:30  Cprogrammer
- * initialize len variable
- *
- * Revision 1.2  2019-06-07 15:58:03+05:30  mbhangui
- * added include file stdlib.h
- *
- * Revision 1.1  2019-04-15 09:45:57+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -136,14 +118,14 @@ insert_bulletin(char *domain, char *emailFile, char *list_file)
 		unlink(tmpbuf.s);
 		return (-1);
 	}
-	substdio_fdbuf(&ssout, write, wfd, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, wfd, outbuf, sizeof(outbuf));
 	if ((rfd = open_read(list_file)) == -1) {
 		strerr_warn3("bulletin: open: ", list_file, ": ", &strerr_sys);
 		close(wfd);
 		unlink(tmpbuf.s);
 		return (-1);
 	}
-	substdio_fdbuf(&ssin, read, rfd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, rfd, inbuf, sizeof(inbuf));
 	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1) {
 			strerr_warn3("bulletin: read: ", list_file, ": ", &strerr_sys);
@@ -280,7 +262,7 @@ store_email(char *host, char *domain, char *email)
 			break;
 	}
 	if (!mdaptr || !(*mdaptr)) { /*- entry for new host */
-		if (!alloc_re((char *) &mdaHOSTS, mdacount * sizeof(struct mdahosts *), (mdacount + 1) * sizeof(struct mdahosts *)))
+		if (!alloc_re((void *) &mdaHOSTS, mdacount * sizeof(struct mdahosts *), (mdacount + 1) * sizeof(struct mdahosts *)))
 			die_nomem();
 		if (!(mdaHOSTS[mdacount] = (struct mdahosts *) alloc(sizeof(struct mdahosts))))
 			die_nomem();
@@ -302,7 +284,7 @@ store_email(char *host, char *domain, char *email)
 		mdacount++;
 	} else { /*- entry for existing host */
 		emailcount = (*mdaptr)->emailcount + 1;
-		if (!alloc_re((char *) &(*mdaptr)->emailptr, emailcount * sizeof(char *) , (emailcount + 1) * sizeof(char *)))
+		if (!alloc_re((void *) &(*mdaptr)->emailptr, emailcount * sizeof(char *) , (emailcount + 1) * sizeof(char *)))
 			die_nomem();
 		else
 		if (!((*mdaptr)->emailptr[emailcount - 1] = (char *) alloc(len = (str_len(email) + 1))))
@@ -332,7 +314,7 @@ bulletin(char *emailFile, char *subscriber_list)
 
 	if ((fd = open_read(subscriber_list)) == -1)
 		strerr_die3sys(111, "bulletin: open: ", subscriber_list, ": ");
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	for (err = 0;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1) {
 			strerr_warn3("bulletin: read: ", subscriber_list, ": ", &strerr_sys);
@@ -405,7 +387,7 @@ bulletin(char *emailFile, char *subscriber_list)
 			strerr_die3sys(111, "bulletin: mkstemp: ", SplitFile.s, ": ");
 		if (chown(SplitFile.s, uid, gid) || chmod(SplitFile.s, INDIMAIL_QMAIL_MODE))
 			strerr_die3sys(111, "bulletin: chown/chmod: ", SplitFile.s, ": ");
-		substdio_fdbuf(&ssout, write, fdtmp, outbuf, sizeof(outbuf));
+		substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fdtmp, outbuf, sizeof(outbuf));
 		for (; *emailptr; emailptr++) {
 			if (substdio_puts(&ssout, *emailptr) ||
 					substdio_put(&ssout, "\n", 1))
@@ -459,7 +441,7 @@ bulletin(char *emailFile, char *subscriber_list)
 		strerr_warn3("bulletin: open: ", emailFile, ": ", &strerr_sys);
 		return (-1);
 	}
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1) {
 			strerr_warn3("bulletin: read: ", emailFile, ": ", &strerr_sys);
@@ -500,3 +482,24 @@ bulletin(char *emailFile, char *subscriber_list)
 	return (insert_bulletin(domain, emailFile, subscriber_list));
 }
 #endif /*- #ifdef CLUSTERED_SITE */
+/*
+ * $Log: bulletin.c,v $
+ * Revision 1.6  2023-03-20 09:50:06+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.5  2021-01-26 00:27:45+05:30  Cprogrammer
+ * renamed sql_init() to in_sql_init() to avoid clash with dovecot sql authentication driver
+ *
+ * Revision 1.4  2020-10-19 12:46:06+05:30  Cprogrammer
+ * use /var/indomain/domains for domain/bulk_mail
+ *
+ * Revision 1.3  2020-10-01 18:20:40+05:30  Cprogrammer
+ * initialize len variable
+ *
+ * Revision 1.2  2019-06-07 15:58:03+05:30  mbhangui
+ * added include file stdlib.h
+ *
+ * Revision 1.1  2019-04-15 09:45:57+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

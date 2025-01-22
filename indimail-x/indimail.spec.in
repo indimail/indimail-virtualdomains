@@ -278,7 +278,7 @@ fi
 %else
   default_domain=%{defaultDomain}
 %endif
-%configure --prefix=%{_prefix} --sysconfdir=%{sysconfdir} \
+%configure --prefix=%{_prefix} --sbindir=%{_prefix}/sbin --sysconfdir=%{sysconfdir} \
   --mandir=%{_prefix}/share/man --datarootdir=%{_prefix}/share/indimail \
   --with-pkgconfigdir=%{_pkg_config_path} --libdir=%{_libdir} \
   --enable-domaindir=%{domaindir} --enable-mysqlprefix=%{mysqlPrefix} \

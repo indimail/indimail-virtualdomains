@@ -1,26 +1,5 @@
 /*
- * $Log: tcplookup.c,v $
- * Revision 1.7  2024-05-28 19:30:02+05:30  Cprogrammer
- * Use INFIFODIR #define from inquery.h for infifo
- *
- * Revision 1.6  2023-06-08 17:49:14+05:30  Cprogrammer
- * renamed fifo directory from FIFODIR to INFIFODIR
- *
- * Revision 1.5  2023-03-20 10:18:43+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.4  2021-09-12 11:53:07+05:30  Cprogrammer
- * removed redundant multiple initialization of InFifo.len
- *
- * Revision 1.3  2021-05-03 12:47:51+05:30  Cprogrammer
- * initialize rfd, wfd
- *
- * Revision 1.2  2021-02-14 21:40:13+05:30  Cprogrammer
- * include <stdlib.h> for srand()
- *
- * Revision 1.1  2021-02-07 20:40:35+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -98,7 +77,7 @@ getTimeoutValues(int *readTimeout, int *writeTimeout, char *sysconfdir, char *co
 	if ((fd = open_read(tmpbuf.s)) == -1)
 		*readTimeout = 4;
 	else {
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			*readTimeout = 4;
 		else {
@@ -131,7 +110,7 @@ getTimeoutValues(int *readTimeout, int *writeTimeout, char *sysconfdir, char *co
 	if ((fd = open_read(tmpbuf.s)) == -1)
 		*writeTimeout = 4;
 	else {
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			*writeTimeout = 4;
 		else {
@@ -152,7 +131,7 @@ getTimeoutValues(int *readTimeout, int *writeTimeout, char *sysconfdir, char *co
 }
 
 static void
-cleanup(int rfd, int wfd, void (*sig_pipe_save)(), char *fifo)
+cleanup(int rfd, int wfd, void (*sig_pipe_save)(int), char *fifo)
 {
 	int             tmperrno;
 
@@ -241,7 +220,7 @@ tcplookup(int argc, char **argv, char **envp)
 	char            tmp[FMT_ULONG], inbuf[512];
 	static stralloc querybuf = { 0 };
 	static stralloc myfifo = { 0 };
-	void            (*sig_pipe_save) () = NULL;
+	void            (*sig_pipe_save) (int) = NULL;
 
 #ifndef MAIN
 	environ = envp;
@@ -386,3 +365,27 @@ tcplookup(int argc, char **argv, char **envp)
 	cleanup(rfd, wfd, sig_pipe_save, myfifo.s);
 	_exit (0);
 }
+/*
+ * $Log: tcplookup.c,v $
+ * Revision 1.7  2024-05-28 19:30:02+05:30  Cprogrammer
+ * Use INFIFODIR #define from inquery.h for infifo
+ *
+ * Revision 1.6  2023-06-08 17:49:14+05:30  Cprogrammer
+ * renamed fifo directory from FIFODIR to INFIFODIR
+ *
+ * Revision 1.5  2023-03-20 10:18:43+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.4  2021-09-12 11:53:07+05:30  Cprogrammer
+ * removed redundant multiple initialization of InFifo.len
+ *
+ * Revision 1.3  2021-05-03 12:47:51+05:30  Cprogrammer
+ * initialize rfd, wfd
+ *
+ * Revision 1.2  2021-02-14 21:40:13+05:30  Cprogrammer
+ * include <stdlib.h> for srand()
+ *
+ * Revision 1.1  2021-02-07 20:40:35+05:30  Cprogrammer
+ * Initial revision
+ *
+ */
