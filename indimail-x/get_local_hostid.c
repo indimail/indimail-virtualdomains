@@ -1,19 +1,6 @@
 /*
- * $Log: get_local_hostid.c,v $
- * Revision 1.4  2023-03-20 10:01:04+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.3  2020-04-01 18:59:44+05:30  Cprogrammer
- * moved authentication functions to libqmail
- *
- * Revision 1.2  2019-07-04 10:04:40+05:30  Cprogrammer
- * collapsed multiple if statements
- *
- * Revision 1.1  2019-04-14 18:32:29+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -82,7 +69,7 @@ get_local_hostid()
 			die_nomem();
 		return (line.s);
 	} else
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			strerr_die3sys(111, "get_local_hostid: read: ", filename.s, ": ");
@@ -103,3 +90,18 @@ get_local_hostid()
 	line.s[line.len] = 0;
 	return (line.s);
 }
+/*
+ * $Log: get_local_hostid.c,v $
+ * Revision 1.4  2023-03-20 10:01:04+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.3  2020-04-01 18:59:44+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
+ * Revision 1.2  2019-07-04 10:04:40+05:30  Cprogrammer
+ * collapsed multiple if statements
+ *
+ * Revision 1.1  2019-04-14 18:32:29+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

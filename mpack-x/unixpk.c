@@ -1,17 +1,5 @@
-/*-
- * $Log: unixpk.c,v $
- * Revision 1.4  2008-06-13 19:25:09+05:30  Cprogrammer
- * include config.h to prevent warning for strchr
- *
- * Revision 1.3  2008-05-21 18:44:58+05:30  Cprogrammer
- * code beautified
- *
- * Revision 1.2  2004-01-06 14:55:21+05:30  Manny
- * fixed compilation warnings
- *
- * Revision 1.1  2004-01-06 12:44:18+05:30  Manny
- * Initial revision
- *
+/*
+ * $Id: unixpk.c,v 1.5 2025-01-22 15:48:35+05:30 Cprogrammer Exp mbhangui $
  *
  * (C) Copyright 1993,1994 by Carnegie Mellon University
  * All Rights Reserved.
@@ -50,8 +38,6 @@
 #include "xmalloc.h"
 
 #define MAXADDRESS 100
-
-extern char    *getenv();
 
 extern int      errno;
 extern int      optind;
@@ -350,3 +336,21 @@ warn(void)
 {
 	abort();
 }
+/*-
+ * $Log: unixpk.c,v $
+ * Revision 1.5  2025-01-22 15:48:35+05:30  Cprogrammer
+ * fix gcc14 errors
+ *
+ * Revision 1.4  2008-06-13 19:25:09+05:30  Cprogrammer
+ * include config.h to prevent warning for strchr
+ *
+ * Revision 1.3  2008-05-21 18:44:58+05:30  Cprogrammer
+ * code beautified
+ *
+ * Revision 1.2  2004-01-06 14:55:21+05:30  Manny
+ * fixed compilation warnings
+ *
+ * Revision 1.1  2004-01-06 12:44:18+05:30  Manny
+ * Initial revision
+ *
+ */

@@ -228,7 +228,7 @@ conf_iwebadmin()
 			!stralloc_0(&TmpBuf))
 		die_nomem();
 	if ((fd = open_read(TmpBuf.s)) != -1) {
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		for (;;) {
 			if (getln(&ssin, &line, &match, '\n') == -1)
 				return;
@@ -316,7 +316,7 @@ main(int argc, char **argv)
 		} else
 		if ((dbgfd = open_append("/tmp/iwebadmin.debug")) == -1)
 			strerr_die1sys(111, "iwebadmin: /tmp/iwebadmin.debug: ");
-		substdio_fdbuf(ssdbg = &dbg, write, dbgfd, dbgbuf, sizeof(dbgbuf));
+		substdio_fdbuf(ssdbg = &dbg, (ssize_t (*)(int,  char *, size_t)) write, dbgfd, dbgbuf, sizeof(dbgbuf));
 		subprintf(ssdbg, "Start Time = %ld\n", mytime);
 		for (i = 0; i < argc; i++)
 			subprintf(ssdbg, "argv[%d]=[%s]\n", i, argv[i]);
@@ -668,7 +668,7 @@ main(int argc, char **argv)
 			show_login();
 			iweb_exit(SESSION_FAILURE);
 		}
-		substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
+		substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fd, outbuf, sizeof(outbuf));
 		/*- set session vars */
 		GetValue(TmpCGI, &returntext, "returntext=");
 		GetValue(TmpCGI, &returnhttp, "returnhttp=");
@@ -742,7 +742,7 @@ load_lang(char *lang)
 		flush();
 		exit(-1);
 	}
-	substdio_fdbuf(&ssin, read, lang_fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, lang_fd, inbuf, sizeof(inbuf));
 	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1) {
 			strerr_warn3("iwebadmin: load_lang: read: ", lang, ": ", &strerr_sys);

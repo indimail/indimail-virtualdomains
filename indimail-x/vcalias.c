@@ -1,23 +1,5 @@
 /*
- * $Log: vcalias.c,v $
- * Revision 1.6  2023-03-20 10:33:27+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.5  2023-01-22 10:40:03+05:30  Cprogrammer
- * replaced qprintf with subprintf
- *
- * Revision 1.4  2020-04-09 18:32:08+05:30  Cprogrammer
- * close MySQL on exit and return on read error
- *
- * Revision 1.3  2019-07-04 10:14:26+05:30  Cprogrammer
- * fixed incorrect initialization by replacing stralloc_cats() with stralloc_copys()
- *
- * Revision 1.2  2019-04-22 23:16:52+05:30  Cprogrammer
- * added missing strerr.h
- *
- * Revision 1.1  2019-04-15 11:16:50+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -126,7 +108,7 @@ main(int argc, char **argv)
 			iclose();
 			return (-1);
 		}
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		for (err = 0, flag = 0;;flag++) {
 			if (getln(&ssin, &line, &match, '\n') == -1) {
 				strerr_warn3("vcalias: read: ", dp->d_name, ": ", &strerr_sys);
@@ -214,3 +196,24 @@ main()
 	return (0);
 }
 #endif
+/*
+ * $Log: vcalias.c,v $
+ * Revision 1.6  2023-03-20 10:33:27+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.5  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
+ * Revision 1.4  2020-04-09 18:32:08+05:30  Cprogrammer
+ * close MySQL on exit and return on read error
+ *
+ * Revision 1.3  2019-07-04 10:14:26+05:30  Cprogrammer
+ * fixed incorrect initialization by replacing stralloc_cats() with stralloc_copys()
+ *
+ * Revision 1.2  2019-04-22 23:16:52+05:30  Cprogrammer
+ * added missing strerr.h
+ *
+ * Revision 1.1  2019-04-15 11:16:50+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

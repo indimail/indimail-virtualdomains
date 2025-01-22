@@ -154,8 +154,8 @@ do
     elif [ " $i" = " fortune-%{fortune_version}" ] ; then
       extra_opt="--enable-cookiedir=%{shareddir}/fortunes --enable-offensive=n"
     fi
-    %configure --prefix=%{_prefix} --mandir=%{mandir} \
-      --datarootdir=%{shareddir} $extra_opt
+    %configure --prefix=%{_prefix} --sbindir=%{_prefix}/sbin \
+      --mandir=%{mandir} --datarootdir=%{shareddir} $extra_opt
     cd ..
   fi
 done

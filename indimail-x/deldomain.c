@@ -1,26 +1,5 @@
 /*
- * $Log: deldomain.c,v $
- * Revision 1.7  2024-05-17 16:24:31+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.6  2023-12-03 15:40:29+05:30  Cprogrammer
- * use same logic for ETRN, ATRN domains
- *
- * Revision 1.5  2023-03-25 14:32:08+05:30  Cprogrammer
- * multiple bug fixes
- *
- * Revision 1.4  2023-03-20 09:57:24+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.3  2020-04-01 18:54:26+05:30  Cprogrammer
- * moved authentication functions to libqmail
- *
- * Revision 1.2  2019-07-02 09:48:07+05:30  Cprogrammer
- * return success while deleting if a domain is not found in assign file
- *
- * Revision 1.1  2019-04-18 08:16:56+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -187,7 +166,7 @@ deldomain(const char *domain)
 		}
 	} else {
 		BasePath.len = 0;
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		if (getln(&ssin, &line, &match, '\n') == -1) {
 			strerr_warn3("deldomain: read: ", tmpbuf.s, ": ", &strerr_sys);
 			close(fd);
@@ -226,7 +205,7 @@ deldomain(const char *domain)
 				out("deldomain", "\n");
 				flush("deldomain");
 			}
-			substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+			substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 			for(;;) {
 				if (getln(&ssin, &line, &match, '\n') == -1) {
 					strerr_warn3("deldomain: read: ", tmpbuf.s, ": ", &strerr_sys);
@@ -335,3 +314,27 @@ deldomain(const char *domain)
 		return (-1);
 	return (0);
 }
+/*
+ * $Log: deldomain.c,v $
+ * Revision 1.7  2024-05-17 16:24:31+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.6  2023-12-03 15:40:29+05:30  Cprogrammer
+ * use same logic for ETRN, ATRN domains
+ *
+ * Revision 1.5  2023-03-25 14:32:08+05:30  Cprogrammer
+ * multiple bug fixes
+ *
+ * Revision 1.4  2023-03-20 09:57:24+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.3  2020-04-01 18:54:26+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
+ * Revision 1.2  2019-07-02 09:48:07+05:30  Cprogrammer
+ * return success while deleting if a domain is not found in assign file
+ *
+ * Revision 1.1  2019-04-18 08:16:56+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

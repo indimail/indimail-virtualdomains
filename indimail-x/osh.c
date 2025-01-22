@@ -1,17 +1,5 @@
 /*
- * $Log: osh.c,v $
- * Revision 1.4  2023-09-05 21:47:22+05:30  Cprogrammer
- * added return type for gethostname
- *
- * Revision 1.3  2022-10-20 11:58:04+05:30  Cprogrammer
- * converted function prototype to ansic
- *
- * Revision 1.2  2020-10-01 18:27:28+05:30  Cprogrammer
- * fixed compiler warnings
- *
- * Revision 1.1  2019-04-14 18:33:12+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  *
  * This is main.c (osh)
  *
@@ -126,6 +114,7 @@ FILE           *inputfp = NULL;
 char            host[17];
 char            LogFile[1024];
 char            work_table[MAXPATHLEN];
+
 static struct hand Internal[] = {
    { "more",   i_more   },
    { "cd",     i_cd     },
@@ -153,7 +142,7 @@ gettoken(char *iword)
 	int             c;
 	char           *w;
 	int             pgetc();
-	void            pungetc();
+	void            pungetc(int, FILE *);
 
 	w = iword;
 	while ((c = pgetc()) != EOF)
@@ -979,7 +968,7 @@ get_table(char *name, char *group)
 					for (x = 0; x < NUMINT; x++)
 						if (strcmp(Table[i].prog_name, Internal[x].prog_name) == 0)
 						{
-							Table[i].handler = Internal[x].handler;
+							Table[i].handler = (int (*)(int,  char **)) Internal[x].handler;
 							break;
 						}
 					if (strcmp(Table[i].path, "NULL") == 0)
@@ -1006,7 +995,7 @@ main(int argc, char **argv) /*- real shell */
 	int             pid;
 	TOKEN           term;
 	extern void     ignoresig();
-	extern void     waitfor();
+	extern void     waitfor(int);
 	struct group   *gp, gph;
 	time_t          timer;
 	struct tm      *dt;
@@ -1188,3 +1177,18 @@ waitfor(int pid)
 	if (wpid == pid)
 		statusprt(0, status);
 }
+/*
+ * $Log: osh.c,v $
+ * Revision 1.4  2023-09-05 21:47:22+05:30  Cprogrammer
+ * added return type for gethostname
+ *
+ * Revision 1.3  2022-10-20 11:58:04+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
+ * Revision 1.2  2020-10-01 18:27:28+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
+ * Revision 1.1  2019-04-14 18:33:12+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

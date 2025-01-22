@@ -1,4 +1,6 @@
 /*
+ * $Id: pam-multi.c,v 1.22 2025-01-22 16:04:09+05:30 Cprogrammer Exp mbhangui $
+ *
  * pam-multi.c - Generic PAM Authentication module
  * Copyright (C) <2008>  Manvendra Bhangui <mbhangui@gmail.com>
  *
@@ -139,7 +141,7 @@ static int      update_passwd(pam_handle_t *, const char *, const char *);
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: pam-multi.c,v 1.21 2023-11-13 10:26:36+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: pam-multi.c,v 1.22 2025-01-22 16:04:09+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -162,9 +164,7 @@ _pam_log(int err, const char *fmt, ...)
 }
 
 int
-wait_pid(wstat, pid)
-	int            *wstat;
-	int             pid;
+wait_pid(int *wstat, int pid)
 {
 	int             r;
 
@@ -1321,6 +1321,9 @@ struct pam_module _pam_multi = {
 
 /*
  * $Log: pam-multi.c,v $
+ * Revision 1.22  2025-01-22 16:04:09+05:30  Cprogrammer
+ * fix gcc14 errors
+ *
  * Revision 1.21  2023-11-13 10:26:36+05:30  Cprogrammer
  * include crypt.h
  *

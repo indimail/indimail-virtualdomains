@@ -1,11 +1,5 @@
-/*-
- * $Log: codes.c,v $
- * Revision 1.2  2004-01-06 14:54:37+05:30  Manny
- * fixed compilation warnings
- *
- * Revision 1.1  2004-01-06 12:44:09+05:30  Manny
- * Initial revision
- *
+/*
+ * $Id: codes.c,v 1.3 2025-01-22 15:44:56+05:30 Cprogrammer Exp mbhangui $
  *
  * (C) Copyright 1993,1994 by Carnegie Mellon University
  * All Rights Reserved.
@@ -151,7 +145,7 @@ char           *
 md5digest(FILE * infile, long int *len)
 {
 	MD5_CTX         context;
-	char            buf[1000];
+	unsigned char   buf[1000];
 	long            length = 0;
 	int             nbytes;
 
@@ -166,3 +160,16 @@ md5digest(FILE * infile, long int *len)
 		*len = length;
 	return md5contextTo64(&context);
 }
+
+/*-
+ * $Log: codes.c,v $
+ * Revision 1.3  2025-01-22 15:44:56+05:30  Cprogrammer
+ * fix gcc14 errors
+ *
+ * Revision 1.2  2004-01-06 14:54:37+05:30  Manny
+ * fixed compilation warnings
+ *
+ * Revision 1.1  2004-01-06 12:44:09+05:30  Manny
+ * Initial revision
+ *
+ */

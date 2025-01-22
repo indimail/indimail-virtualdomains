@@ -1,24 +1,5 @@
 /*
- * $Log: crc.c,v $
- * Revision 1.6  2024-07-18 09:22:59+05:30  Cprogrammer
- * removed ignoring errors
- *
- * Revision 1.5  2024-05-02 20:40:01+05:30  Cprogrammer
- * fixed bug with -d option
- * fixed bug with printing group permissions
- *
- * Revision 1.4  2023-05-11 22:43:45+05:30  Cprogrammer
- * crc.c: define SYS_OPEN on the basis of openat is present or not
- *
- * Revision 1.3  2020-10-01 18:23:01+05:30  Cprogrammer
- * Darwin Port
- *
- * Revision 1.2  2019-04-22 23:10:00+05:30  Cprogrammer
- * replaced atoi() with scan_long()
- *
- * Revision 1.1  2019-04-14 20:58:06+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -531,9 +512,7 @@ usage(int exitval)
 	_exit(exitval);
 }
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 	int             statflag = 0, displayhex = 1;
 	unsigned long   linecount;
@@ -565,3 +544,25 @@ main(argc, argv)
 }
 #endif
 #endif /* !CRCTAB */
+/*
+ * $Log: crc.c,v $
+ * Revision 1.6  2024-07-18 09:22:59+05:30  Cprogrammer
+ * removed ignoring errors
+ *
+ * Revision 1.5  2024-05-02 20:40:01+05:30  Cprogrammer
+ * fixed bug with -d option
+ * fixed bug with printing group permissions
+ *
+ * Revision 1.4  2023-05-11 22:43:45+05:30  Cprogrammer
+ * crc.c: define SYS_OPEN on the basis of openat is present or not
+ *
+ * Revision 1.3  2020-10-01 18:23:01+05:30  Cprogrammer
+ * Darwin Port
+ *
+ * Revision 1.2  2019-04-22 23:10:00+05:30  Cprogrammer
+ * replaced atoi() with scan_long()
+ *
+ * Revision 1.1  2019-04-14 20:58:06+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

@@ -1,26 +1,5 @@
 /*
- * $Log: vrenamedomain.c,v $
- * Revision 1.7  2024-05-17 16:25:48+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.6  2023-03-23 22:27:49+05:30  Cprogrammer
- * multiple bug fixes
- *
- * Revision 1.5  2023-03-20 10:39:05+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.4  2023-01-22 10:40:03+05:30  Cprogrammer
- * replaced qprintf with subprintf
- *
- * Revision 1.3  2021-09-12 20:18:04+05:30  Cprogrammer
- * moved replacestr to libqmail
- *
- * Revision 1.2  2019-06-07 15:43:14+05:30  Cprogrammer
- * removed not needed sgetopt.h include file
- *
- * Revision 1.1  2019-04-18 08:33:38+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -194,7 +173,7 @@ main(int argc, char **argv)
 		return (1);
 	}
 	if (fd != -1) {
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		subprintfe(subfdout, "vrenamedomain", "Relinking domains aliased to %s\n", argv[1]);
 		substdio_flush(subfdout);
 		for (;;) {
@@ -281,7 +260,7 @@ main(int argc, char **argv)
 			strerr_warn4(WARN, "open_trunc: ", tmpbuf.s, ": ", &strerr_sys);
 			continue;
 		}
-		substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
+		substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fd, outbuf, sizeof(outbuf));
 		if (substdio_puts(&ssout, argv[1]) ||
 				substdio_put(&ssout, "\n", 1) ||
 				substdio_flush(&ssout)) {
@@ -316,3 +295,27 @@ main(int argc, char **argv)
 		return(post_handle("%s %s %s", ptr, argv[1], argv[2]));
 	}
 }
+/*
+ * $Log: vrenamedomain.c,v $
+ * Revision 1.7  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.6  2023-03-23 22:27:49+05:30  Cprogrammer
+ * multiple bug fixes
+ *
+ * Revision 1.5  2023-03-20 10:39:05+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.4  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
+ * Revision 1.3  2021-09-12 20:18:04+05:30  Cprogrammer
+ * moved replacestr to libqmail
+ *
+ * Revision 1.2  2019-06-07 15:43:14+05:30  Cprogrammer
+ * removed not needed sgetopt.h include file
+ *
+ * Revision 1.1  2019-04-18 08:33:38+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

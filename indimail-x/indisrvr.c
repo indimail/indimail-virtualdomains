@@ -93,12 +93,12 @@ static char     sccsid[] = "$Id: indisrvr.c,v 1.21 2024-05-23 20:56:56+05:30 Cpr
  */
 int             Login_User(stralloc *, stralloc *);
 int             call_prg();
-static void     SigChild(void);
-static void     SigTerm();
-static void     SigUsr();
+static void     SigChild(int);
+static void     SigTerm(int);
+static void     SigUsr(int);
 static int      get_options(int argc, char **argv, char **, char **, int *);
 #ifdef HAVE_SSL
-static void     SigHup();
+static void     SigHup(int);
 #endif
 
 #ifdef HAVE_SSL
@@ -178,7 +178,7 @@ main(int argc, char **argv)
 	}
 	len = MAXBUF; /*- for setsockopt */
 	addrlen = sizeof(cliaddress);
-	(void) signal(SIGCHLD, (void (*)()) SigChild);
+	(void) signal(SIGCHLD, SigChild);
 #ifdef HAVE_SSL
 	filewrt(3, "%d: IndiServer Ready with Address %s:%s backlog %d cert=%s\n", getpid(), ipaddr, port, backlog, certfile);
 #else
@@ -650,14 +650,14 @@ get_options(int argc, char **argv, char **ipaddr, char **port, int *backlog)
 }
 
 static void
-SigTerm()
+SigTerm(int x)
 {
 	filewrt(3, "%d: indisrvr going down on SIGTERM\n", getpid());
 	_exit(0);
 }
 
 static void
-SigChild(void)
+SigChild(int x)
 {
 	int             status;
 	pid_t           pid;
@@ -671,23 +671,23 @@ SigChild(void)
 			continue;
 		break;
 	} /*- for (; pid = waitpid(-1, &status, WNOHANG | WUNTRACED);) -*/
-	(void) signal(SIGCHLD, (void (*)()) SigChild);
+	signal(SIGCHLD, SigChild);
 	return;
 }
 
 static void
-SigUsr(void)
+SigUsr(int x)
 {
 	filewrt(3, "%d Resetting Verbose flag to %d\n", (int) getpid(), verbose ? 0 : 1);
 	verbose = (verbose ? 0 : 1);
-	(void) signal(SIGUSR2, (void(*)()) SigUsr);
+	signal(SIGUSR2, SigUsr);
 	errno = EINTR;
 	return;
 }
 
 #ifdef HAVE_SSL
 static void
-SigHup(void)
+SigHup(int x)
 {
 	filewrt(3, "%d: IndiServer received SIGHUP\n", getpid());
 	if (ctx)
@@ -696,7 +696,7 @@ SigHup(void)
 		SSL_free(ssl);
 	ctx = NULL;
 	ssl = NULL;
-	(void) signal(SIGHUP, (void(*)()) SigHup);
+	signal(SIGHUP, SigHup);
 	errno = EINTR;
 	return;
 }

@@ -1,8 +1,5 @@
 /*
- * $Log: md5c.c,v $
- * Revision 1.1  2004-01-06 12:44:14+05:30  Manny
- * Initial revision
- *
+ * $Id: md5c.c,v 1.2 2025-01-22 15:47:00+05:30 Cprogrammer Exp mbhangui $
  *
  * MD5C.C - RSA Data Security, Inc., MD5 message-digest algorithm
  * 
@@ -176,7 +173,7 @@ MD5Update(MD5_CTX *context, unsigned char *input, unsigned int inputLen)
  * context 
  */
 void
-MD5Final(unsigned char *digest, MD5_CTX * context)
+MD5Final(unsigned char digest[16], MD5_CTX * context)
 {
 	unsigned char   bits[8];
 	unsigned int    index, padLen;
@@ -213,7 +210,7 @@ MD5Final(unsigned char *digest, MD5_CTX * context)
  * MD5 basic transformation. Transforms state based on block.
  */
 static void
-MD5Transform(UINT4 * state, unsigned char *block)
+MD5Transform(UINT4 state[4], unsigned char block[64])
 {
 	UINT4           a = state[0], b = state[1], c = state[2], d = state[3], x[16];
 
@@ -366,3 +363,12 @@ MD5_memset(POINTER output, int value, unsigned int len)
 	for (i = 0; i < len; i++)
 		((char *) output)[i] = (char) value;
 }
+/*
+ * $Log: md5c.c,v $
+ * Revision 1.2  2025-01-22 15:47:00+05:30  Cprogrammer
+ * fix gcc14 errors
+ *
+ * Revision 1.1  2004-01-06 12:44:14+05:30  Manny
+ * Initial revision
+ *
+ */

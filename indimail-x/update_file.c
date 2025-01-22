@@ -1,17 +1,5 @@
 /*
- * $Log: update_file.c,v $
- * Revision 1.4  2024-05-17 16:25:48+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.3  2020-03-20 15:12:01+05:30  Cprogrammer
- * BUG Fix. Virtualdomains not created when it doesn't exist
- *
- * Revision 1.2  2019-07-04 00:02:05+05:30  Cprogrammer
- * delete locks on each and every exit
- *
- * Revision 1.1  2019-04-18 08:33:42+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -105,7 +93,7 @@ update_file(const char *filename, const char *update_line, mode_t mode)
 		unlink(fname.s);
 		return (-1);
 	}
-	substdio_fdbuf(&ssout, write, fd2, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fd2, outbuf, sizeof(outbuf));
 	if (access(filename, F_OK)) {
 		if (substdio_puts(&ssout, update_line) || substdio_put(&ssout, "\n", 1)) {
 			strerr_warn3("update_file: write error: ", fname.s, ": ", &strerr_sys);
@@ -149,7 +137,7 @@ update_file(const char *filename, const char *update_line, mode_t mode)
 		unlink(fname.s);
 		return (-1);
 	} else {
-		substdio_fdbuf(&ssin, read, fd1, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd1, inbuf, sizeof(inbuf));
 		for (found = 0;;) {
 			if (getln(&ssin, &line, &match, '\n') == -1) {
 				strerr_warn3("update_file: read: ", filename, ": ", &strerr_sys);
@@ -240,3 +228,18 @@ update_file(const char *filename, const char *update_line, mode_t mode)
 #endif
 	return (0);
 }
+/*
+ * $Log: update_file.c,v $
+ * Revision 1.4  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.3  2020-03-20 15:12:01+05:30  Cprogrammer
+ * BUG Fix. Virtualdomains not created when it doesn't exist
+ *
+ * Revision 1.2  2019-07-04 00:02:05+05:30  Cprogrammer
+ * delete locks on each and every exit
+ *
+ * Revision 1.1  2019-04-18 08:33:42+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

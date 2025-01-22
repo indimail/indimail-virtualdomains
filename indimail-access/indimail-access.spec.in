@@ -212,8 +212,8 @@ if [ -d courier-imap-%{courier_version} ] ; then
     export CFLAGS="${CFLAGS} -Wno-implicit-function-declaration"
   fi
   %configure --prefix=%{_prefix} --libexecdir=%{libexecdir} --bindir=%{_prefix}/bin \
-    --mandir=%{mandir} --sysconfdir=%{sysconfdir} --libdir=%{_libdir} \
-    --datarootdir=%{shareddir} --with-certsdir=%{sysconfdir}/certs \
+    --sbindir=%{_prefix}/sbin --mandir=%{mandir} --sysconfdir=%{sysconfdir} \
+    --libdir=%{_libdir} --datarootdir=%{shareddir} --with-certsdir=%{sysconfdir}/certs \
     --with-mailer=%{_prefix}/bin/sendmail --disable-root-check --with-redhat \
     --without-userdb --without-authcustom --without-authchangepwdir \
     --without-authgeneric --with-authshadow --with-authpam --without-authpwd \

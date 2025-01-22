@@ -1,50 +1,5 @@
 /*
- * $Log: LoadDbInfo.c,v $
- * Revision 1.15  2023-09-11 09:09:41+05:30  Cprogrammer
- * incorrect use of localiphost instead of hostip
- *
- * Revision 1.14  2023-03-20 10:12:22+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.13  2023-01-22 10:40:03+05:30  Cprogrammer
- * replaced qprintf with subprintf
- *
- * Revision 1.12  2021-07-27 18:05:36+05:30  Cprogrammer
- * set default domain using vset_default_domain
- *
- * Revision 1.11  2020-10-18 07:51:37+05:30  Cprogrammer
- * initialize last_error_len field of dbinfo
- *
- * Revision 1.10  2020-07-04 22:53:56+05:30  Cprogrammer
- * replaced utime() with utimes()
- *
- * Revision 1.9  2020-05-12 19:23:58+05:30  Cprogrammer
- * BUG - uninitialized relayhosts variable
- *
- * Revision 1.8  2020-04-30 19:25:15+05:30  Cprogrammer
- * changed scope of ssin, ssout variables to local
- *
- * Revision 1.7  2020-04-01 18:56:49+05:30  Cprogrammer
- * moved authentication functions to libqmail
- *
- * Revision 1.6  2019-07-02 09:51:38+05:30  Cprogrammer
- * Null terminate RelayHosts before calling writemcdinfo
- *
- * Revision 1.5  2019-06-27 10:46:31+05:30  Cprogrammer
- * use newline as a separator between records
- *
- * Revision 1.4  2019-06-07 10:51:50+05:30  Cprogrammer
- * fix SIGSEGV on hosts with mcdfile missing (non-distributed domains)
- *
- * Revision 1.3  2019-05-27 20:34:37+05:30  Cprogrammer
- * initialize socket & port after allocating dbinfo structure
- *
- * Revision 1.2  2019-04-22 23:13:33+05:30  Cprogrammer
- * replaced atoi(), atol() with scan_int(), scan_ulong() functions
- *
- * Revision 1.1  2019-04-17 12:49:54+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -177,7 +132,7 @@ writemcdinfo(DBINFO **rhostsptr, time_t mtime)
 		return (1);
 	if ((fd = open(mcdFile.s, O_CREAT|O_WRONLY, INDIMAIL_QMAIL_MODE)) == -1)
 		strerr_die3sys(111, "LoadDbInfo: open-write: ", mcdFile.s, ": ");
-	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fd, outbuf, sizeof(outbuf));
 	if (indimailuid == -1 || indimailgid == -1)
 		get_indimailuidgid(&indimailuid, &indimailgid);
 	uid = indimailuid;
@@ -559,7 +514,7 @@ loadMCDInfo(int *total)
 		else
 			return (localDbInfo(total, &relayhosts));
 	}
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	/*-
 	 * get count of dbinfo records each
 	 * dbinfo record has a 'server line
@@ -766,7 +721,7 @@ localDbInfo(int *total, DBINFO ***rhosts)
 		else
 			return ((DBINFO **) 0);
 	}
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	/*- +indimail.org-:indimail.org:508:508:/var/indimail/domains/indimail.org:-:: -*/
 	for (count = 0;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1)
@@ -833,7 +788,7 @@ localDbInfo(int *total, DBINFO ***rhosts)
 		if ((mfd = open_read(host_path.s)) == -1)
 			strerr_die2sys(111, host_path.s, ": ");
 		else {
-			substdio_fdbuf(&ssin, read, mfd, inbuf, sizeof(inbuf));
+			substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, mfd, inbuf, sizeof(inbuf));
 			if (getln(&ssin, &line, &match, '\n') == -1)
 				strerr_die3sys(111, "read: ", host_path.s, ": ");
 			close(mfd);
@@ -900,7 +855,7 @@ localDbInfo(int *total, DBINFO ***rhosts)
 			 * The new allocated becomes total + 1 plus 1 for the last NULL dbinfo structure
 			 * The old total was total + 1 and the new total becomes total + 2
 			 */
-			alloc_re((char *) &relayhosts, sizeof(DBINFO *) * (*total + 1), sizeof(DBINFO *) * (*total + 2));
+			alloc_re((void *) &relayhosts, sizeof(DBINFO *) * (*total + 1), sizeof(DBINFO *) * (*total + 2));
 			rhostsptr = relayhosts + *total;
 			for (tmpPtr = rhostsptr;tmpPtr < relayhosts + *total + 2;tmpPtr++)
 				*tmpPtr = (DBINFO *) 0;
@@ -936,7 +891,7 @@ localDbInfo(int *total, DBINFO ***rhosts)
 	}
 	if (*total) { /*- non-empty mcdinfo file */
 		/*- +ve count indicates that we found domains in the assign file */
-		alloc_re((char *) &relayhosts, sizeof(DBINFO *) * *total, sizeof(DBINFO *) * (*total + count + 1));
+		alloc_re((void *) &relayhosts, sizeof(DBINFO *) * *total, sizeof(DBINFO *) * (*total + count + 1));
 		rhostsptr = relayhosts + *total;
 		for (tmpPtr = rhostsptr;tmpPtr < relayhosts + *total + count + 1;tmpPtr++)
 			*tmpPtr = (DBINFO *) 0;
@@ -950,7 +905,7 @@ localDbInfo(int *total, DBINFO ***rhosts)
 	}
 	if (!relayhosts)
 		die_nomem();
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	if (lseek(fd, 0, SEEK_SET) == -1)
 		strerr_die3sys(111, "LoadDbInfo: lseek: ", filename.s, ": ");
 	ssin.p = 0; /*- reset position to beginning of file */
@@ -1020,3 +975,51 @@ localDbInfo(int *total, DBINFO ***rhosts)
 	(*rhostsptr) = (DBINFO *) 0; /*- Null structure to end relayhosts */
 	return (relayhosts);
 }
+/*
+ * $Log: LoadDbInfo.c,v $
+ * Revision 1.15  2023-09-11 09:09:41+05:30  Cprogrammer
+ * incorrect use of localiphost instead of hostip
+ *
+ * Revision 1.14  2023-03-20 10:12:22+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.13  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
+ * Revision 1.12  2021-07-27 18:05:36+05:30  Cprogrammer
+ * set default domain using vset_default_domain
+ *
+ * Revision 1.11  2020-10-18 07:51:37+05:30  Cprogrammer
+ * initialize last_error_len field of dbinfo
+ *
+ * Revision 1.10  2020-07-04 22:53:56+05:30  Cprogrammer
+ * replaced utime() with utimes()
+ *
+ * Revision 1.9  2020-05-12 19:23:58+05:30  Cprogrammer
+ * BUG - uninitialized relayhosts variable
+ *
+ * Revision 1.8  2020-04-30 19:25:15+05:30  Cprogrammer
+ * changed scope of ssin, ssout variables to local
+ *
+ * Revision 1.7  2020-04-01 18:56:49+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
+ * Revision 1.6  2019-07-02 09:51:38+05:30  Cprogrammer
+ * Null terminate RelayHosts before calling writemcdinfo
+ *
+ * Revision 1.5  2019-06-27 10:46:31+05:30  Cprogrammer
+ * use newline as a separator between records
+ *
+ * Revision 1.4  2019-06-07 10:51:50+05:30  Cprogrammer
+ * fix SIGSEGV on hosts with mcdfile missing (non-distributed domains)
+ *
+ * Revision 1.3  2019-05-27 20:34:37+05:30  Cprogrammer
+ * initialize socket & port after allocating dbinfo structure
+ *
+ * Revision 1.2  2019-04-22 23:13:33+05:30  Cprogrammer
+ * replaced atoi(), atol() with scan_int(), scan_ulong() functions
+ *
+ * Revision 1.1  2019-04-17 12:49:54+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

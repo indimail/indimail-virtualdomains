@@ -1,14 +1,5 @@
 /*
- * $Log: update_rules.c,v $
- * Revision 1.3  2022-10-20 11:58:19+05:30  Cprogrammer
- * converted function prototype to ansic
- *
- * Revision 1.2  2020-04-01 18:58:16+05:30  Cprogrammer
- * moved authentication functions to libqmail
- *
- * Revision 1.1  2019-04-18 08:33:49+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -111,7 +102,7 @@ update_rules(int lock)
 		close(fdm);
 		return (-1);
 	}
-	substdio_fdbuf(&ssin, read, tcpfd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, tcpfd, inbuf, sizeof(inbuf));
 	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1) {
 			strerr_warn3("update_rules: read: ", tcp_file, ": ", &strerr_sys);
@@ -217,3 +208,15 @@ tcprules_open(int *fd)
 	return (pid);
 }
 #endif
+/*
+ * $Log: update_rules.c,v $
+ * Revision 1.3  2022-10-20 11:58:19+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
+ * Revision 1.2  2020-04-01 18:58:16+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
+ * Revision 1.1  2019-04-18 08:33:49+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

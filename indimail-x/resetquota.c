@@ -1,14 +1,5 @@
 /*
- * $Log: resetquota.c,v $
- * Revision 1.3  2023-03-20 10:17:49+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.2  2019-06-07 16:01:45+05:30  mbhangui
- * use sgetopt library for getopt()
- *
- * Revision 1.1  2019-04-18 08:36:21+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -155,7 +146,7 @@ main(int argc, char **argv)
 				status = -1;
 				continue;
 			}
-			substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+			substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 			if (getln(&ssin, &line, &match, '\n') == -1) {
 				strerr_warn3("resetquota: read: ", filename.s, ": ", &strerr_sys);
 				close(fd);
@@ -217,7 +208,7 @@ main(int argc, char **argv)
 			status = -1;
 			continue;
 		}
-		substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
+		substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fd, outbuf, sizeof(outbuf));
 		strnum1[i = fmt_ulong(strnum1, (unsigned long) mailsize)] = 0;
 		strnum2[j = fmt_ulong(strnum2, (unsigned long) mailcount)] = 0;
 		if (substdio_puts(&ssout, quota) ||
@@ -240,3 +231,15 @@ main(int argc, char **argv)
 	}
 	return (status);
 }
+/*
+ * $Log: resetquota.c,v $
+ * Revision 1.3  2023-03-20 10:17:49+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.2  2019-06-07 16:01:45+05:30  mbhangui
+ * use sgetopt library for getopt()
+ *
+ * Revision 1.1  2019-04-18 08:36:21+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

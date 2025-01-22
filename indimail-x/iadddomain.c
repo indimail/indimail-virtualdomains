@@ -190,7 +190,7 @@ iadddomain(char *domain, char *ipaddr, char *dir, uid_t uid, gid_t gid, int chk_
 		return (-1);
 	}
 	umask(omask);
-	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fd, outbuf, sizeof(outbuf));
 	if (use_etrn == 1) { /*- etrn, atrn */
 		if (substdio_puts(&ssout, dir) ||
 				substdio_put(&ssout, "/", 1) ||

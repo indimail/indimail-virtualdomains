@@ -1,14 +1,5 @@
 /*
- * $Log: remove_line.c,v $
- * Revision 1.3  2024-05-17 16:25:48+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.2  2023-12-03 16:09:24+05:30  Cprogrammer
- * new function remove_line_p() for partial match
- *
- * Revision 1.1  2019-04-18 08:36:17+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -109,8 +100,8 @@ remove_line_int(const char *template, const char *filename, int once_only, mode_
 #endif
 		unlink(fname.s);
 	}
-	substdio_fdbuf(&ssin, read, fd1, inbuf, sizeof(inbuf));
-	substdio_fdbuf(&ssout, write, fd2, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd1, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fd2, outbuf, sizeof(outbuf));
 	/*- pound away on the files run the search algorithm */
 	if (partial)
 		tlen = str_len(template);
@@ -182,3 +173,15 @@ remove_line_p(const char *template, const char *filename, int once_only, mode_t 
 {
 	return (remove_line_int(template, filename, once_only, mode, 1));
 }
+/*
+ * $Log: remove_line.c,v $
+ * Revision 1.3  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.2  2023-12-03 16:09:24+05:30  Cprogrammer
+ * new function remove_line_p() for partial match
+ *
+ * Revision 1.1  2019-04-18 08:36:17+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

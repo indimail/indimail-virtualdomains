@@ -1,14 +1,5 @@
 /*
- * $Log: print_control.c,v $
- * Revision 1.3  2023-03-20 10:15:39+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.2  2023-01-22 10:40:03+05:30  Cprogrammer
- * replaced qprintf with subprintf
- *
- * Revision 1.1  2019-04-14 21:04:19+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -48,7 +39,7 @@ print_control(char *filename, char *domain, int max_users_per_level, int silent)
 		return (0);
 	}
 	users_per_level = max_users_per_level ? max_users_per_level : MAX_USERS_PER_LEVEL;
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1) {
 			strerr_warn3("print_control: read: ", filename, ": ", &strerr_sys);
@@ -99,3 +90,15 @@ print_control(char *filename, char *domain, int max_users_per_level, int silent)
 	flush("print_control");
 	return (total);
 }
+/*
+ * $Log: print_control.c,v $
+ * Revision 1.3  2023-03-20 10:15:39+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.2  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
+ * Revision 1.1  2019-04-14 21:04:19+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

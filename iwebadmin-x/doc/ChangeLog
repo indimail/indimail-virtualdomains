@@ -37,6 +37,8 @@ Release 2.1.2-1.1 Start 28/07/2023 End 06/08/2024
 21. user.c: fix search by index
 22. user.c: use mod_user1.html, mod_user2.html for scram, non-scram setup
 - 06/08/2024 - indimail-3.4.7
+- 22/01/2025
+23. fix gcc14 errors
 
 * Tue Jan 31 2023 03:34:39 +0000 Manvendra Bhangui <iwebadmin@indimail.org> 2.1.1-1.1%{?dist}
 Release 2.1.1-1.1 Start 14/09/2022 End 31/01/2023

@@ -687,6 +687,7 @@ post_remove() {
   do
     > ${_servicedir}/qmail-smtpd.$port/variables/VIRTUAL_PKG_LIB
   done
+  > ${_servicedir}/qmail-send.25/variables/VIRTUAL_PKG_LIB
 
   rm -f ${_sysconfdir}/indimail.mrtg.ok ${_sysconfdir}/system.mrtg.ok
   echo "removing startup services"

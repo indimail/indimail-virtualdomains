@@ -268,7 +268,7 @@ addautorespondnow()
 		strerr_warn3("open: ", TmpBuf.s, ": ", &strerr_sys);
 		ack("144", "write .autoresp.msg");
 	}
-	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fd, outbuf, sizeof(outbuf));
 	/*- subject in iwebadmin autoresponder panel */
 	if (substdio_put(&ssout, "Reference: ", 11) ||
 			substdio_put(&ssout, Alias.s, Alias.len) ||
@@ -506,7 +506,7 @@ modautorespondnow()
 		strerr_warn3("open: ", TmpBuf.s, ": ", &strerr_sys);
 		ack("144", ".autoresp");
 	}
-	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fd, outbuf, sizeof(outbuf));
 	if (substdio_put(&ssout, "Reference: ", 11) ||
 			substdio_put(&ssout, Alias.s, Alias.len) ||
 			substdio_put(&ssout, "\n", 1) ||

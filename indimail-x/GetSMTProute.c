@@ -1,20 +1,5 @@
 /*
- * $Log: GetSMTProute.c,v $
- * Revision 1.5  2024-05-17 16:25:48+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.4  2023-03-20 10:02:16+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.3  2020-10-14 00:17:52+05:30  Cprogrammer
- * BUG: Fixed infinite loop
- *
- * Revision 1.2  2020-04-01 18:55:02+05:30  Cprogrammer
- * moved authentication functions to libqmail
- *
- * Revision 1.1  2019-04-18 08:36:02+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -65,7 +50,7 @@ get_smtp_qmtp_port(const char *file, const char *domain, int default_port)
 		}
 	}
 	len = str_len(domain);
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	for(;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1) {
 			strerr_warn3("GetSMTProute: read: ", file, ": ", &strerr_sys);
@@ -179,3 +164,21 @@ GetSMTProute(const char *domain)
 		return (-1);
 	return (get_smtp_qmtp_port(smtproute.s, domain, default_port));
 }
+/*
+ * $Log: GetSMTProute.c,v $
+ * Revision 1.5  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.4  2023-03-20 10:02:16+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.3  2020-10-14 00:17:52+05:30  Cprogrammer
+ * BUG: Fixed infinite loop
+ *
+ * Revision 1.2  2020-04-01 18:55:02+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
+ * Revision 1.1  2019-04-18 08:36:02+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

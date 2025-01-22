@@ -1,44 +1,5 @@
 /*
- * $Log: findhost.c,v $
- * Revision 1.13  2024-05-17 16:25:48+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.12  2023-04-01 13:29:19+05:30  Cprogrammer
- * display mysql error for mysql_options()
- *
- * Revision 1.11  2023-03-20 09:59:14+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.10  2021-07-27 18:05:27+05:30  Cprogrammer
- * set default domain using vset_default_domain
- *
- * Revision 1.9  2020-04-30 19:26:37+05:30  Cprogrammer
- * changed scope of ssin to local
- *
- * Revision 1.8  2020-04-01 18:54:35+05:30  Cprogrammer
- * moved authentication functions to libqmail
- *
- * Revision 1.7  2019-06-30 10:14:19+05:30  Cprogrammer
- * seperate fields in error string by commas
- *
- * Revision 1.6  2019-06-27 20:00:23+05:30  Cprogrammer
- * provide default cnf file and group to set_mysql_options
- *
- * Revision 1.5  2019-06-27 10:45:31+05:30  Cprogrammer
- * display ssl setting for mysql_real_connect() error
- *
- * Revision 1.4  2019-05-28 17:39:09+05:30  Cprogrammer
- * added load_mysql.h for mysql interceptor function prototypes
- *
- * Revision 1.3  2019-04-22 23:10:42+05:30  Cprogrammer
- * added stdlib.h header
- *
- * Revision 1.2  2019-04-20 08:12:53+05:30  Cprogrammer
- * fixed formatting for error messages
- *
- * Revision 1.1  2019-04-18 15:40:26+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -172,7 +133,7 @@ open_central_db(const char *dbhost)
 	if (!cntrl_host.len && !access(host_path.s, F_OK)) {
 		if ((fd = open_read(host_path.s)) == -1)
 			strerr_die3sys(111, "open_central_db: open: ", host_path.s, ": ");
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		if (getln(&ssin, &cntrl_host, &match, '\n') == -1)
 			strerr_die3sys(111, "open_central_db: read: ", host_path.s, ": ");
 		close(fd);
@@ -510,3 +471,45 @@ findhost(char *email, int connect_primarydb)
 	return (mailstore.s);
 }
 #endif
+/*
+ * $Log: findhost.c,v $
+ * Revision 1.13  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.12  2023-04-01 13:29:19+05:30  Cprogrammer
+ * display mysql error for mysql_options()
+ *
+ * Revision 1.11  2023-03-20 09:59:14+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.10  2021-07-27 18:05:27+05:30  Cprogrammer
+ * set default domain using vset_default_domain
+ *
+ * Revision 1.9  2020-04-30 19:26:37+05:30  Cprogrammer
+ * changed scope of ssin to local
+ *
+ * Revision 1.8  2020-04-01 18:54:35+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
+ * Revision 1.7  2019-06-30 10:14:19+05:30  Cprogrammer
+ * seperate fields in error string by commas
+ *
+ * Revision 1.6  2019-06-27 20:00:23+05:30  Cprogrammer
+ * provide default cnf file and group to set_mysql_options
+ *
+ * Revision 1.5  2019-06-27 10:45:31+05:30  Cprogrammer
+ * display ssl setting for mysql_real_connect() error
+ *
+ * Revision 1.4  2019-05-28 17:39:09+05:30  Cprogrammer
+ * added load_mysql.h for mysql interceptor function prototypes
+ *
+ * Revision 1.3  2019-04-22 23:10:42+05:30  Cprogrammer
+ * added stdlib.h header
+ *
+ * Revision 1.2  2019-04-20 08:12:53+05:30  Cprogrammer
+ * fixed formatting for error messages
+ *
+ * Revision 1.1  2019-04-18 15:40:26+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

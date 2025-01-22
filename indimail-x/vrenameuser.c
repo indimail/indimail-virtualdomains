@@ -1,26 +1,5 @@
 /*
- * $Log: vrenameuser.c,v $
- * Revision 1.7  2023-03-23 22:25:30+05:30  Cprogrammer
- * set BASE PATH of original domain for the new user
- *
- * Revision 1.6  2023-03-22 14:49:10+05:30  Cprogrammer
- * run POST_HANDLE program (if set) with domain user uid/gid
- *
- * Revision 1.5  2022-10-20 11:59:15+05:30  Cprogrammer
- * converted function prototype to ansic
- *
- * Revision 1.4  2021-07-08 11:50:02+05:30  Cprogrammer
- * add check for misconfigured assign file
- *
- * Revision 1.3  2020-06-16 17:56:51+05:30  Cprogrammer
- * moved setuserid function to libqmail
- *
- * Revision 1.2  2019-06-07 15:42:29+05:30  Cprogrammer
- * use sgetopt library for getopt()
- *
- * Revision 1.1  2019-04-18 08:33:39+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -113,7 +92,7 @@ set_basepath(char *domain_dir)
 		if (errno != error_noent)
 			strerr_die3sys(111, "vrenameuser: open: ", tmpbuf.s, ": ");
 	} else {
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			strerr_die3sys(111, "vrenameuser: read: ", tmpbuf.s, ": ");
 		close(fd);
@@ -190,3 +169,27 @@ main(int argc, char **argv)
 		return (post_handle("%s %s %s", ptr, oldEmail, newEmail));
 	}
 }
+/*
+ * $Log: vrenameuser.c,v $
+ * Revision 1.7  2023-03-23 22:25:30+05:30  Cprogrammer
+ * set BASE PATH of original domain for the new user
+ *
+ * Revision 1.6  2023-03-22 14:49:10+05:30  Cprogrammer
+ * run POST_HANDLE program (if set) with domain user uid/gid
+ *
+ * Revision 1.5  2022-10-20 11:59:15+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
+ * Revision 1.4  2021-07-08 11:50:02+05:30  Cprogrammer
+ * add check for misconfigured assign file
+ *
+ * Revision 1.3  2020-06-16 17:56:51+05:30  Cprogrammer
+ * moved setuserid function to libqmail
+ *
+ * Revision 1.2  2019-06-07 15:42:29+05:30  Cprogrammer
+ * use sgetopt library for getopt()
+ *
+ * Revision 1.1  2019-04-18 08:33:39+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

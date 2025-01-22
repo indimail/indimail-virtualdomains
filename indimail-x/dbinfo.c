@@ -1,20 +1,5 @@
 /*
- * $Log: dbinfo.c,v $
- * Revision 1.5  2022-08-05 21:01:35+05:30  Cprogrammer
- * replaced fprintf with strerr_warn1
- *
- * Revision 1.4  2020-04-01 18:54:05+05:30  Cprogrammer
- * moved authentication functions to libqmail
- *
- * Revision 1.3  2019-06-07 15:59:13+05:30  mbhangui
- * use sgetopt library for getopt()
- *
- * Revision 1.2  2019-04-22 23:10:07+05:30  Cprogrammer
- * added missing header strerr.h
- *
- * Revision 1.1  2019-04-17 12:47:22+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -95,8 +80,7 @@ die_nomem()
 }
 
 static int
-getch(ch)
-	char           *ch;
+getch(char *ch)
 {
 	int             r;
 
@@ -329,3 +313,21 @@ main()
 	return (0);
 }
 #endif
+/*
+ * $Log: dbinfo.c,v $
+ * Revision 1.5  2022-08-05 21:01:35+05:30  Cprogrammer
+ * replaced fprintf with strerr_warn1
+ *
+ * Revision 1.4  2020-04-01 18:54:05+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
+ * Revision 1.3  2019-06-07 15:59:13+05:30  mbhangui
+ * use sgetopt library for getopt()
+ *
+ * Revision 1.2  2019-04-22 23:10:07+05:30  Cprogrammer
+ * added missing header strerr.h
+ *
+ * Revision 1.1  2019-04-17 12:47:22+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

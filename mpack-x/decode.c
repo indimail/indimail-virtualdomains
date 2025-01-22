@@ -1,14 +1,5 @@
-/*-
- * $Log: decode.c,v $
- * Revision 1.3  2008-06-13 19:24:46+05:30  Cprogrammer
- * include config.h to prevent warning for strchr
- *
- * Revision 1.2  2004-01-06 14:54:57+05:30  Manny
- * fixed compilation warnings
- *
- * Revision 1.1  2004-01-06 12:44:10+05:30  Manny
- * Initial revision
- *
+/*
+ * $Id: decode.c,v 1.4 2025-01-22 15:51:44+05:30 Cprogrammer Exp mbhangui $
  *
  * Decode MIME parts.
  * (C) Copyright 1993,1994 by Carnegie Mellon University
@@ -1310,7 +1301,7 @@ from64(struct part *inpart, FILE * outfile, char **digestp, int suppressCR)
 {
 	int             c1, c2, c3, c4;
 	int             DataDone = 0;
-	char            buf[3];
+	unsigned char   buf[3];
 	MD5_CTX         context;
 
 	if (digestp)
@@ -1408,7 +1399,7 @@ fromqp(struct part *inpart, FILE * outfile, char **digestp)
 				if (c != '\r')
 					putc(c, outfile);
 				if (digestp)
-					MD5Update(&context, &c, 1);
+					MD5Update(&context, (unsigned char *) &c, 1);
 			}
 		} else
 		{
@@ -1416,11 +1407,11 @@ fromqp(struct part *inpart, FILE * outfile, char **digestp)
 			if (c1 == '\n')
 			{
 				if (digestp)
-					MD5Update(&context, "\r", 1);
+					MD5Update(&context, (unsigned char *) "\r", 1);
 			}
 			c = c1;
 			if (digestp)
-				MD5Update(&context, &c, 1);
+				MD5Update(&context, (unsigned char *) &c, 1);
 		}
 	}
 	if (digestp)
@@ -1431,7 +1422,7 @@ void
 fromnone(struct part *inpart, FILE * outfile, char **digestp)
 {
 	int             c;
-	char            ch;
+	unsigned char   ch;
 	MD5_CTX         context;
 
 	if (digestp)
@@ -1443,7 +1434,7 @@ fromnone(struct part *inpart, FILE * outfile, char **digestp)
 		if (c == '\n')
 		{
 			if (digestp)
-				MD5Update(&context, "\r", 1);
+				MD5Update(&context, (unsigned char *) "\r", 1);
 		}
 		ch = c;
 		if (digestp)
@@ -1452,3 +1443,22 @@ fromnone(struct part *inpart, FILE * outfile, char **digestp)
 	if (digestp)
 		*digestp = md5contextTo64(&context);
 }
+
+/*-
+ * $Log: decode.c,v $
+ * Revision 1.4  2025-01-22 15:51:44+05:30  Cprogrammer
+ * fix gcc14 errors
+ *
+ * Revision 1.4  2025-01-22 15:45:12+05:30  Cprogrammer
+ * fix gcc14 errors
+ *
+ * Revision 1.3  2008-06-13 19:24:46+05:30  Cprogrammer
+ * include config.h to prevent warning for strchr
+ *
+ * Revision 1.2  2004-01-06 14:54:57+05:30  Manny
+ * fixed compilation warnings
+ *
+ * Revision 1.1  2004-01-06 12:44:10+05:30  Manny
+ * Initial revision
+ *
+ */

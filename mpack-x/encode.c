@@ -1,11 +1,5 @@
-/*-
- * $Log: encode.c,v $
- * Revision 1.2  2004-01-06 14:55:01+05:30  Manny
- * fixed compilation warnings
- *
- * Revision 1.1  2004-01-06 12:44:12+05:30  Manny
- * Initial revision
- *
+/*
+ * $Id: encode.c,v 1.3 2025-01-22 15:46:06+05:30 Cprogrammer Exp mbhangui $
  *
  * (C) Copyright 1993,1994 by Carnegie Mellon University
  * All Rights Reserved.
@@ -262,3 +256,15 @@ encode(FILE * infile, FILE * applefile, char *fname, FILE * descfile, char *subj
 	}
 	return 0;
 }
+/*-
+ * $Log: encode.c,v $
+ * Revision 1.3  2025-01-22 15:46:06+05:30  Cprogrammer
+ * fix gcc14 errors
+ *
+ * Revision 1.2  2004-01-06 14:55:01+05:30  Manny
+ * fixed compilation warnings
+ *
+ * Revision 1.1  2004-01-06 12:44:12+05:30  Manny
+ * Initial revision
+ *
+ */

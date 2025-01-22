@@ -24,7 +24,7 @@ jobs:
         path: libqmail
     - name: install_qmail
       run: |
-        sudo apt-get update; sudo apt-get install libpcre3-dev flex bison libmysqlclient-dev libncurses5-dev
+        sudo apt-get update; sudo apt-get install libpcre3-dev flex bison libmysqlclient-dev libncurses5-dev libtirpc-dev
         cd libqmail; ./default.configure; make; sudo make install-strip
     - name: prepare obs
       run: cd logalert-x; ./prepare_obs logalert

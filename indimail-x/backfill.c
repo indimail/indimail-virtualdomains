@@ -1,17 +1,5 @@
 /*
- * $Log: backfill.c,v $
- * Revision 1.4  2024-05-17 16:25:48+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.3  2023-03-20 09:48:42+05:30  Cprogrammer
- * documented backfill code
- *
- * Revision 1.2  2019-07-04 09:19:02+05:30  Cprogrammer
- * initialize filename by using stralloc_copys insteadd of stralloc_cats
- *
- * Revision 1.1  2019-04-18 08:25:25+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -87,7 +75,7 @@ backfill(const char *username, const char *domain, const char *path, int operati
 				strerr_warn3("backfill: ", filename.s, ": ", &strerr_sys);
 			return ((char *) 0);
 		}
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		for (;;) {
 			if (getln(&ssin, &line, &match, '\n') == -1) {
 				strerr_warn3("backfill: read: ", filename.s, ": ", &strerr_sys);
@@ -181,3 +169,18 @@ backfill(const char *username, const char *domain, const char *path, int operati
 	} /*- if (operation == 2) */
 	return ((char *) 0);
 }
+/*
+ * $Log: backfill.c,v $
+ * Revision 1.4  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.3  2023-03-20 09:48:42+05:30  Cprogrammer
+ * documented backfill code
+ *
+ * Revision 1.2  2019-07-04 09:19:02+05:30  Cprogrammer
+ * initialize filename by using stralloc_copys insteadd of stralloc_cats
+ *
+ * Revision 1.1  2019-04-18 08:25:25+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

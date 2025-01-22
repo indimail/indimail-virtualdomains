@@ -1,17 +1,5 @@
 /*
- * $Log: runcmmd.c,v $
- * Revision 1.4  2022-12-18 19:27:45+05:30  Cprogrammer
- * handle SIGCONT
- *
- * Revision 1.3  2022-05-10 20:01:40+05:30  Cprogrammer
- * use headers from include path
- *
- * Revision 1.2  2021-06-11 17:01:21+05:30  Cprogrammer
- * replaced MakeArgs() with makeargs() from libqmail
- *
- * Revision 1.1  2019-04-18 07:59:58+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -52,7 +40,7 @@ runcmmd(char *cmmd, int useP)
 	int             status, i, retval;
 	pid_t           pid;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
-	void            (*pstat[2]) ();
+	void            (*pstat[2]) (int);
 
 	switch ((pid = fork()))
 	{
@@ -117,3 +105,18 @@ runcmmd(char *cmmd, int useP)
 	(void) signal(SIGQUIT, pstat[1]);
 	return (retval);
 }
+/*
+ * $Log: runcmmd.c,v $
+ * Revision 1.4  2022-12-18 19:27:45+05:30  Cprogrammer
+ * handle SIGCONT
+ *
+ * Revision 1.3  2022-05-10 20:01:40+05:30  Cprogrammer
+ * use headers from include path
+ *
+ * Revision 1.2  2021-06-11 17:01:21+05:30  Cprogrammer
+ * replaced MakeArgs() with makeargs() from libqmail
+ *
+ * Revision 1.1  2019-04-18 07:59:58+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

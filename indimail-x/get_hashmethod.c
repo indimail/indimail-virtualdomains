@@ -107,7 +107,7 @@ get_hashmethod(const char *domain)
 		strerr_warn3("get_hashmethod: ", fn.s, ": ", &strerr_sys);
 		return -1;
 	}
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1) {
 			strerr_warn3("get_hashmethod: read: ", fn.s, ": ", &strerr_sys);

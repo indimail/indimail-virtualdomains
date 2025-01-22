@@ -1,27 +1,5 @@
 /*
- * $Log: valiasinfo.c,v $
- * Revision 1.7  2024-05-17 16:25:48+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.6  2023-03-20 10:32:54+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.5  2023-01-22 10:40:03+05:30  Cprogrammer
- * replaced qprintf with subprintf
- *
- * Revision 1.4  2021-07-08 11:46:52+05:30  Cprogrammer
- * removed QMAILDIR setting through env variable
- *
- * Revision 1.3  2020-04-01 18:58:29+05:30  Cprogrammer
- * moved authentication functions to libqmail
- *
- * Revision 1.2  2019-06-07 14:23:56+05:30  Cprogrammer
- * fixed directory length
- * added missing new line
- *
- * Revision 1.1  2019-04-15 12:04:44+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -108,7 +86,7 @@ valiasinfo(const char *user, const char *domain)
 				flag1 = 0;
 		}
 		if (fd != -1) {
-			substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+			substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 			for (flag1 = 0;;) {
 				if (getln(&ssin, &line, &match, '\n') == -1) {
 					strerr_warn3("valiasinfo: read: ", tmpbuf.s, ": ", &strerr_sys);
@@ -154,7 +132,7 @@ valiasinfo(const char *user, const char *domain)
 				}
 			}
 			if (fd != -1) {
-				substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+				substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 				for (;;) {
 					if (getln(&ssin, &line, &match, '\n') == -1) {
 						strerr_warn3("valiasinfo: read: ", tmpbuf.s, ": ", &strerr_sys);
@@ -203,3 +181,28 @@ valiasinfo(const char *user, const char *domain)
 	return(flag1);
 #endif
 }
+/*
+ * $Log: valiasinfo.c,v $
+ * Revision 1.7  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.6  2023-03-20 10:32:54+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.5  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
+ * Revision 1.4  2021-07-08 11:46:52+05:30  Cprogrammer
+ * removed QMAILDIR setting through env variable
+ *
+ * Revision 1.3  2020-04-01 18:58:29+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
+ * Revision 1.2  2019-06-07 14:23:56+05:30  Cprogrammer
+ * fixed directory length
+ * added missing new line
+ *
+ * Revision 1.1  2019-04-15 12:04:44+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

@@ -1,20 +1,5 @@
 /*
- * $Log: monkey.c,v $
- * Revision 1.5  2021-07-21 14:05:05+05:30  Cprogrammer
- * conditional compilation (alpine linux)
- *
- * Revision 1.4  2020-10-01 18:26:49+05:30  Cprogrammer
- * fixed compiler warnings
- *
- * Revision 1.3  2020-04-01 18:57:19+05:30  Cprogrammer
- * moved authentication functions to libqmail
- *
- * Revision 1.2  2019-04-22 23:14:13+05:30  Cprogrammer
- * replaced atoi() with scan_int()
- *
- * Revision 1.1  2019-04-18 08:36:08+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -79,7 +64,7 @@ monkey(char *host, char *servicename, char *startbuf, int skip_nl)
 	struct timeval  timeout;
 	time_t          idle_time, last_timeout;
 	char           *ptr, *cptr;
-	void            (*pstat) ();
+	void            (*pstat) (int);
 
 #ifdef SOLARIS
 #ifdef _SC_HOST_NAME_MAX
@@ -287,3 +272,21 @@ monkey(char *host, char *servicename, char *startbuf, int skip_nl)
 	(void) signal(SIGPIPE, pstat);
 	return (0);
 }
+/*
+ * $Log: monkey.c,v $
+ * Revision 1.5  2021-07-21 14:05:05+05:30  Cprogrammer
+ * conditional compilation (alpine linux)
+ *
+ * Revision 1.4  2020-10-01 18:26:49+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
+ * Revision 1.3  2020-04-01 18:57:19+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
+ * Revision 1.2  2019-04-22 23:14:13+05:30  Cprogrammer
+ * replaced atoi() with scan_int()
+ *
+ * Revision 1.1  2019-04-18 08:36:08+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

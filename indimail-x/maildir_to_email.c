@@ -1,17 +1,5 @@
 /*
- * $Log: maildir_to_email.c,v $
- * Revision 1.4  2023-03-20 10:13:16+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.3  2020-04-01 18:56:55+05:30  Cprogrammer
- * moved authentication functions to libqmail
- *
- * Revision 1.2  2019-04-21 16:14:02+05:30  Cprogrammer
- * remove '/' from the end
- *
- * Revision 1.1  2019-04-18 08:27:58+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -62,7 +50,7 @@ maildir_to_email(char *maildir, char *domain)
 			strerr_die3sys(111, "maildir_to_email: open: ", tmpbuf.s, ": ");
 	}
 	if (fd != -1) {
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		if (getln(&ssin, &email, &match, '\n') == -1) {
 			strerr_warn3("maildir_to_email: read: ", tmpbuf.s, ": ", &strerr_sys);
 			close(fd);
@@ -114,7 +102,7 @@ maildir_to_email(char *maildir, char *domain)
 				strerr_die3sys(111, "maildir_to_email: open: ", tmpbuf.s, ": ");
 		}
 		if (fd != -1) {
-			substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+			substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 			if (getln(&ssin, &line, &match, '\n') == -1) {
 				strerr_warn3("maildir_to_email: read: ", tmpbuf.s, ": ", &strerr_sys);
 				close(fd);
@@ -155,3 +143,18 @@ maildir_to_email(char *maildir, char *domain)
 		return (email.s);
 	}
 }
+/*
+ * $Log: maildir_to_email.c,v $
+ * Revision 1.4  2023-03-20 10:13:16+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.3  2020-04-01 18:56:55+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
+ * Revision 1.2  2019-04-21 16:14:02+05:30  Cprogrammer
+ * remove '/' from the end
+ *
+ * Revision 1.1  2019-04-18 08:27:58+05:30  Cprogrammer
+ * Initial revision
+ *
+ */
