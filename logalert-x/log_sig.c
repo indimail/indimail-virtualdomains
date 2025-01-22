@@ -1,10 +1,6 @@
 /*
- * $Log: log_sig.c,v $
- * Revision 1.1  2013-05-15 00:34:35+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: log_sig.c,v 1.2 2025-01-22 15:58:22+05:30 Cprogrammer Exp mbhangui $
  */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -38,3 +34,12 @@ sig_init()
 	signal(SIGINT, (void (*)(int)) sig_handle_abort);
 	signal(SIGTERM, (void (*)(int)) sig_handle_abort);
 }
+/*
+ * $Log: log_sig.c,v $
+ * Revision 1.2  2025-01-22 15:58:22+05:30  Cprogrammer
+ * fix gcc14 errors
+ *
+ * Revision 1.1  2013-05-15 00:34:35+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

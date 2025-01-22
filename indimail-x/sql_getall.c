@@ -1,17 +1,5 @@
 /*
- * $Log: sql_getall.c,v $
- * Revision 1.4  2024-05-17 16:25:48+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.3  2020-10-18 07:53:54+05:30  Cprogrammer
- * use alloc_re() only for expansion of memory
- *
- * Revision 1.2  2019-05-02 14:38:04+05:30  Cprogrammer
- * reset onum after alloc_free()
- *
- * Revision 1.1  2019-04-15 12:38:51+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -204,3 +192,18 @@ FreeSqlPtr()
 	}
 	return;
 }
+/*
+ * $Log: sql_getall.c,v $
+ * Revision 1.4  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.3  2020-10-18 07:53:54+05:30  Cprogrammer
+ * use alloc_re() only for expansion of memory
+ *
+ * Revision 1.2  2019-05-02 14:38:04+05:30  Cprogrammer
+ * reset onum after alloc_free()
+ *
+ * Revision 1.1  2019-04-15 12:38:51+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

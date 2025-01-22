@@ -1,11 +1,5 @@
-/*-
- * $Log: storeHeader.c,v $
- * Revision 1.2  2023-08-31 22:37:07+05:30  Cprogrammer
- * return error if parseAddress is unsuccessful
- *
- * Revision 1.1  2019-04-18 08:36:27+05:30  Cprogrammer
- * Initial revision
- *
+/*
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -146,3 +140,12 @@ storeHeader(struct header ***Hptr, struct header_t *h)
 	return(0);
 }
 #endif
+/*-
+ * $Log: storeHeader.c,v $
+ * Revision 1.2  2023-08-31 22:37:07+05:30  Cprogrammer
+ * return error if parseAddress is unsuccessful
+ *
+ * Revision 1.1  2019-04-18 08:36:27+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

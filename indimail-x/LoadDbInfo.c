@@ -1,50 +1,5 @@
 /*
- * $Log: LoadDbInfo.c,v $
- * Revision 1.15  2023-09-11 09:09:41+05:30  Cprogrammer
- * incorrect use of localiphost instead of hostip
- *
- * Revision 1.14  2023-03-20 10:12:22+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.13  2023-01-22 10:40:03+05:30  Cprogrammer
- * replaced qprintf with subprintf
- *
- * Revision 1.12  2021-07-27 18:05:36+05:30  Cprogrammer
- * set default domain using vset_default_domain
- *
- * Revision 1.11  2020-10-18 07:51:37+05:30  Cprogrammer
- * initialize last_error_len field of dbinfo
- *
- * Revision 1.10  2020-07-04 22:53:56+05:30  Cprogrammer
- * replaced utime() with utimes()
- *
- * Revision 1.9  2020-05-12 19:23:58+05:30  Cprogrammer
- * BUG - uninitialized relayhosts variable
- *
- * Revision 1.8  2020-04-30 19:25:15+05:30  Cprogrammer
- * changed scope of ssin, ssout variables to local
- *
- * Revision 1.7  2020-04-01 18:56:49+05:30  Cprogrammer
- * moved authentication functions to libqmail
- *
- * Revision 1.6  2019-07-02 09:51:38+05:30  Cprogrammer
- * Null terminate RelayHosts before calling writemcdinfo
- *
- * Revision 1.5  2019-06-27 10:46:31+05:30  Cprogrammer
- * use newline as a separator between records
- *
- * Revision 1.4  2019-06-07 10:51:50+05:30  Cprogrammer
- * fix SIGSEGV on hosts with mcdfile missing (non-distributed domains)
- *
- * Revision 1.3  2019-05-27 20:34:37+05:30  Cprogrammer
- * initialize socket & port after allocating dbinfo structure
- *
- * Revision 1.2  2019-04-22 23:13:33+05:30  Cprogrammer
- * replaced atoi(), atol() with scan_int(), scan_ulong() functions
- *
- * Revision 1.1  2019-04-17 12:49:54+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -1020,3 +975,51 @@ localDbInfo(int *total, DBINFO ***rhosts)
 	(*rhostsptr) = (DBINFO *) 0; /*- Null structure to end relayhosts */
 	return (relayhosts);
 }
+/*
+ * $Log: LoadDbInfo.c,v $
+ * Revision 1.15  2023-09-11 09:09:41+05:30  Cprogrammer
+ * incorrect use of localiphost instead of hostip
+ *
+ * Revision 1.14  2023-03-20 10:12:22+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.13  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
+ * Revision 1.12  2021-07-27 18:05:36+05:30  Cprogrammer
+ * set default domain using vset_default_domain
+ *
+ * Revision 1.11  2020-10-18 07:51:37+05:30  Cprogrammer
+ * initialize last_error_len field of dbinfo
+ *
+ * Revision 1.10  2020-07-04 22:53:56+05:30  Cprogrammer
+ * replaced utime() with utimes()
+ *
+ * Revision 1.9  2020-05-12 19:23:58+05:30  Cprogrammer
+ * BUG - uninitialized relayhosts variable
+ *
+ * Revision 1.8  2020-04-30 19:25:15+05:30  Cprogrammer
+ * changed scope of ssin, ssout variables to local
+ *
+ * Revision 1.7  2020-04-01 18:56:49+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
+ * Revision 1.6  2019-07-02 09:51:38+05:30  Cprogrammer
+ * Null terminate RelayHosts before calling writemcdinfo
+ *
+ * Revision 1.5  2019-06-27 10:46:31+05:30  Cprogrammer
+ * use newline as a separator between records
+ *
+ * Revision 1.4  2019-06-07 10:51:50+05:30  Cprogrammer
+ * fix SIGSEGV on hosts with mcdfile missing (non-distributed domains)
+ *
+ * Revision 1.3  2019-05-27 20:34:37+05:30  Cprogrammer
+ * initialize socket & port after allocating dbinfo structure
+ *
+ * Revision 1.2  2019-04-22 23:13:33+05:30  Cprogrammer
+ * replaced atoi(), atol() with scan_int(), scan_ulong() functions
+ *
+ * Revision 1.1  2019-04-17 12:49:54+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

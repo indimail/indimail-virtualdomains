@@ -1,17 +1,5 @@
 /*
- * $Log: osh.c,v $
- * Revision 1.4  2023-09-05 21:47:22+05:30  Cprogrammer
- * added return type for gethostname
- *
- * Revision 1.3  2022-10-20 11:58:04+05:30  Cprogrammer
- * converted function prototype to ansic
- *
- * Revision 1.2  2020-10-01 18:27:28+05:30  Cprogrammer
- * fixed compiler warnings
- *
- * Revision 1.1  2019-04-14 18:33:12+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  *
  * This is main.c (osh)
  *
@@ -1189,3 +1177,18 @@ waitfor(int pid)
 	if (wpid == pid)
 		statusprt(0, status);
 }
+/*
+ * $Log: osh.c,v $
+ * Revision 1.4  2023-09-05 21:47:22+05:30  Cprogrammer
+ * added return type for gethostname
+ *
+ * Revision 1.3  2022-10-20 11:58:04+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
+ * Revision 1.2  2020-10-01 18:27:28+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
+ * Revision 1.1  2019-04-14 18:33:12+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

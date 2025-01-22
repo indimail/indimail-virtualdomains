@@ -1,35 +1,5 @@
 /*
- * $Log: iadduser.c,v $
- * Revision 1.10  2024-05-17 16:24:31+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.9  2023-07-17 11:44:10+05:30  Cprogrammer
- * set hash method from hash_method control file in controldir, domaindir
- *
- * Revision 1.8  2023-07-16 13:56:59+05:30  Cprogrammer
- * check mkpasswd for error
- *
- * Revision 1.7  2023-03-20 10:03:03+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.6  2022-11-02 12:43:44+05:30  Cprogrammer
- * added feature to add scram password during user addition
- *
- * Revision 1.5  2022-10-27 17:06:18+05:30  Cprogrammer
- * add to hostcntrl only if domain is distrbuted
- *
- * Revision 1.4  2022-08-05 22:40:35+05:30  Cprogrammer
- * removed apop argument to iadduser()
- *
- * Revision 1.3  2022-08-05 21:02:18+05:30  Cprogrammer
- * added encrypt_flag argument
- *
- * Revision 1.2  2020-04-01 18:55:09+05:30  Cprogrammer
- * moved authentication functions to libqmail
- *
- * Revision 1.1  2019-04-14 18:31:35+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -302,3 +272,36 @@ iadduser(const char *username, const char *domain, const char *mdahost, const ch
 		return (-1);
 	return (0);
 }
+/*
+ * $Log: iadduser.c,v $
+ * Revision 1.10  2024-05-17 16:24:31+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.9  2023-07-17 11:44:10+05:30  Cprogrammer
+ * set hash method from hash_method control file in controldir, domaindir
+ *
+ * Revision 1.8  2023-07-16 13:56:59+05:30  Cprogrammer
+ * check mkpasswd for error
+ *
+ * Revision 1.7  2023-03-20 10:03:03+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.6  2022-11-02 12:43:44+05:30  Cprogrammer
+ * added feature to add scram password during user addition
+ *
+ * Revision 1.5  2022-10-27 17:06:18+05:30  Cprogrammer
+ * add to hostcntrl only if domain is distrbuted
+ *
+ * Revision 1.4  2022-08-05 22:40:35+05:30  Cprogrammer
+ * removed apop argument to iadduser()
+ *
+ * Revision 1.3  2022-08-05 21:02:18+05:30  Cprogrammer
+ * added encrypt_flag argument
+ *
+ * Revision 1.2  2020-04-01 18:55:09+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
+ * Revision 1.1  2019-04-14 18:31:35+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

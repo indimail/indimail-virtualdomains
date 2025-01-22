@@ -1,23 +1,5 @@
 /*
- * $Log: LoadBMF.c,v $
- * Revision 1.6  2023-03-23 23:10:01+05:30  Cprogrammer
- * fix wrong counts when badmailfrom has comments
- *
- * Revision 1.5  2023-03-20 10:11:13+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.4  2023-01-22 10:40:03+05:30  Cprogrammer
- * replaced qprintf with subprintf
- *
- * Revision 1.3  2020-07-04 22:53:05+05:30  Cprogrammer
- * replaced utime() with utimes()
- *
- * Revision 1.2  2020-04-01 18:56:45+05:30  Cprogrammer
- * moved authentication functions to libqmail
- *
- * Revision 1.1  2019-04-15 13:05:29+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -554,3 +536,24 @@ BMFTimestamp(int badmail_flag, char *bmf)
 	return (mcd_time);
 }
 #endif /*- CLUSTERED_SITE */
+/*
+ * $Log: LoadBMF.c,v $
+ * Revision 1.6  2023-03-23 23:10:01+05:30  Cprogrammer
+ * fix wrong counts when badmailfrom has comments
+ *
+ * Revision 1.5  2023-03-20 10:11:13+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.4  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
+ * Revision 1.3  2020-07-04 22:53:05+05:30  Cprogrammer
+ * replaced utime() with utimes()
+ *
+ * Revision 1.2  2020-04-01 18:56:45+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
+ * Revision 1.1  2019-04-15 13:05:29+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

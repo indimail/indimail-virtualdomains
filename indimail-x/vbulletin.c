@@ -1,35 +1,5 @@
 /*
- * $Log: vbulletin.c,v $
- * Revision 1.10  2024-05-17 16:25:48+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.9  2023-03-26 00:33:27+05:30  Cprogrammer
- * fixed code using wait_handler
- *
- * Revision 1.8  2023-03-24 12:59:25+05:30  Cprogrammer
- * fork and run bulletin for all domains with domain uid
- *
- * Revision 1.7  2023-03-20 10:33:13+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.6  2022-10-20 11:58:36+05:30  Cprogrammer
- * converted function prototype to ansic
- *
- * Revision 1.5  2021-07-08 11:47:41+05:30  Cprogrammer
- * add check for misconfigured assign file
- *
- * Revision 1.4  2020-10-19 12:47:03+05:30  Cprogrammer
- * use /var/indomain/domains for domain/bulk_mail
- *
- * Revision 1.3  2020-06-16 17:56:15+05:30  Cprogrammer
- * moved setuserid function to libqmail
- *
- * Revision 1.2  2019-06-07 15:54:44+05:30  mbhangui
- * use sgetopt library for getopt()
- *
- * Revision 1.1  2019-04-18 08:38:42+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -621,3 +591,36 @@ main(int argc, char **argv)
 	iclose();
 	return (status);
 }
+/*
+ * $Log: vbulletin.c,v $
+ * Revision 1.10  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.9  2023-03-26 00:33:27+05:30  Cprogrammer
+ * fixed code using wait_handler
+ *
+ * Revision 1.8  2023-03-24 12:59:25+05:30  Cprogrammer
+ * fork and run bulletin for all domains with domain uid
+ *
+ * Revision 1.7  2023-03-20 10:33:13+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.6  2022-10-20 11:58:36+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
+ * Revision 1.5  2021-07-08 11:47:41+05:30  Cprogrammer
+ * add check for misconfigured assign file
+ *
+ * Revision 1.4  2020-10-19 12:47:03+05:30  Cprogrammer
+ * use /var/indomain/domains for domain/bulk_mail
+ *
+ * Revision 1.3  2020-06-16 17:56:15+05:30  Cprogrammer
+ * moved setuserid function to libqmail
+ *
+ * Revision 1.2  2019-06-07 15:54:44+05:30  mbhangui
+ * use sgetopt library for getopt()
+ *
+ * Revision 1.1  2019-04-18 08:38:42+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

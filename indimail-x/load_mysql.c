@@ -1,44 +1,5 @@
 /*
- * $Log: load_mysql.c,v $
- * Revision 1.13  2023-04-01 19:27:39+05:30  Cprogrammer
- * refactored getlibObject function
- *
- * Revision 1.12  2022-11-23 15:23:17+05:30  Cprogrammer
- * renamed mysql_lib to libmysql
- *
- * Revision 1.11  2022-10-20 11:57:49+05:30  Cprogrammer
- * converted function prototype to ansic
- *
- * Revision 1.10  2020-10-18 07:52:43+05:30  Cprogrammer
- * renamed closeLibrary() to incloseLibrary()
- *
- * Revision 1.9  2019-07-04 10:07:07+05:30  Cprogrammer
- * collapsed multiple if statements
- *
- * Revision 1.8  2019-06-13 19:14:35+05:30  Cprogrammer
- * added wrappers for mysql_next_result(), mysql_fetch_lengths(), mysql_num_fields()
- *
- * Revision 1.7  2019-06-09 17:39:16+05:30  Cprogrammer
- * conditional compilation of bool typedef
- *
- * Revision 1.6  2019-06-08 18:10:50+05:30  Cprogrammer
- * define bool unconditionally as older mariadb devel package don't have #ifdef LIBMARIADB
- *
- * Revision 1.5  2019-06-07 19:22:07+05:30  Cprogrammer
- * treat missing libmysqlclient as error
- *
- * Revision 1.4  2019-06-07 17:31:29+05:30  Cprogrammer
- * changed scope of closeLibrary() to global
- *
- * Revision 1.3  2019-06-07 16:07:56+05:30  Cprogrammer
- * fix for missing mysql_get_option() in new versions of libmariadb
- *
- * Revision 1.2  2019-06-03 06:50:56+05:30  Cprogrammer
- * use RTLD_NODELETE
- *
- * Revision 1.1  2019-05-28 16:17:27+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -568,3 +529,45 @@ const char     *in_mysql_get_client_info(void)
 	return (mysql_get_client_info());
 }
 #endif /*- #ifdef DLOPEN_LIBMYSQLCLIENT */
+/*
+ * $Log: load_mysql.c,v $
+ * Revision 1.13  2023-04-01 19:27:39+05:30  Cprogrammer
+ * refactored getlibObject function
+ *
+ * Revision 1.12  2022-11-23 15:23:17+05:30  Cprogrammer
+ * renamed mysql_lib to libmysql
+ *
+ * Revision 1.11  2022-10-20 11:57:49+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
+ * Revision 1.10  2020-10-18 07:52:43+05:30  Cprogrammer
+ * renamed closeLibrary() to incloseLibrary()
+ *
+ * Revision 1.9  2019-07-04 10:07:07+05:30  Cprogrammer
+ * collapsed multiple if statements
+ *
+ * Revision 1.8  2019-06-13 19:14:35+05:30  Cprogrammer
+ * added wrappers for mysql_next_result(), mysql_fetch_lengths(), mysql_num_fields()
+ *
+ * Revision 1.7  2019-06-09 17:39:16+05:30  Cprogrammer
+ * conditional compilation of bool typedef
+ *
+ * Revision 1.6  2019-06-08 18:10:50+05:30  Cprogrammer
+ * define bool unconditionally as older mariadb devel package don't have #ifdef LIBMARIADB
+ *
+ * Revision 1.5  2019-06-07 19:22:07+05:30  Cprogrammer
+ * treat missing libmysqlclient as error
+ *
+ * Revision 1.4  2019-06-07 17:31:29+05:30  Cprogrammer
+ * changed scope of closeLibrary() to global
+ *
+ * Revision 1.3  2019-06-07 16:07:56+05:30  Cprogrammer
+ * fix for missing mysql_get_option() in new versions of libmariadb
+ *
+ * Revision 1.2  2019-06-03 06:50:56+05:30  Cprogrammer
+ * use RTLD_NODELETE
+ *
+ * Revision 1.1  2019-05-28 16:17:27+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

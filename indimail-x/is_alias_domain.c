@@ -1,21 +1,5 @@
 /*
- * $Log: is_alias_domain.c,v $
- * Revision 1.5  2024-05-17 16:25:48+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.4  2023-03-25 17:49:16+05:30  Cprogrammer
- * bug fix - fixed using resolved link
- *
- * Revision 1.3  2023-03-20 10:08:07+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.2  2021-09-11 13:26:14+05:30  Cprogrammer
- * use getEnvConfig for domain directory
- * on system error, return -1 instead of exit
- *
- * Revision 1.1  2019-04-18 08:25:36+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -125,3 +109,22 @@ is_alias_domain(const char *domain)
 	close(fd);
 	return (0);
 }
+/*
+ * $Log: is_alias_domain.c,v $
+ * Revision 1.5  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.4  2023-03-25 17:49:16+05:30  Cprogrammer
+ * bug fix - fixed using resolved link
+ *
+ * Revision 1.3  2023-03-20 10:08:07+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.2  2021-09-11 13:26:14+05:30  Cprogrammer
+ * use getEnvConfig for domain directory
+ * on system error, return -1 instead of exit
+ *
+ * Revision 1.1  2019-04-18 08:25:36+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

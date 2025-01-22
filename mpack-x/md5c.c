@@ -1,8 +1,5 @@
 /*
- * $Log: md5c.c,v $
- * Revision 1.1  2004-01-06 12:44:14+05:30  Manny
- * Initial revision
- *
+ * $Id: md5c.c,v 1.2 2025-01-22 15:47:00+05:30 Cprogrammer Exp mbhangui $
  *
  * MD5C.C - RSA Data Security, Inc., MD5 message-digest algorithm
  * 
@@ -366,3 +363,12 @@ MD5_memset(POINTER output, int value, unsigned int len)
 	for (i = 0; i < len; i++)
 		((char *) output)[i] = (char) value;
 }
+/*
+ * $Log: md5c.c,v $
+ * Revision 1.2  2025-01-22 15:47:00+05:30  Cprogrammer
+ * fix gcc14 errors
+ *
+ * Revision 1.1  2004-01-06 12:44:14+05:30  Manny
+ * Initial revision
+ *
+ */

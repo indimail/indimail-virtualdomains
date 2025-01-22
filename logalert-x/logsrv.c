@@ -1,5 +1,5 @@
 /*
- * $Id: logsrv.c,v 1.27 2024-09-05 21:12:32+05:30 Cprogrammer Exp mbhangui $
+ * $Id: logsrv.c,v 1.28 2025-01-22 15:58:29+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -68,7 +68,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: logsrv.c,v 1.27 2024-09-05 21:12:32+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: logsrv.c,v 1.28 2025-01-22 15:58:29+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*-
@@ -279,6 +279,9 @@ getversion_logsrv_c()
 
 /*
  * $Log: logsrv.c,v $
+ * Revision 1.28  2025-01-22 15:58:29+05:30  Cprogrammer
+ * fix gcc14 errors
+ *
  * Revision 1.27  2024-09-05 21:12:32+05:30  Cprogrammer
  * included additional qmail headers
  *

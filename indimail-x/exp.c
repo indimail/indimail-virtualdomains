@@ -1,11 +1,5 @@
 /*
- * $Log: exp.c,v $
- * Revision 1.2  2022-10-20 11:57:30+05:30  Cprogrammer
- * converted function prototype to ansic
- *
- * Revision 1.1  2019-04-14 18:33:22+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  *
  * This is (osh) exp.c  Version 1.0
  *
@@ -250,3 +244,12 @@ expand(char *argv[MAXARG + 1], int *argc, char *word)
 		return ("No Match");
 	return (NULL);
 }
+/*
+ * $Log: exp.c,v $
+ * Revision 1.2  2022-10-20 11:57:30+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
+ * Revision 1.1  2019-04-14 18:33:22+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

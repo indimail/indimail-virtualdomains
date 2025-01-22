@@ -1,38 +1,5 @@
 /*
- * $Log: incrmesg.c,v $
- * Revision 1.11  2023-04-14 00:08:17+05:30  Cprogrammer
- * refactored code
- *
- * Revision 1.10  2022-05-10 20:09:47+05:30  Cprogrammer
- * use tcpopen from libqmail
- *
- * Revision 1.9  2022-05-10 01:11:02+05:30  Cprogrammer
- * include r_mkdir.h
- *
- * Revision 1.8  2021-04-05 21:57:22+05:30  Cprogrammer
- * fixed compilation errors
- *
- * Revision 1.7  2021-03-15 11:31:57+05:30  Cprogrammer
- * removed common.h
- *
- * Revision 1.6  2020-06-21 12:47:48+05:30  Cprogrammer
- * quench rpmlint
- *
- * Revision 1.5  2013-05-15 00:19:32+05:30  Cprogrammer
- * fixed warnings
- *
- * Revision 1.4  2013-03-03 23:36:12+05:30  Cprogrammer
- * create the directory with owner of incrmesg process
- *
- * Revision 1.3  2012-12-13 08:36:45+05:30  Cprogrammer
- * use SEEKDIR env variable
- *
- * Revision 1.2  2012-09-18 17:39:28+05:30  Cprogrammer
- * changed seek directory to /var/tmp
- *
- * Revision 1.1  2012-09-18 13:26:10+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: incrmesg.c,v 1.12 2025-01-22 15:57:48+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -70,7 +37,7 @@
 #define FATAL   "incrmesg: fatal: " 
 
 #ifndef	lint
-static char     rcsid[] = "$Id: incrmesg.c,v 1.11 2023-04-14 00:08:17+05:30 Cprogrammer Exp mbhangui $";
+static char     rcsid[] = "$Id: incrmesg.c,v 1.12 2025-01-22 15:57:48+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 struct msgtab
@@ -324,3 +291,42 @@ getversion_incrmesg_c()
 	x++;
 }
 #endif
+/*
+ * $Log: incrmesg.c,v $
+ * Revision 1.12  2025-01-22 15:57:48+05:30  Cprogrammer
+ * fix gcc14 errors
+ *
+ * Revision 1.11  2023-04-14 00:08:17+05:30  Cprogrammer
+ * refactored code
+ *
+ * Revision 1.10  2022-05-10 20:09:47+05:30  Cprogrammer
+ * use tcpopen from libqmail
+ *
+ * Revision 1.9  2022-05-10 01:11:02+05:30  Cprogrammer
+ * include r_mkdir.h
+ *
+ * Revision 1.8  2021-04-05 21:57:22+05:30  Cprogrammer
+ * fixed compilation errors
+ *
+ * Revision 1.7  2021-03-15 11:31:57+05:30  Cprogrammer
+ * removed common.h
+ *
+ * Revision 1.6  2020-06-21 12:47:48+05:30  Cprogrammer
+ * quench rpmlint
+ *
+ * Revision 1.5  2013-05-15 00:19:32+05:30  Cprogrammer
+ * fixed warnings
+ *
+ * Revision 1.4  2013-03-03 23:36:12+05:30  Cprogrammer
+ * create the directory with owner of incrmesg process
+ *
+ * Revision 1.3  2012-12-13 08:36:45+05:30  Cprogrammer
+ * use SEEKDIR env variable
+ *
+ * Revision 1.2  2012-09-18 17:39:28+05:30  Cprogrammer
+ * changed seek directory to /var/tmp
+ *
+ * Revision 1.1  2012-09-18 13:26:10+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

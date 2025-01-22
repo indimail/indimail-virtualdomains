@@ -1,14 +1,5 @@
 /*
- * $Log: add_vacation.c,v $
- * Revision 1.3  2024-05-17 16:25:48+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.2  2021-07-08 15:14:46+05:30  Cprogrammer
- * add missing error check
- *
- * Revision 1.1  2019-04-18 08:39:06+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -242,3 +233,15 @@ add_vacation(char *email, char *fname)
 	}
 	return (0);
 }
+/*
+ * $Log: add_vacation.c,v $
+ * Revision 1.3  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.2  2021-07-08 15:14:46+05:30  Cprogrammer
+ * add missing error check
+ *
+ * Revision 1.1  2019-04-18 08:39:06+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

@@ -1,17 +1,5 @@
 /*
- * $Log: update_quota.c,v $
- * Revision 1.4  2020-09-21 07:55:21+05:30  Cprogrammer
- * fixed incorrect initialization of struct flock
- *
- * Revision 1.3  2019-07-26 22:19:43+05:30  Cprogrammer
- * refactored code
- *
- * Revision 1.2  2019-04-21 16:14:27+05:30  Cprogrammer
- * remove '/' from the end
- *
- * Revision 1.1  2019-04-18 08:33:48+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -145,3 +133,18 @@ update_quota(char *Maildir, mdir_t new_size)
 	close(fd);
 	return (1);
 }
+/*
+ * $Log: update_quota.c,v $
+ * Revision 1.4  2020-09-21 07:55:21+05:30  Cprogrammer
+ * fixed incorrect initialization of struct flock
+ *
+ * Revision 1.3  2019-07-26 22:19:43+05:30  Cprogrammer
+ * refactored code
+ *
+ * Revision 1.2  2019-04-21 16:14:27+05:30  Cprogrammer
+ * remove '/' from the end
+ *
+ * Revision 1.1  2019-04-18 08:33:48+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

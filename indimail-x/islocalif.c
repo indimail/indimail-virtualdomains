@@ -1,26 +1,5 @@
 /*
- * $Log: islocalif.c,v $
- * Revision 1.7  2023-09-11 09:08:48+05:30  Cprogrammer
- * incorrect use of localiphost instead of hostip
- *
- * Revision 1.6  2023-03-20 10:10:38+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.5  2020-10-18 07:51:29+05:30  Cprogrammer
- * use alloc() instead of alloc_re()
- *
- * Revision 1.4  2020-10-13 18:33:46+05:30  Cprogrammer
- * added missing alloc_free
- *
- * Revision 1.3  2020-04-01 18:56:37+05:30  Cprogrammer
- * moved authentication functions to libqmail
- *
- * Revision 1.2  2019-07-04 10:06:33+05:30  Cprogrammer
- * collapsed multiple if statements
- *
- * Revision 1.1  2019-04-11 00:42:56+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -287,3 +266,27 @@ islocalif(char *hostptr)
 	close(s);
 	return (0);
 }
+/*
+ * $Log: islocalif.c,v $
+ * Revision 1.7  2023-09-11 09:08:48+05:30  Cprogrammer
+ * incorrect use of localiphost instead of hostip
+ *
+ * Revision 1.6  2023-03-20 10:10:38+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.5  2020-10-18 07:51:29+05:30  Cprogrammer
+ * use alloc() instead of alloc_re()
+ *
+ * Revision 1.4  2020-10-13 18:33:46+05:30  Cprogrammer
+ * added missing alloc_free
+ *
+ * Revision 1.3  2020-04-01 18:56:37+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
+ * Revision 1.2  2019-07-04 10:06:33+05:30  Cprogrammer
+ * collapsed multiple if statements
+ *
+ * Revision 1.1  2019-04-11 00:42:56+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

@@ -1,29 +1,5 @@
 /*
- * $Log: qmailmrtg.c,v $
- * Revision 1.8  2024-05-10 11:44:24+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.7  2023-09-17 22:36:34+05:30  Cprogrammer
- * removed leading white space to correct current concurrency
- *
- * Revision 1.6  2023-04-09 22:26:02+05:30  Cprogrammer
- * read from stdin if logdir is -
- *
- * Revision 1.5  2023-04-09 12:00:46+05:30  Cprogrammer
- * added case for generating status for inlookup Cache Hits
- *
- * Revision 1.4  2023-04-08 23:55:32+05:30  Cprogrammer
- * refactored code to print service uptime and status
- *
- * Revision 1.3  2023-04-07 22:32:47+05:30  Cprogrammer
- * converted queue messages to messages/hour
- *
- * Revision 1.2  2023-04-07 22:24:37+05:30  Cprogrammer
- * refactored to use libqmail
- *
- * Revision 1.1  2019-04-18 08:36:13+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  *
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc.
  *
@@ -903,3 +879,30 @@ main(int argc, char **argv)
 	substdio_flush(subfdoutsmall);
 	return (0);
 }
+/*
+ * $Log: qmailmrtg.c,v $
+ * Revision 1.8  2024-05-10 11:44:24+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.7  2023-09-17 22:36:34+05:30  Cprogrammer
+ * removed leading white space to correct current concurrency
+ *
+ * Revision 1.6  2023-04-09 22:26:02+05:30  Cprogrammer
+ * read from stdin if logdir is -
+ *
+ * Revision 1.5  2023-04-09 12:00:46+05:30  Cprogrammer
+ * added case for generating status for inlookup Cache Hits
+ *
+ * Revision 1.4  2023-04-08 23:55:32+05:30  Cprogrammer
+ * refactored code to print service uptime and status
+ *
+ * Revision 1.3  2023-04-07 22:32:47+05:30  Cprogrammer
+ * converted queue messages to messages/hour
+ *
+ * Revision 1.2  2023-04-07 22:24:37+05:30  Cprogrammer
+ * refactored to use libqmail
+ *
+ * Revision 1.1  2019-04-18 08:36:13+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

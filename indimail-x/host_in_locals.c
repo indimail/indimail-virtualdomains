@@ -1,14 +1,5 @@
 /*
- * $Log: host_in_locals.c,v $
- * Revision 1.3  2023-03-20 10:02:35+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.2  2020-04-01 18:55:05+05:30  Cprogrammer
- * moved authentication functions to libqmail
- *
- * Revision 1.1  2019-04-18 08:25:31+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -111,3 +102,15 @@ host_in_locals(char *domain)
 	return (0);
 }
 #endif
+/*
+ * $Log: host_in_locals.c,v $
+ * Revision 1.3  2023-03-20 10:02:35+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.2  2020-04-01 18:55:05+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
+ * Revision 1.1  2019-04-18 08:25:31+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

@@ -1,14 +1,5 @@
 /*
- * $Log: deluser.c,v $
- * Revision 1.3  2024-05-17 16:25:48+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.2  2023-03-23 22:06:55+05:30  Cprogrammer
- * skip vdelfiles when directory doesn't exist
- *
- * Revision 1.1  2019-04-14 21:49:41+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -337,3 +328,15 @@ deluser(const char *user, const char *domain, int remove_db)
 	}
 	return (0);
 }
+/*
+ * $Log: deluser.c,v $
+ * Revision 1.3  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.2  2023-03-23 22:06:55+05:30  Cprogrammer
+ * skip vdelfiles when directory doesn't exist
+ *
+ * Revision 1.1  2019-04-14 21:49:41+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

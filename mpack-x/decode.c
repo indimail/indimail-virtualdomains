@@ -1,14 +1,5 @@
-/*-
- * $Log: decode.c,v $
- * Revision 1.3  2008-06-13 19:24:46+05:30  Cprogrammer
- * include config.h to prevent warning for strchr
- *
- * Revision 1.2  2004-01-06 14:54:57+05:30  Manny
- * fixed compilation warnings
- *
- * Revision 1.1  2004-01-06 12:44:10+05:30  Manny
- * Initial revision
- *
+/*
+ * $Id: decode.c,v 1.4 2025-01-22 15:51:44+05:30 Cprogrammer Exp mbhangui $
  *
  * Decode MIME parts.
  * (C) Copyright 1993,1994 by Carnegie Mellon University
@@ -1452,3 +1443,22 @@ fromnone(struct part *inpart, FILE * outfile, char **digestp)
 	if (digestp)
 		*digestp = md5contextTo64(&context);
 }
+
+/*-
+ * $Log: decode.c,v $
+ * Revision 1.4  2025-01-22 15:51:44+05:30  Cprogrammer
+ * fix gcc14 errors
+ *
+ * Revision 1.4  2025-01-22 15:45:12+05:30  Cprogrammer
+ * fix gcc14 errors
+ *
+ * Revision 1.3  2008-06-13 19:24:46+05:30  Cprogrammer
+ * include config.h to prevent warning for strchr
+ *
+ * Revision 1.2  2004-01-06 14:54:57+05:30  Manny
+ * fixed compilation warnings
+ *
+ * Revision 1.1  2004-01-06 12:44:10+05:30  Manny
+ * Initial revision
+ *
+ */

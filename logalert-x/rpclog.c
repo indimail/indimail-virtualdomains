@@ -1,32 +1,5 @@
 /*
- * $Log: rpclog.c,v $
- * Revision 1.9  2023-04-14 22:31:06+05:30  Cprogrammer
- * print rpc program number and version during startup
- *
- * Revision 1.8  2023-04-14 09:43:44+05:30  Cprogrammer
- * refactored code
- *
- * Revision 1.7  2021-04-05 21:58:09+05:30  Cprogrammer
- * fixed compilation errors
- *
- * Revision 1.6  2018-08-21 19:39:23+05:30  Cprogrammer
- * fix for rpc.h on openSUSE tumbleweed
- *
- * Revision 1.5  2018-08-20 13:13:28+05:30  Cprogrammer
- * added tirpc/rpc inclusion
- *
- * Revision 1.4  2014-04-17 11:29:15+05:30  Cprogrammer
- * added conditional inclusion of stdlib.h, string.h
- *
- * Revision 1.3  2013-05-15 00:18:45+05:30  Cprogrammer
- * fixed warnings
- *
- * Revision 1.2  2012-09-19 11:07:26+05:30  Cprogrammer
- * rearranged functions
- *
- * Revision 1.1  2012-09-18 18:25:37+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: rpclog.c,v 1.10 2025-01-22 15:58:36+05:30 Cprogrammer Exp mbhangui $
  */
 #include <time.h>
 #include <errno.h>
@@ -83,7 +56,7 @@
 #define SEND_MESSAGE ((u_long)1)
 
 #ifndef	lint
-static char     sccsid[] = "$Id: rpclog.c,v 1.9 2023-04-14 22:31:06+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: rpclog.c,v 1.10 2025-01-22 15:58:36+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 struct CONSOLE_MSG
@@ -308,3 +281,36 @@ getversion_rpclog_c()
 	printf("%s\n", sccsid);
 }
 #endif
+/*
+ * $Log: rpclog.c,v $
+ * Revision 1.10  2025-01-22 15:58:36+05:30  Cprogrammer
+ * fix gcc14 errors
+ *
+ * Revision 1.9  2023-04-14 22:31:06+05:30  Cprogrammer
+ * print rpc program number and version during startup
+ *
+ * Revision 1.8  2023-04-14 09:43:44+05:30  Cprogrammer
+ * refactored code
+ *
+ * Revision 1.7  2021-04-05 21:58:09+05:30  Cprogrammer
+ * fixed compilation errors
+ *
+ * Revision 1.6  2018-08-21 19:39:23+05:30  Cprogrammer
+ * fix for rpc.h on openSUSE tumbleweed
+ *
+ * Revision 1.5  2018-08-20 13:13:28+05:30  Cprogrammer
+ * added tirpc/rpc inclusion
+ *
+ * Revision 1.4  2014-04-17 11:29:15+05:30  Cprogrammer
+ * added conditional inclusion of stdlib.h, string.h
+ *
+ * Revision 1.3  2013-05-15 00:18:45+05:30  Cprogrammer
+ * fixed warnings
+ *
+ * Revision 1.2  2012-09-19 11:07:26+05:30  Cprogrammer
+ * rearranged functions
+ *
+ * Revision 1.1  2012-09-18 18:25:37+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

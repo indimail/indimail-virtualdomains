@@ -1,14 +1,5 @@
 /*
- * $Log: open_master.c,v $
- * Revision 1.3  2023-03-20 10:15:21+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.2  2020-04-01 18:57:22+05:30  Cprogrammer
- * moved authentication functions to libqmail
- *
- * Revision 1.1  2019-04-14 18:34:39+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -98,3 +89,15 @@ open_master()
 	return (open_central_db(line.s));
 }
 #endif
+/*
+ * $Log: open_master.c,v $
+ * Revision 1.3  2023-03-20 10:15:21+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.2  2020-04-01 18:57:22+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
+ * Revision 1.1  2019-04-14 18:34:39+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

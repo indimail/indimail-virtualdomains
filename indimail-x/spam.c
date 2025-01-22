@@ -1,26 +1,5 @@
 /*
- * $Log: spam.c,v $
- * Revision 1.7  2024-05-23 17:23:15+05:30  Cprogrammer
- * moved wildmat.h to libqmail
- *
- * Revision 1.6  2023-09-05 21:47:40+05:30  Cprogrammer
- * use matchregex from libqmail
- *
- * Revision 1.5  2023-03-20 10:18:16+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.4  2023-01-22 10:40:03+05:30  Cprogrammer
- * replaced qprintf with subprintf
- *
- * Revision 1.3  2020-10-01 18:29:19+05:30  Cprogrammer
- * initialize pos variable
- *
- * Revision 1.2  2020-04-01 18:57:58+05:30  Cprogrammer
- * moved authentication functions to libqmail
- *
- * Revision 1.1  2019-04-18 08:37:53+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -612,3 +591,27 @@ insertAddr(int ht, char *email)
 	hash_tab[h] = sym;
 	return sym;
 }
+/*
+ * $Log: spam.c,v $
+ * Revision 1.7  2024-05-23 17:23:15+05:30  Cprogrammer
+ * moved wildmat.h to libqmail
+ *
+ * Revision 1.6  2023-09-05 21:47:40+05:30  Cprogrammer
+ * use matchregex from libqmail
+ *
+ * Revision 1.5  2023-03-20 10:18:16+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.4  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
+ * Revision 1.3  2020-10-01 18:29:19+05:30  Cprogrammer
+ * initialize pos variable
+ *
+ * Revision 1.2  2020-04-01 18:57:58+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
+ * Revision 1.1  2019-04-18 08:37:53+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

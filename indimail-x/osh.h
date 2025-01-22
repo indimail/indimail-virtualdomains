@@ -1,17 +1,5 @@
 /*
- * $Log: osh.h,v $
- * Revision 1.3  2021-09-01 18:41:48+05:30  Cprogrammer
- * reverted return type of i_exit to int
- *
- * Revision 1.2  2021-09-01 18:29:59+05:30  Cprogrammer
- * updated function prototyps
- *
- * Revision 1.1  2019-04-13 23:39:27+05:30  Cprogrammer
- * osh.h
- *
- * Revision 2.1  2004-09-05 00:53:13+05:30  Cprogrammer
- * operator shell header file
- *
+ * $Id: $
  */
 #ifndef OSH_H
 #define OSH_H
@@ -179,3 +167,18 @@ extern char **environ;
 extern void logit(char);
 void logout();
 #endif
+/*
+ * $Log: osh.h,v $
+ * Revision 1.3  2021-09-01 18:41:48+05:30  Cprogrammer
+ * reverted return type of i_exit to int
+ *
+ * Revision 1.2  2021-09-01 18:29:59+05:30  Cprogrammer
+ * updated function prototyps
+ *
+ * Revision 1.1  2019-04-13 23:39:27+05:30  Cprogrammer
+ * osh.h
+ *
+ * Revision 2.1  2004-09-05 00:53:13+05:30  Cprogrammer
+ * operator shell header file
+ *
+ */

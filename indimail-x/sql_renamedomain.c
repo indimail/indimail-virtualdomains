@@ -1,14 +1,5 @@
 /*
- * $Log: sql_renamedomain.c,v $
- * Revision 1.3  2023-03-23 22:15:24+05:30  Cprogrammer
- * refactored code
- *
- * Revision 1.2  2023-03-20 10:18:27+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.1  2019-04-15 12:39:38+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -190,3 +181,15 @@ sql_renamedomain(char *OldDomain, char *NewDomain, char *domdir)
 		err = 1;
 	return (err);
 }
+/*
+ * $Log: sql_renamedomain.c,v $
+ * Revision 1.3  2023-03-23 22:15:24+05:30  Cprogrammer
+ * refactored code
+ *
+ * Revision 1.2  2023-03-20 10:18:27+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.1  2019-04-15 12:39:38+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

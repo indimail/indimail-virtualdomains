@@ -1,17 +1,5 @@
 /*
- * $Log: update_file.c,v $
- * Revision 1.4  2024-05-17 16:25:48+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.3  2020-03-20 15:12:01+05:30  Cprogrammer
- * BUG Fix. Virtualdomains not created when it doesn't exist
- *
- * Revision 1.2  2019-07-04 00:02:05+05:30  Cprogrammer
- * delete locks on each and every exit
- *
- * Revision 1.1  2019-04-18 08:33:42+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -240,3 +228,18 @@ update_file(const char *filename, const char *update_line, mode_t mode)
 #endif
 	return (0);
 }
+/*
+ * $Log: update_file.c,v $
+ * Revision 1.4  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.3  2020-03-20 15:12:01+05:30  Cprogrammer
+ * BUG Fix. Virtualdomains not created when it doesn't exist
+ *
+ * Revision 1.2  2019-07-04 00:02:05+05:30  Cprogrammer
+ * delete locks on each and every exit
+ *
+ * Revision 1.1  2019-04-18 08:33:42+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

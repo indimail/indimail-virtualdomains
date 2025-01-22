@@ -1,39 +1,5 @@
 /*
- * $Log: inlookup.c,v $
- * Revision 1.11  2023-03-20 10:07:28+05:30  Cprogrammer
- * fixed command line argument handling
- *
- * Revision 1.10  2023-01-22 10:40:03+05:30  Cprogrammer
- * replaced qprintf with subprintf
- *
- * Revision 1.9  2022-12-18 19:25:52+05:30  Cprogrammer
- * handle SIGCONT
- *
- * Revision 1.8  2022-10-20 11:57:46+05:30  Cprogrammer
- * converted function prototype to ansic
- *
- * Revision 1.7  2022-08-25 18:16:42+05:30  Cprogrammer
- * re-positioned location of include config.h
- *
- * Revision 1.6  2021-09-11 13:36:54+05:30  Cprogrammer
- * fixed wrong assignment of strnum2 for pid
- *
- * Revision 1.5  2021-02-07 20:26:13+05:30  Cprogrammer
- * make inlookup runable under tcpserver
- *
- * Revision 1.4  2020-10-01 18:24:22+05:30  Cprogrammer
- * Darwin Port
- *
- * Revision 1.3  2020-04-01 18:55:49+05:30  Cprogrammer
- * moved authentication functions to libqmail
- *
- * Revision 1.2  2019-04-22 23:18:13+05:30  Cprogrammer
- * replace exit() with _exit()
- * replaced atoi with scan_int
- *
- * Revision 1.1  2019-04-20 09:18:10+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifndef	lint
 static char     sccsid[] = "$Id: inlookup.c,v 1.11 2023-03-20 10:07:28+05:30 Cprogrammer Exp mbhangui $";
@@ -408,3 +374,40 @@ main()
 	return (0);
 }
 #endif
+/*
+ * $Log: inlookup.c,v $
+ * Revision 1.11  2023-03-20 10:07:28+05:30  Cprogrammer
+ * fixed command line argument handling
+ *
+ * Revision 1.10  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
+ * Revision 1.9  2022-12-18 19:25:52+05:30  Cprogrammer
+ * handle SIGCONT
+ *
+ * Revision 1.8  2022-10-20 11:57:46+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
+ * Revision 1.7  2022-08-25 18:16:42+05:30  Cprogrammer
+ * re-positioned location of include config.h
+ *
+ * Revision 1.6  2021-09-11 13:36:54+05:30  Cprogrammer
+ * fixed wrong assignment of strnum2 for pid
+ *
+ * Revision 1.5  2021-02-07 20:26:13+05:30  Cprogrammer
+ * make inlookup runable under tcpserver
+ *
+ * Revision 1.4  2020-10-01 18:24:22+05:30  Cprogrammer
+ * Darwin Port
+ *
+ * Revision 1.3  2020-04-01 18:55:49+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
+ * Revision 1.2  2019-04-22 23:18:13+05:30  Cprogrammer
+ * replace exit() with _exit()
+ * replaced atoi with scan_int
+ *
+ * Revision 1.1  2019-04-20 09:18:10+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

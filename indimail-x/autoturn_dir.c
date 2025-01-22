@@ -1,17 +1,5 @@
 /*
- * $Log: autoturn_dir.c,v $
- * Revision 1.4  2024-05-17 16:25:48+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.3  2023-03-20 09:41:36+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.2  2020-04-01 18:53:10+05:30  Cprogrammer
- * moved getEnvConfig to libqmail
- *
- * Revision 1.1  2019-04-18 08:25:27+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -103,3 +91,18 @@ autoturn_dir(const char *domain)
 	close(fd);
 	return ((char *) 0);
 }
+/*
+ * $Log: autoturn_dir.c,v $
+ * Revision 1.4  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.3  2023-03-20 09:41:36+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.2  2020-04-01 18:53:10+05:30  Cprogrammer
+ * moved getEnvConfig to libqmail
+ *
+ * Revision 1.1  2019-04-18 08:25:27+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

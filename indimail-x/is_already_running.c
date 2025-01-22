@@ -1,11 +1,5 @@
 /*
- * $Log: is_already_running.c,v $
- * Revision 1.2  2023-03-20 10:08:20+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.1  2019-04-18 08:21:41+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -98,3 +92,12 @@ is_already_running(char *pgname)
 	close(fd);
 	return (0);
 }
+/*
+ * $Log: is_already_running.c,v $
+ * Revision 1.2  2023-03-20 10:08:20+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.1  2019-04-18 08:21:41+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

@@ -1,32 +1,5 @@
 /*
- * $Log: vreorg.c,v $
- * Revision 1.9  2023-03-20 10:39:58+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.8  2022-08-07 13:10:17+05:30  Cprogrammer
- * updated for scram argument to sql_getpw()
- *
- * Revision 1.7  2021-09-12 20:18:07+05:30  Cprogrammer
- * moved replacestr to libqmail
- *
- * Revision 1.6  2021-07-08 11:51:29+05:30  Cprogrammer
- * add check for misconfigured assign file
- *
- * Revision 1.5  2020-10-14 00:20:59+05:30  Cprogrammer
- * fixed infinite loop
- *
- * Revision 1.4  2020-06-16 17:56:58+05:30  Cprogrammer
- * moved setuserid function to libqmail
- *
- * Revision 1.3  2019-06-07 15:41:57+05:30  Cprogrammer
- * use sgetopt library for getopt()
- *
- * Revision 1.2  2019-04-22 23:20:15+05:30  Cprogrammer
- * replaced atoi() with scan_int()
- *
- * Revision 1.1  2019-04-18 08:38:47+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -265,3 +238,33 @@ main(int argc, char **argv)
 	flush("vreorg");
 	return (0);
 }
+/*
+ * $Log: vreorg.c,v $
+ * Revision 1.9  2023-03-20 10:39:58+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.8  2022-08-07 13:10:17+05:30  Cprogrammer
+ * updated for scram argument to sql_getpw()
+ *
+ * Revision 1.7  2021-09-12 20:18:07+05:30  Cprogrammer
+ * moved replacestr to libqmail
+ *
+ * Revision 1.6  2021-07-08 11:51:29+05:30  Cprogrammer
+ * add check for misconfigured assign file
+ *
+ * Revision 1.5  2020-10-14 00:20:59+05:30  Cprogrammer
+ * fixed infinite loop
+ *
+ * Revision 1.4  2020-06-16 17:56:58+05:30  Cprogrammer
+ * moved setuserid function to libqmail
+ *
+ * Revision 1.3  2019-06-07 15:41:57+05:30  Cprogrammer
+ * use sgetopt library for getopt()
+ *
+ * Revision 1.2  2019-04-22 23:20:15+05:30  Cprogrammer
+ * replaced atoi() with scan_int()
+ *
+ * Revision 1.1  2019-04-18 08:38:47+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

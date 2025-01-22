@@ -1,17 +1,5 @@
 /*
- * $Log: vfilter_header.c,v $
- * Revision 1.4  2023-09-05 21:50:44+05:30  Cprogrammer
- * added headerNumber function to convert textual header name to number
- *
- * Revision 1.3  2023-03-20 10:36:29+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.2  2020-04-01 18:58:46+05:30  Cprogrammer
- * moved authentication functions to libqmail
- *
- * Revision 1.1  2019-04-18 08:33:58+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -155,3 +143,18 @@ headerList()
 	return (hptr);
 }
 #endif
+/*
+ * $Log: vfilter_header.c,v $
+ * Revision 1.4  2023-09-05 21:50:44+05:30  Cprogrammer
+ * added headerNumber function to convert textual header name to number
+ *
+ * Revision 1.3  2023-03-20 10:36:29+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.2  2020-04-01 18:58:46+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
+ * Revision 1.1  2019-04-18 08:33:58+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

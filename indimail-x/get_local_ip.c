@@ -1,23 +1,5 @@
 /*
- * $Log: get_local_ip.c,v $
- * Revision 1.6  2023-09-11 09:08:35+05:30  Cprogrammer
- * incorrect use of localiphost instead of hostip
- *
- * Revision 1.5  2023-03-20 10:01:48+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.4  2023-01-03 21:11:09+05:30  Cprogrammer
- * replaced hints.ai_socktype from SOCK_DGRAM to SOCK_STREAM
- *
- * Revision 1.3  2020-04-01 18:54:49+05:30  Cprogrammer
- * moved authentication functions to libqmail
- *
- * Revision 1.2  2019-07-04 10:05:36+05:30  Cprogrammer
- * collapsed multiple if statements
- *
- * Revision 1.1  2019-04-14 18:32:24+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -161,3 +143,24 @@ get_local_ip(int family)
 #endif /*- ENABLE_IPV6 */
 	return (hostbuf.s);
 }
+/*
+ * $Log: get_local_ip.c,v $
+ * Revision 1.6  2023-09-11 09:08:35+05:30  Cprogrammer
+ * incorrect use of localiphost instead of hostip
+ *
+ * Revision 1.5  2023-03-20 10:01:48+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.4  2023-01-03 21:11:09+05:30  Cprogrammer
+ * replaced hints.ai_socktype from SOCK_DGRAM to SOCK_STREAM
+ *
+ * Revision 1.3  2020-04-01 18:54:49+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
+ * Revision 1.2  2019-07-04 10:05:36+05:30  Cprogrammer
+ * collapsed multiple if statements
+ *
+ * Revision 1.1  2019-04-14 18:32:24+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

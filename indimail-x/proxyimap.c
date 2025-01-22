@@ -1,20 +1,5 @@
 /*
- * $Log: proxyimap.c,v $
- * Revision 1.5  2023-03-20 10:16:38+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.4  2023-01-03 21:16:40+05:30  Cprogrammer
- * added 'proxyimap' identifier in connection log message
- *
- * Revision 1.3  2022-12-25 20:32:53+05:30  Cprogrammer
- * allow any TLS/SSL helper program other than sslerator, couriertls
- *
- * Revision 1.2  2019-04-22 23:14:34+05:30  Cprogrammer
- * added missing strerr.h
- *
- * Revision 1.1  2019-04-18 08:39:50+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -265,3 +250,21 @@ main()
 	return(0);
 }
 #endif
+/*
+ * $Log: proxyimap.c,v $
+ * Revision 1.5  2023-03-20 10:16:38+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.4  2023-01-03 21:16:40+05:30  Cprogrammer
+ * added 'proxyimap' identifier in connection log message
+ *
+ * Revision 1.3  2022-12-25 20:32:53+05:30  Cprogrammer
+ * allow any TLS/SSL helper program other than sslerator, couriertls
+ *
+ * Revision 1.2  2019-04-22 23:14:34+05:30  Cprogrammer
+ * added missing strerr.h
+ *
+ * Revision 1.1  2019-04-18 08:39:50+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

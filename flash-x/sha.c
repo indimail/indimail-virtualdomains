@@ -1,14 +1,5 @@
 /*
- * $Log: sha.c,v $
- * Revision 1.3  2020-06-02 18:55:42+05:30  Cprogrammer
- * increased size of crypted_buffer
- *
- * Revision 1.2  2008-07-17 21:39:09+05:30  Cprogrammer
- * fixed compile warnings on mac
- *
- * Revision 1.1  2002-12-16 01:55:20+05:30  Manny
- * Initial revision
- *
+ * $Id: sha.c,v 1.4 2025-01-22 15:37:42+05:30 Cprogrammer Exp mbhangui $
  *
  * Implementation of NIST's Secure Hash Algorithm (FIPS 180)
  * Lightly bummed for execution efficiency.
@@ -465,3 +456,18 @@ nist_guts(int file_flag, FILE *stream, char *mem, unsigned long length, unsigned
 	buf[3] = h3;
 	buf[4] = h4;
 }
+/*
+ * $Log: sha.c,v $
+ * Revision 1.4  2025-01-22 15:37:42+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
+ * Revision 1.3  2020-06-02 18:55:42+05:30  Cprogrammer
+ * increased size of crypted_buffer
+ *
+ * Revision 1.2  2008-07-17 21:39:09+05:30  Cprogrammer
+ * fixed compile warnings on mac
+ *
+ * Revision 1.1  2002-12-16 01:55:20+05:30  Manny
+ * Initial revision
+ *
+ */

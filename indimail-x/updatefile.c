@@ -1,11 +1,5 @@
 /*
- * $Log: updatefile.c,v $
- * Revision 1.2  2019-06-07 16:10:05+05:30  mbhangui
- * use sgetopt library for getopt()
- *
- * Revision 1.1  2019-04-18 08:33:41+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -123,3 +117,12 @@ main(int argc, char **argv)
 	}
 	return (0);
 }
+/*
+ * $Log: updatefile.c,v $
+ * Revision 1.2  2019-06-07 16:10:05+05:30  mbhangui
+ * use sgetopt library for getopt()
+ *
+ * Revision 1.1  2019-04-18 08:33:41+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

@@ -1,20 +1,5 @@
 /*
- * $Log: isvirtualdomain.c,v $
- * Revision 1.5  2023-03-20 10:11:01+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.4  2021-09-11 13:38:48+05:30  Cprogrammer
- * on system error return -1 instead of exit
- *
- * Revision 1.3  2020-04-01 18:56:42+05:30  Cprogrammer
- * moved authentication functions to libqmail
- *
- * Revision 1.2  2019-12-03 22:13:19+05:30  Cprogrammer
- * return 0 for all domains if virtualdomains control file is absent
- *
- * Revision 1.1  2019-04-18 08:25:39+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -110,3 +95,21 @@ isvirtualdomain(char *domain)
 	close(fd);
 	return (0);
 }
+/*
+ * $Log: isvirtualdomain.c,v $
+ * Revision 1.5  2023-03-20 10:11:01+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.4  2021-09-11 13:38:48+05:30  Cprogrammer
+ * on system error return -1 instead of exit
+ *
+ * Revision 1.3  2020-04-01 18:56:42+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
+ * Revision 1.2  2019-12-03 22:13:19+05:30  Cprogrammer
+ * return 0 for all domains if virtualdomains control file is absent
+ *
+ * Revision 1.1  2019-04-18 08:25:39+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

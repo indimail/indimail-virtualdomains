@@ -1,26 +1,5 @@
 /*
- * $Log: recalc_quota.c,v $
- * Revision 1.7  2020-10-12 12:41:07+05:30  Cprogrammer
- * maildirquota problem: strnum2 variable wasn't getting set
- *
- * Revision 1.6  2020-09-21 07:55:11+05:30  Cprogrammer
- * fixed incorrect initialization of struct flock
- *
- * Revision 1.5  2019-07-29 14:02:12+05:30  Cprogrammer
- * added scan.h for scan_ulong()
- *
- * Revision 1.4  2019-07-27 11:26:53+05:30  Cprogrammer
- * added FAST_QUOTA, MAILDIRSIZE_MAX_SIZE, MALIDISIZE_MAX_AGE variables for improving locking on NFS mounted Maildirs
- *
- * Revision 1.3  2019-07-26 21:54:40+05:30  Cprogrammer
- * added FAST_QUOTA env variable to avoid costly disk read for quota calculations
- *
- * Revision 1.2  2019-04-21 16:14:17+05:30  Cprogrammer
- * remove '/' from the end
- *
- * Revision 1.1  2019-04-18 15:43:49+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -245,3 +224,27 @@ mdir_t recalc_quota(char *Maildir, int force_flag)
 	prevmaildir.len--;
 	return (mail_size);
 }
+/*
+ * $Log: recalc_quota.c,v $
+ * Revision 1.7  2020-10-12 12:41:07+05:30  Cprogrammer
+ * maildirquota problem: strnum2 variable wasn't getting set
+ *
+ * Revision 1.6  2020-09-21 07:55:11+05:30  Cprogrammer
+ * fixed incorrect initialization of struct flock
+ *
+ * Revision 1.5  2019-07-29 14:02:12+05:30  Cprogrammer
+ * added scan.h for scan_ulong()
+ *
+ * Revision 1.4  2019-07-27 11:26:53+05:30  Cprogrammer
+ * added FAST_QUOTA, MAILDIRSIZE_MAX_SIZE, MALIDISIZE_MAX_AGE variables for improving locking on NFS mounted Maildirs
+ *
+ * Revision 1.3  2019-07-26 21:54:40+05:30  Cprogrammer
+ * added FAST_QUOTA env variable to avoid costly disk read for quota calculations
+ *
+ * Revision 1.2  2019-04-21 16:14:17+05:30  Cprogrammer
+ * remove '/' from the end
+ *
+ * Revision 1.1  2019-04-18 15:43:49+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

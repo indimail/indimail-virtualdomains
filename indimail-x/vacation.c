@@ -1,26 +1,5 @@
 /*
- * $Log: vacation.c,v $
- * Revision 1.7  2024-05-17 16:25:48+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.6  2021-07-08 15:18:37+05:30  Cprogrammer
- * fixed argument handling
- *
- * Revision 1.5  2020-07-04 22:54:50+05:30  Cprogrammer
- * replaced utime() with utimes()
- *
- * Revision 1.4  2020-06-12 21:37:59+05:30  Cprogrammer
- * added stdlib.h for mkstemp() prototype
- *
- * Revision 1.3  2020-04-01 18:58:21+05:30  Cprogrammer
- * moved authentication functions to libqmail
- *
- * Revision 1.2  2019-06-07 15:57:12+05:30  mbhangui
- * use _exit() instead of exit()
- *
- * Revision 1.1  2019-04-18 08:38:40+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -400,3 +379,27 @@ main(int argc, char **argv)
 		close(wfd);
 	_exit(runcmmd(cmmd.s, 0));
 }
+/*
+ * $Log: vacation.c,v $
+ * Revision 1.7  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.6  2021-07-08 15:18:37+05:30  Cprogrammer
+ * fixed argument handling
+ *
+ * Revision 1.5  2020-07-04 22:54:50+05:30  Cprogrammer
+ * replaced utime() with utimes()
+ *
+ * Revision 1.4  2020-06-12 21:37:59+05:30  Cprogrammer
+ * added stdlib.h for mkstemp() prototype
+ *
+ * Revision 1.3  2020-04-01 18:58:21+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
+ * Revision 1.2  2019-06-07 15:57:12+05:30  mbhangui
+ * use _exit() instead of exit()
+ *
+ * Revision 1.1  2019-04-18 08:38:40+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

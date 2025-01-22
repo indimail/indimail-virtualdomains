@@ -1,17 +1,5 @@
 /*
- * $Log: skip_relay.c,v $
- * Revision 1.4  2023-03-20 10:18:10+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.3  2020-10-14 00:19:48+05:30  Cprogrammer
- * new logic for terminating a line
- *
- * Revision 1.2  2020-04-01 18:57:52+05:30  Cprogrammer
- * moved authentication functions to libqmail
- *
- * Revision 1.1  2019-04-18 08:36:22+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -101,3 +89,18 @@ skip_relay(char *ipaddr)
 	return (0);
 }
 #endif
+/*
+ * $Log: skip_relay.c,v $
+ * Revision 1.4  2023-03-20 10:18:10+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.3  2020-10-14 00:19:48+05:30  Cprogrammer
+ * new logic for terminating a line
+ *
+ * Revision 1.2  2020-04-01 18:57:52+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
+ * Revision 1.1  2019-04-18 08:36:22+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

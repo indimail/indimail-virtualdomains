@@ -1,8 +1,5 @@
 /*
- * $Log: md5.h,v $
- * Revision 1.1  2004-01-06 12:49:10+05:30  Manny
- * Initial revision
- * 
+ * $Id: md5.h,v 1.2 2025-01-22 15:51:54+05:30 Cprogrammer Exp mbhangui $
  *
  * MD5.H - header file for MD5C.C
  * Copyright (C) 1991-2, RSA Data Security, Inc. Created 1991. All
@@ -74,3 +71,11 @@ MD5_CTX;
 void MD5Init    PROTO_LIST((MD5_CTX *));
 void MD5Update  PROTO_LIST((MD5_CTX *, unsigned char *, unsigned int));
 void MD5Final   PROTO_LIST((unsigned char[16], MD5_CTX *));
+/*
+ * $Log: md5.h,v $
+ * Revision 1.2  2025-01-22 15:51:54+05:30  Cprogrammer
+ * fix gcc14 errors
+ *
+ * Revision 1.1  2004-01-06 12:49:10+05:30  Manny
+ * Initial revision
+ */

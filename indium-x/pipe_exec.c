@@ -1,18 +1,8 @@
 /*
- * $Log: pipe_exec.c,v $
- * Revision 2.3  2021-03-14 21:32:32+05:30  Cprogrammer
- * fixed compilation error
- *
- * Revision 2.2  2002-09-02 22:04:37+05:30  Cprogrammer
- * added SIGPIPE handling
- *
- * Revision 2.1  2002-09-01 20:52:53+05:30  Cprogrammer
- * function for executing smtp auth programs
- *
+ * $Id: pipe_exec.c,v 2.4 2025-01-22 15:53:56+05:30 Cprogrammer Exp mbhangui $
  */
-
 #ifndef lint
-static char     sccsid[] = "$Id: pipe_exec.c,v 2.3 2021-03-14 21:32:32+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: pipe_exec.c,v 2.4 2025-01-22 15:53:56+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdio.h>
@@ -68,3 +58,18 @@ getversion_pipe_exec_c()
 	printf("%s\n", sccsid);
 }
 #endif
+/*
+ * $Log: pipe_exec.c,v $
+ * Revision 2.4  2025-01-22 15:53:56+05:30  Cprogrammer
+ * fix gcc14 errors
+ *
+ * Revision 2.3  2021-03-14 21:32:32+05:30  Cprogrammer
+ * fixed compilation error
+ *
+ * Revision 2.2  2002-09-02 22:04:37+05:30  Cprogrammer
+ * added SIGPIPE handling
+ *
+ * Revision 2.1  2002-09-01 20:52:53+05:30  Cprogrammer
+ * function for executing smtp auth programs
+ *
+ */

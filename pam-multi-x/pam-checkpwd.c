@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: pam-checkpwd.c,v 1.15 2025-01-22 16:04:00+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -25,7 +25,7 @@
 #define isEscape(ch) ((ch) == '"' || (ch) == '\'')
 
 #ifndef lint
-static char     sccsid[] = "$Id: pam-checkpwd.c,v 1.14 2021-01-27 18:47:28+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: pam-checkpwd.c,v 1.15 2025-01-22 16:04:00+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             authlen = 512;
@@ -462,6 +462,9 @@ getversion_checkpassword_pam_c()
 
 /*
  * $Log: pam-checkpwd.c,v $
+ * Revision 1.15  2025-01-22 16:04:00+05:30  Cprogrammer
+ * fix gcc14 errors
+ *
  * Revision 1.14  2021-01-27 18:47:28+05:30  Cprogrammer
  * renamed use_dovecot to native_checkpassword
  *

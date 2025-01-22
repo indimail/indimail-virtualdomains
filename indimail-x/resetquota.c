@@ -1,14 +1,5 @@
 /*
- * $Log: resetquota.c,v $
- * Revision 1.3  2023-03-20 10:17:49+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.2  2019-06-07 16:01:45+05:30  mbhangui
- * use sgetopt library for getopt()
- *
- * Revision 1.1  2019-04-18 08:36:21+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -240,3 +231,15 @@ main(int argc, char **argv)
 	}
 	return (status);
 }
+/*
+ * $Log: resetquota.c,v $
+ * Revision 1.3  2023-03-20 10:17:49+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.2  2019-06-07 16:01:45+05:30  mbhangui
+ * use sgetopt library for getopt()
+ *
+ * Revision 1.1  2019-04-18 08:36:21+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

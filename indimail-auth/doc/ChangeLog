@@ -17,6 +17,8 @@ Release 1.0.1-1.1 Start 07/06/2023 End 13/11/2023
 08. indimail-auth.spec, debian/postinst.in: removed creation of
     /run/indimail/pwdlookup
 - 06/08/2024 - indimail-3.4.7
+- 22/01/2025
+09. fix gcc14 errors
 
 * Sun 14 May 2023 11:24:48 +0000 Manvendra Bhangui <indimail-auth@indimail.org> 1.0.0-1.1%{?dist}
 Release 1.0.0-1.1 Start 21/05/2020 End 14/05/2023

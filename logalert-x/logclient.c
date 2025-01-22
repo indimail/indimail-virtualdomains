@@ -1,3 +1,6 @@
+/*
+ * $Id: logclient.c,v 1.17 2025-01-22 15:58:08+05:30 Cprogrammer Exp mbhangui $
+ */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -53,7 +56,7 @@
 #define FATAL   "logclient: fatal: " 
 
 #ifndef	lint
-static char     sccsid[] = "$Id: logclient.c,v 1.16 2024-05-31 09:01:34+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: logclient.c,v 1.17 2025-01-22 15:58:08+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 
@@ -551,6 +554,9 @@ getversion_logclient_c()
 
 /*
  * $Log: logclient.c,v $
+ * Revision 1.17  2025-01-22 15:58:08+05:30  Cprogrammer
+ * fix gcc14 errors
+ *
  * Revision 1.16  2024-05-31 09:01:34+05:30  Cprogrammer
  * replaced perror with strerr_die2sys
  *

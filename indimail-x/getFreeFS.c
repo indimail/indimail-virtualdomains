@@ -1,14 +1,5 @@
 /*
- * $Log: getFreeFS.c,v $
- * Revision 1.3  2023-03-20 10:00:12+05:30  Cprogrammer
- * use SYSONFDIR env variable if set for lastfstab
- *
- * Revision 1.2  2020-04-01 18:59:42+05:30  Cprogrammer
- * moved authentication functions to libqmail
- *
- * Revision 1.1  2019-04-18 08:25:28+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -201,3 +192,15 @@ getFreeFS()
 		return (tmpfstab);
 	return (ptr);
 }
+/*
+ * $Log: getFreeFS.c,v $
+ * Revision 1.3  2023-03-20 10:00:12+05:30  Cprogrammer
+ * use SYSONFDIR env variable if set for lastfstab
+ *
+ * Revision 1.2  2020-04-01 18:59:42+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
+ * Revision 1.1  2019-04-18 08:25:28+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

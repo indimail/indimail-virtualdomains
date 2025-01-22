@@ -1,23 +1,5 @@
 /*
- * $Log: bulletin.c,v $
- * Revision 1.6  2023-03-20 09:50:06+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.5  2021-01-26 00:27:45+05:30  Cprogrammer
- * renamed sql_init() to in_sql_init() to avoid clash with dovecot sql authentication driver
- *
- * Revision 1.4  2020-10-19 12:46:06+05:30  Cprogrammer
- * use /var/indomain/domains for domain/bulk_mail
- *
- * Revision 1.3  2020-10-01 18:20:40+05:30  Cprogrammer
- * initialize len variable
- *
- * Revision 1.2  2019-06-07 15:58:03+05:30  mbhangui
- * added include file stdlib.h
- *
- * Revision 1.1  2019-04-15 09:45:57+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -500,3 +482,24 @@ bulletin(char *emailFile, char *subscriber_list)
 	return (insert_bulletin(domain, emailFile, subscriber_list));
 }
 #endif /*- #ifdef CLUSTERED_SITE */
+/*
+ * $Log: bulletin.c,v $
+ * Revision 1.6  2023-03-20 09:50:06+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.5  2021-01-26 00:27:45+05:30  Cprogrammer
+ * renamed sql_init() to in_sql_init() to avoid clash with dovecot sql authentication driver
+ *
+ * Revision 1.4  2020-10-19 12:46:06+05:30  Cprogrammer
+ * use /var/indomain/domains for domain/bulk_mail
+ *
+ * Revision 1.3  2020-10-01 18:20:40+05:30  Cprogrammer
+ * initialize len variable
+ *
+ * Revision 1.2  2019-06-07 15:58:03+05:30  mbhangui
+ * added include file stdlib.h
+ *
+ * Revision 1.1  2019-04-15 09:45:57+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

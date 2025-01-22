@@ -1,38 +1,5 @@
 /*
- * $Log: vdominfo.c,v $
- * Revision 1.11  2024-05-17 16:25:48+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.10  2023-07-18 17:05:51+05:30  Cprogrammer
- * fixed using a static location that was being overwritten
- *
- * Revision 1.9  2023-07-17 11:48:22+05:30  Cprogrammer
- * display hash method for domain
- *
- * Revision 1.8  2023-03-20 10:36:03+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.7  2023-01-22 10:40:03+05:30  Cprogrammer
- * replaced qprintf with subprintf
- *
- * Revision 1.6  2022-10-20 11:58:48+05:30  Cprogrammer
- * converted function prototype to ansic
- *
- * Revision 1.5  2021-07-08 11:49:11+05:30  Cprogrammer
- * add check for misconfigured assign file
- *
- * Revision 1.4  2020-06-16 17:56:39+05:30  Cprogrammer
- * moved setuserid function to libqmail
- *
- * Revision 1.3  2020-04-01 18:58:41+05:30  Cprogrammer
- * moved authentication functions to libqmail
- *
- * Revision 1.2  2019-06-07 15:53:04+05:30  mbhangui
- * use sgetopt library for getopt()
- *
- * Revision 1.1  2019-04-18 15:51:43+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -692,3 +659,39 @@ main(int argc, char **argv)
 	iclose();
 	return(0);
 }
+/*
+ * $Log: vdominfo.c,v $
+ * Revision 1.11  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.10  2023-07-18 17:05:51+05:30  Cprogrammer
+ * fixed using a static location that was being overwritten
+ *
+ * Revision 1.9  2023-07-17 11:48:22+05:30  Cprogrammer
+ * display hash method for domain
+ *
+ * Revision 1.8  2023-03-20 10:36:03+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.7  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
+ * Revision 1.6  2022-10-20 11:58:48+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
+ * Revision 1.5  2021-07-08 11:49:11+05:30  Cprogrammer
+ * add check for misconfigured assign file
+ *
+ * Revision 1.4  2020-06-16 17:56:39+05:30  Cprogrammer
+ * moved setuserid function to libqmail
+ *
+ * Revision 1.3  2020-04-01 18:58:41+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
+ * Revision 1.2  2019-06-07 15:53:04+05:30  mbhangui
+ * use sgetopt library for getopt()
+ *
+ * Revision 1.1  2019-04-18 15:51:43+05:30  Cprogrammer
+ * Initial revision
+ *
+ */
