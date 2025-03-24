@@ -20,7 +20,6 @@
 %global _hardened_build    1
 %endif
 
-#global nodebug            1
 %if %{defined nodebug}
 %global debug_package %{nil}
 %endif
@@ -48,7 +47,7 @@
 %global buildsubdir        %{name}-%{version}
 %endif
 
-%if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?centos_ver} > 7 || 0%{?almalinux_version} > 700 || 0%{?rocky_version} > 700 || 0%{?fedora} > 30 || 0%{?rhel} > 7 || %{defined mgaversion} || %{defined amzn} || %{defined openEuler} || ( 0%{?sle_version} >= 150400 && 0%{?is_opensuse} ) || 0%{?mageia}
+%if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?centos_ver} > 7 || 0%{?almalinux_version} > 700 || 0%{?rocky_version} > 700 || 0%{?fedora} > 30 || 0%{?rhel} > 7 || %{defined mgaversion} || %{defined amzn} || %{defined openEuler} || ( 0%{?sle_version} >= 150400 && 0%{?is_opensuse} ) || 0%{?suse_version} > 1600 || 0%{?mageia}
 %global pythondir %{python3_sitelib}
 %else
 %global pythondir %(python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")
@@ -97,7 +96,7 @@ BuildRequires: gzip autoconf automake libtool pkgconfig
 BuildRequires: sed findutils procps
 BuildRequires: xz bison flex
 BuildRequires: gettext-devel
-%if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?centos_ver} > 7 || 0%{?almalinux_version} > 700 || 0%{?rocky_version} > 700 || 0%{?fedora} > 30 || 0%{?rhel} > 7 || %{defined mgaversion} || %{defined amzn} || %{defined openEuler} || ( 0%{?sle_version} >= 150400 && 0%{?is_opensuse} ) || 0%{?mageia}
+%if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?centos_ver} > 7 || 0%{?almalinux_version} > 700 || 0%{?rocky_version} > 700 || 0%{?fedora} > 30 || 0%{?rhel} > 7 || %{defined mgaversion} || %{defined amzn} || %{defined openEuler} || ( 0%{?sle_version} >= 150400 && 0%{?is_opensuse} ) || 0%{?suse_version} > 1600 || 0%{?mageia}
 BuildRequires: python3 python3-devel
 %else
 BuildRequires: python python-devel
@@ -180,7 +179,7 @@ echo target_alias   %_target_alias
 echo target_cpu     %_target_cpu
 echo target_os      %_target_os
 echo target_vendor  %_target_vendor
-%if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?centos_ver} > 7 || 0%{?almalinux_version} > 700 || 0%{?rocky_version} > 700 || 0%{?fedora} > 30 || 0%{?rhel} > 7 || %{defined mgaversion} || %{defined amzn} || %{defined openEuler} || ( 0%{?sle_version} >= 150400 && 0%{?is_opensuse} ) || 0%{?mageia}
+%if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?centos_ver} > 7 || 0%{?almalinux_version} > 700 || 0%{?rocky_version} > 700 || 0%{?fedora} > 30 || 0%{?rhel} > 7 || %{defined mgaversion} || %{defined amzn} || %{defined openEuler} || ( 0%{?sle_version} >= 150400 && 0%{?is_opensuse} ) || 0%{?suse_version} > 1600 || 0%{?mageia}
 echo pythondir      %{python3_sitelib}
 %else
 echo pythondir      %{pythondir}
@@ -275,12 +274,11 @@ echo "Removing pyc for rocky"
 echo "Removing pyc for scientificlinux"
 %{__rm} -f %{buildroot}%{pythondir}/fetchmailconf.py
 %endif
-%if ( 0%{?sle_version} < 150400 && 0%{?is_opensuse} )
-echo "Removing pyc for opensuse version 150400"
-%{__rm} -f %{buildroot}%{pythondir}/fetchmailconf.py
-%endif
-%if %{defined suse_version} && 0%{?suse_version} <= 150400 && !0%{?is_opensuse}
-echo "Removing pyc for SLE version 15"
+
+%if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?centos_ver} > 7 || 0%{?almalinux_version} > 700 || 0%{?rocky_version} > 700 || 0%{?fedora} > 30 || 0%{?rhel} > 7 || %{defined mgaversion} || %{defined amzn} || %{defined openEuler} || ( 0%{?sle_version} >= 150400 && 0%{?is_opensuse} ) || 0%{?suse_version} > 1600 || 0%{?mageia}
+echo "Not removing pyc"
+%else
+echo "Removing pyc for sle_version %{sle_version} suse_version %{suse_version}"
 %{__rm} -f %{buildroot}%{pythondir}/fetchmailconf.py
 %endif
 
@@ -438,7 +436,7 @@ done
 %lang(ro) /usr/share/indimail/locale/ro/LC_MESSAGES/fetchmail.mo
 %lang(sr) /usr/share/indimail/locale/sr/LC_MESSAGES/fetchmail.mo
 
-%if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?centos_ver} > 7 || 0%{?almalinux_version} > 700 || 0%{?rocky_version} > 700 || 0%{?fedora} > 30 || 0%{?rhel} > 7 || %{defined mgaversion} || %{defined amzn} || %{defined openEuler} || ( 0%{?sle_version} >= 150400 && 0%{?is_opensuse} ) || 0%{?mageia}
+%if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?centos_ver} > 7 || 0%{?almalinux_version} > 700 || 0%{?rocky_version} > 700 || 0%{?fedora} > 30 || 0%{?rhel} > 7 || %{defined mgaversion} || %{defined amzn} || %{defined openEuler} || ( 0%{?sle_version} >= 150400 && 0%{?is_opensuse} ) || 0%{?suse_version} > 1600 || 0%{?mageia}
 %attr(644,root,root)                    %{pythondir}/__pycache__/*.pyc
 %attr(755,root,root)                    %{pythondir}/fetchmailconf.py
 %endif

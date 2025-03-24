@@ -21,8 +21,7 @@ tai64nlocal(Tcl_Interp *interp, int argc, char **argv)
 	static char     str[56], errormsg[128];
 	struct tm      *t;
 
-	if (argc <= 0 || argv[0] == NULL)
-	{
+	if (argc <= 0 || argv[0] == NULL) {
 		Tcl_SetResult(interp, "Usage: tai unix|local|version timestamp; please try again.", TCL_STATIC);
 		return TCL_ERROR;
 	}
@@ -34,24 +33,20 @@ tai64nlocal(Tcl_Interp *interp, int argc, char **argv)
 	query = argv[0];
 #endif
 	ch = *query;
-	if (ch != '@')
-	{
+	if (ch != '@') {
 #if UTF_ENCODING
 		Tcl_DStringFree(&ds);
 #endif
-		/*- Tcl_SetResult(interp, "", TCL_STATIC); -*/
-		snprintf(errormsg, sizeof(errormsg), "Invalid string [%s]", query),
+		snprintf(errormsg, sizeof(errormsg), "Invalid string [%s]", query);
 		Tcl_SetResult(interp, errormsg, TCL_STATIC);
 		return TCL_ERROR;
 	}
 	secs = 0;
 	nanosecs = 0;
-	for (ptr = query + 1;*ptr;ptr++)
-	{
+	for (ptr = query + 1;*ptr;ptr++) {
 		ch = *ptr;
 		u = ch - '0';
-		if (u >= 10)
-		{
+		if (u >= 10) {
 			u = ch - 'a';
 			if (u >= 6)
 				break;
@@ -84,8 +79,7 @@ tai64nunix(Tcl_Interp *interp, int argc, char **argv)
 	unsigned long   nanosecs, u;
 	static char     str[56], errormsg[128];
 
-	if (argc <= 0 || argv[0] == NULL)
-	{
+	if (argc <= 0 || argv[0] == NULL) {
 		Tcl_SetResult(interp, "Usage: tai unix|local|version timestamp; please try again.", TCL_STATIC);
 		return TCL_ERROR;
 	}
@@ -97,24 +91,20 @@ tai64nunix(Tcl_Interp *interp, int argc, char **argv)
 	query = argv[0];
 #endif
 	ch = *query;
-	if (ch != '@')
-	{
+	if (ch != '@') {
 #if UTF_ENCODING
 		Tcl_DStringFree(&ds);
 #endif
-		/*- Tcl_SetResult(interp, "", TCL_STATIC); -*/
-		snprintf(errormsg, sizeof(errormsg), "Invalid string [%s]", query),
+		snprintf(errormsg, sizeof(errormsg), "Invalid string [%s]", query);
 		Tcl_SetResult(interp, errormsg, TCL_STATIC);
 		return TCL_ERROR;
 	}
 	secs = 0;
 	nanosecs = 0;
-	for (ptr = query + 1;*ptr;ptr++)
-	{
+	for (ptr = query + 1;*ptr;ptr++) {
 		ch = *ptr;
 		u = ch - '0';
-		if (u >= 10)
-		{
+		if (u >= 10) {
 			u = ch - 'a';
 			if (u >= 6)
 				break;
@@ -139,8 +129,7 @@ int
 Tai64Cmd(ClientData data, Tcl_Interp *interp, int argc, char **argv)
 {
 	/*- any command specified */
-	if (argc <= 1)
-	{
+	if (argc <= 1) {
 		Tcl_SetResult(interp, "Usage: tai unix|local|version; please try again.", TCL_STATIC);
 		return TCL_ERROR;
 	}
@@ -151,8 +140,7 @@ Tai64Cmd(ClientData data, Tcl_Interp *interp, int argc, char **argv)
 	if (strcmp(argv[1], "unix") == 0)
 		return tai64nunix(interp, argc - 2, argv + 2);
 	else
-	if (strcmp(argv[1], "version") == 0)
-	{
+	if (strcmp(argv[1], "version") == 0) {
 		Tcl_SetResult(interp, "TAI64 Interface for Tcl; version 1.0", TCL_STATIC);
 		return TCL_OK;
 	} 
