@@ -3,7 +3,7 @@ Release @version@-@release@ Start 01/01/2025 End XX/XX/XXXX
 - 01/01/2025
 01. remove VIRTUAL_PKG_LIB env variable on package removal
 02. added libindimail, libmysql control file to control files list in
-   controlfiles.i
+    controlfiles.i
 - 22/01/2025
 03. fix gcc14 errors
 
