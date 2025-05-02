@@ -7,7 +7,7 @@ email=$(shell cat ../conf-email)
 #
 
 all: rules postinst postrm debian.tar.gz logalert.dsc \
-logalert-xUbuntu_24.04.dsc dummy.tar.gz
+logalert-xUbuntu_24.04.dsc logalert-xUbuntu_25.04.dsc dummy.tar.gz
 
 clean:
 	/bin/rm -f rules postinst postrm *.dsc debian.tar.gz dummy.tar.gz
@@ -36,6 +36,8 @@ copyright: copyright.in ../conf-email
 logalert.dsc: Makefile logalert.dsc.in ../conf-version ../conf-release ../conf-email
 	$(edit) $@.in > $@
 logalert-xUbuntu_24.04.dsc: Makefile logalert-xUbuntu_24.04.dsc.in ../conf-version ../conf-release ../conf-email
+	$(edit) $@.in > $@
+logalert-xUbuntu_25.04.dsc: Makefile logalert-xUbuntu_25.04.dsc.in ../conf-version ../conf-release ../conf-email
 	$(edit) $@.in > $@
 
 dummy.tar.gz: README
