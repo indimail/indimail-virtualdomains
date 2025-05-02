@@ -117,6 +117,8 @@ binary-indep: build install
 	dh_testroot
 	find $(DESTDIR)$(mandir) -name '*'.? -type f -exec gzip -q {} \;
 	sed -i -e 's,@libd\@,$(libd),g' debian/indimail-access.install
+	# do chmod because debian is a fckued packaging system
+	chmod 755 $(DESTDIR)${libexecdir}/imapmodules/authshadow $(DESTDIR)${libexecdir}/imapmodules/authpam
 	dh_install --sourcedir=$(DESTDIR) -pindimail-access
 	dh_installchangelogs
 	dh_installcron
