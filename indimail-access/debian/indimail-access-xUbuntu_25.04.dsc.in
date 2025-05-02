@@ -1,0 +1,13 @@
+Format: 1.0
+Source: indimail-access
+Section: Misc
+Priority: extra
+Binary: indimail-access
+Architecture: any
+Version: @version@-@release@
+Maintainer: @email@
+Homepage: https://github.com/mbhangui/indimail-virtualdomains
+Debtransform-Release: 1
+Debtransform-Tar: debian.tar.gz
+Standards-Version: 3.9.1
+Build-Depends: cdbs, debhelper (>= 9), gcc, g++, sed, pkg-config, binutils, coreutils, automake, libpam0g-dev, libpcre2-dev, libpcre3-dev, libgdbm-dev, libdb-dev, libgcrypt20-dev, python3, libssl-dev, bison (>= 1.2), flex (>= 2.5), libidn2-dev, m4, gawk, procps
