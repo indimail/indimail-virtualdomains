@@ -32,7 +32,7 @@ jobs:
     - name: build courier-imap
       run: |
         cd courier-imap-x
-        if [ "${OS}" = "macos-latest" ] ; then env CPPFLAGS="-I/opt/homebrew/Cellar/openssl@3/3.4.1/include" LDFLAGS="-L/opt/homebrew/Cellar/openssl@3/3.4.1/lib" ./default.configure; else ./default.configure; fi
-        if [ "${OS}" = "macos-latest" ] ; then env CPPFLAGS="-I/opt/homebrew/Cellar/openssl@3/3.4.1/include" LDFLAGS="-L/opt/homebrew/Cellar/openssl@3/3.4.1/lib" make; else make; fi
+        if [ "${OS}" = "macos-latest" ] ; then env CPPFLAGS="-I/opt/homebrew/Cellar/openssl@3/3.5.0/include" LDFLAGS="-L/opt/homebrew/Cellar/openssl@3/3.5.0/lib" ./default.configure; else ./default.configure; fi
+        if [ "${OS}" = "macos-latest" ] ; then env CPPFLAGS="-I/opt/homebrew/Cellar/openssl@3/3.5.0/include" LDFLAGS="-L/opt/homebrew/Cellar/openssl@3/3.5.0/lib" make; else make; fi
       env:
         OS: ${{ matrix.host }}

@@ -22,7 +22,7 @@ jobs:
     - name: extra_packages
       run: |
         if [ "${OS}" = "macos-latest" ] ; then brew install automake autoconf libtool pkgconfig openssl; fi
-        if [ "${OS}" = "macos-latest" ] ; then sudo mkdir -p /usr/local/opt;sudo ln -sf /opt/homebrew/Cellar/openssl@3/3.4.1 /usr/local/opt/openssl; fi
+        if [ "${OS}" = "macos-latest" ] ; then sudo mkdir -p /usr/local/opt;sudo ln -sf /opt/homebrew/Cellar/openssl@3/3.5.0 /usr/local/opt/openssl; fi
         if [ "${OS}" = "ubuntu-latest" ] ; then sudo apt-get install gcc g++ automake autoconf libtool gettext autopoint; fi
       env:
         OS: ${{ matrix.host }}
@@ -33,7 +33,7 @@ jobs:
     - name: build fetchmail
       run: |
         cd fetchmail-x
-        if [ "${OS}" = "macos-latest" ] ; then env CFLAGS="-I/opt/homebrew/Cellar/openssl@3/3.4.1/include" CPPFLAGS="-I/opt/homebrew/Cellar/openssl@3/3.4.1/include" LDFLAGS="-L/opt/homebrew/Cellar/openssl@3/3.4.1/lib" ./default.configure; else ./default.configure; fi
-        if [ "${OS}" = "macos-latest" ] ; then env CFLAGS="-I/opt/homebrew/Cellar/openssl@3/3.4.1/include" CPPFLAGS="-I/opt/homebrew/Cellar/openssl@3/3.4.1/include" LDFLAGS="-L/opt/homebrew/Cellar/openssl@3/3.4.1/lib" make; else make; fi
+        if [ "${OS}" = "macos-latest" ] ; then env CFLAGS="-I/opt/homebrew/Cellar/openssl@3/3.5.0/include" CPPFLAGS="-I/opt/homebrew/Cellar/openssl@3/3.5.0/include" LDFLAGS="-L/opt/homebrew/Cellar/openssl@3/3.5.0/lib" ./default.configure; else ./default.configure; fi
+        if [ "${OS}" = "macos-latest" ] ; then env CFLAGS="-I/opt/homebrew/Cellar/openssl@3/3.5.0/include" CPPFLAGS="-I/opt/homebrew/Cellar/openssl@3/3.5.0/include" LDFLAGS="-L/opt/homebrew/Cellar/openssl@3/3.5.0/lib" make; else make; fi
       env:
         OS: ${{ matrix.host }}
