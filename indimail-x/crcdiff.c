@@ -1,5 +1,8 @@
 /*
  * $Log: crcdiff.c,v $
+ * Revision 1.6  2025-05-13 19:58:53+05:30  Cprogrammer
+ * added -i option to ignore corrupt entries
+ *
  * Revision 1.5  2024-09-05 19:01:08+05:30  Cprogrammer
  * updated usage string
  *
@@ -65,13 +68,13 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: crcdiff.c,v 1.5 2024-09-05 19:01:08+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: crcdiff.c,v 1.6 2025-05-13 19:58:53+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
 usage(int exitval)
 {
-	fprintf(stderr, "crcdiff [-Cs] [-c critical_list] file1 file2)\n");
+	fprintf(stderr, "crcdiff [-Cis] [-c critical_list] file1 file2)\n");
 	exit(exitval);
 }
 
@@ -110,12 +113,12 @@ main(int argc, char **argv)
 
 	char           *new_ptr, *old_ptr, *critical_file_list = NULL;
 	FILE           *newfp, *oldfp, *fp = NULL;
-	int             match, c, sorted = 0, crit_flag, display_checksum = 0;
+	int             match, c, sorted = 0, crit_flag, display_checksum = 0, ignore_corrupted = 0;
 	unsigned long   add_count, del_count, corrupt_count, perm_count,
 					owner_count, mod_count, crit_l1_count, crit_l2_count, count;
 	char            new_line[BUF_SIZE], old_line[BUF_SIZE];
 
-	while ((c = getopt(argc, argv, "c:Cs")) != -1) {
+	while ((c = getopt(argc, argv, "c:Cis")) != -1) {
 		switch (c)
 		{
 		case 'C':
@@ -130,6 +133,9 @@ main(int argc, char **argv)
 			break;
 		case 's':
 			sorted = 1;
+			break;
+		case 'i':
+			ignore_corrupted = 1;
 			break;
 		default:
 			usage(100);
@@ -211,14 +217,16 @@ main(int argc, char **argv)
 					return (1);
 				}
 				/*- check crc change */
-				if (strncmp(new_line, old_line, 10)) {
+				if (strncmp(new_line, old_line, 10)) { /* corrupt  - crc changed w/o date change */
 					if (!strcmp(new_ptr, old_ptr)) {
-						printf("corrupt    %s", new_line + (display_checksum ? 0 : 11));
-						if (fp && check_critical_list(fp, new_line)) {
-							fprintf(stderr, "WARN L2 >  %s", new_line + 11);
-							crit_l2_count++;
+						if (!ignore_corrupted) {
+							printf("corrupt    %s", new_line + (display_checksum ? 0 : 11));
+							if (fp && check_critical_list(fp, new_line)) {
+								fprintf(stderr, "WARN L2 >  %s", new_line + 11);
+								crit_l2_count++;
+							}
+							corrupt_count++;
 						}
-						corrupt_count++;
 					} else {
 						printf("replaced   %s", new_line + (display_checksum ? 0 : 11));
 						fflush(stdout);
@@ -361,9 +369,14 @@ main(int argc, char **argv)
 	printf("1. added               : %lu\n", add_count);
 	printf("2. deleted             : %lu\n", del_count);
 	printf("3. replaced            : %lu\n", mod_count);
-	printf("4. corrupted           : %lu\n", corrupt_count);
-	printf("5. permission  changes : %lu\n", perm_count);
-	printf("6. owner/group changes : %lu\n", owner_count);
+	if (ignore_corrupted) {
+		printf("4. permission  changes : %lu\n", perm_count);
+		printf("5. owner/group changes : %lu\n", owner_count);
+	} else {
+		printf("4. corrupted           : %lu\n", corrupt_count);
+		printf("5. permission  changes : %lu\n", perm_count);
+		printf("6. owner/group changes : %lu\n", owner_count);
+	}
 	if (crit_l1_count || crit_l2_count) {
 		printf("\n");
 		printf("NOTE: Critical Changes\n");
