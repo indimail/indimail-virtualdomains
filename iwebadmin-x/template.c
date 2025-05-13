@@ -1,5 +1,5 @@
 /*
- * $Id: template.c,v 1.35 2024-06-02 18:54:31+05:30 Cprogrammer Exp mbhangui $
+ * $Id: template.c,v 1.36 2025-05-13 20:41:19+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify

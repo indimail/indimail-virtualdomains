@@ -1,5 +1,5 @@
 /*
- * $Id: iwebadmin.c,v 1.38 2024-05-30 22:59:50+05:30 Cprogrammer Exp mbhangui $
+ * $Id: iwebadmin.c,v 1.39 2025-05-13 20:41:12+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -993,6 +993,9 @@ quickAction(const char *username, int action)
 
 /*
  * $Log: iwebadmin.c,v $
+ * Revision 1.39  2025-05-13 20:41:12+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.38  2024-05-30 22:59:50+05:30  Cprogrammer
  * fetch vlimit records
  * refactored code

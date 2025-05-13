@@ -1,5 +1,5 @@
 /*
- * $Id: user.c,v 1.40 2024-06-02 18:54:55+05:30 Cprogrammer Exp mbhangui $
+ * $Id: user.c,v 1.41 2025-05-13 20:41:22+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -1873,6 +1873,9 @@ parse_users_dotqmail(char newchar)
 
 /*-
  * $Log: user.c,v $
+ * Revision 1.41  2025-05-13 20:41:22+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.40  2024-06-02 18:54:55+05:30  Cprogrammer
  * fix search by index
  * use mod_user1.html, mod_user2.html for scram, non-scram setup
