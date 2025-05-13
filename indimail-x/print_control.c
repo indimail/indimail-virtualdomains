@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: print_control.c,v 1.4 2025-05-13 20:02:10+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -20,7 +20,7 @@
 #include "dir_control.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: print_control.c,v 1.3 2023-03-20 10:15:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: print_control.c,v 1.4 2025-05-13 20:02:10+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 unsigned long
@@ -92,6 +92,9 @@ print_control(char *filename, char *domain, int max_users_per_level, int silent)
 }
 /*
  * $Log: print_control.c,v $
+ * Revision 1.4  2025-05-13 20:02:10+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.3  2023-03-20 10:15:39+05:30  Cprogrammer
  * standardize getln handling
  *

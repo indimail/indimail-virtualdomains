@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: exp.c,v 1.3 2025-05-13 19:59:31+05:30 Cprogrammer Exp mbhangui $
  *
  * This is (osh) exp.c  Version 1.0
  *
@@ -28,7 +28,7 @@
  */
 
 #ifndef	lint
-static char    *rcsid = "@(#) $Id: exp.c,v 1.2 2022-10-20 11:57:30+05:30 Cprogrammer Exp mbhangui $";
+static char    *rcsid = "@(#) $Id: exp.c,v 1.3 2025-05-13 19:59:31+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -246,6 +246,9 @@ expand(char *argv[MAXARG + 1], int *argc, char *word)
 }
 /*
  * $Log: exp.c,v $
+ * Revision 1.3  2025-05-13 19:59:31+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.2  2022-10-20 11:57:30+05:30  Cprogrammer
  * converted function prototype to ansic
  *

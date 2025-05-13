@@ -1,5 +1,5 @@
 /*
- * $Id: vdelivermail.c,v 1.15 2024-05-23 17:23:31+05:30 Cprogrammer Exp mbhangui $
+ * $Id: vdelivermail.c,v 1.16 2025-05-13 20:37:16+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -68,7 +68,7 @@
 #include "vset_default_domain.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdelivermail.c,v 1.15 2024-05-23 17:23:31+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdelivermail.c,v 1.16 2025-05-13 20:37:16+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vdelivermail: fatal: "
@@ -968,6 +968,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: vdelivermail.c,v $
+ * Revision 1.16  2025-05-13 20:37:16+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.15  2024-05-23 17:23:31+05:30  Cprogrammer
  * moved wildmat.h to libqmail
  *

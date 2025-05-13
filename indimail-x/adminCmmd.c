@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: adminCmmd.c,v 1.6 2025-05-13 19:58:07+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -41,7 +41,7 @@
 #include "indimail.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: adminCmmd.c,v 1.5 2023-08-08 00:34:55+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: adminCmmd.c,v 1.6 2025-05-13 19:58:07+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static int      IOPlex(int, int);
@@ -241,6 +241,9 @@ IOPlex(int sockfd, int timeoutdata)
 }
 /*
  * $Log: adminCmmd.c,v $
+ * Revision 1.6  2025-05-13 19:58:07+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.5  2023-08-08 00:34:55+05:30  Cprogrammer
  * use strerr_tls for reporting tls error
  *

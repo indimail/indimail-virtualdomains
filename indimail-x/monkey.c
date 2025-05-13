@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: monkey.c,v 1.6 2025-05-13 20:01:23+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -46,7 +46,7 @@
 #include "sockwrite.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: monkey.c,v 1.5 2021-07-21 14:05:05+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: monkey.c,v 1.6 2025-05-13 20:01:23+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -274,6 +274,9 @@ monkey(char *host, char *servicename, char *startbuf, int skip_nl)
 }
 /*
  * $Log: monkey.c,v $
+ * Revision 1.6  2025-05-13 20:01:23+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.5  2021-07-21 14:05:05+05:30  Cprogrammer
  * conditional compilation (alpine linux)
  *

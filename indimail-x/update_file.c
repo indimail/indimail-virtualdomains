@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: update_file.c,v 1.5 2025-05-13 20:03:39+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -31,7 +31,7 @@
 #include "dblock.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: update_file.c,v 1.4 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: update_file.c,v 1.5 2025-05-13 20:03:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -230,6 +230,9 @@ update_file(const char *filename, const char *update_line, mode_t mode)
 }
 /*
  * $Log: update_file.c,v $
+ * Revision 1.5  2025-05-13 20:03:39+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.4  2024-05-17 16:25:48+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

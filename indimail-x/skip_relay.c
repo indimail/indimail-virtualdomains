@@ -1,12 +1,12 @@
 /*
- * $Id: $
+ * $Id: skip_relay.c,v 1.5 2025-05-13 20:03:00+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: skip_relay.c,v 1.4 2023-03-20 10:18:10+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: skip_relay.c,v 1.5 2025-05-13 20:03:00+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef POP_AUTH_OPEN_RELAY
@@ -91,6 +91,9 @@ skip_relay(char *ipaddr)
 #endif
 /*
  * $Log: skip_relay.c,v $
+ * Revision 1.5  2025-05-13 20:03:00+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.4  2023-03-20 10:18:10+05:30  Cprogrammer
  * standardize getln handling
  *

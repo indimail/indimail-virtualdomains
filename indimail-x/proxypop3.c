@@ -1,12 +1,12 @@
 /*
- * $Id: $
+ * $Id: proxypop3.c,v 1.7 2025-05-13 20:02:35+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: proxypop3.c,v 1.6 2023-03-20 10:16:55+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: proxypop3.c,v 1.7 2025-05-13 20:02:35+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -229,6 +229,9 @@ main()
 #endif
 /*
  * $Log: proxypop3.c,v $
+ * Revision 1.7  2025-05-13 20:02:35+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.6  2023-03-20 10:16:55+05:30  Cprogrammer
  * standardize getln handling
  *

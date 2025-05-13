@@ -1,12 +1,12 @@
 /*
- * $Id: $
+ * $Id: storeHeader.c,v 1.3 2025-05-13 20:03:28+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: storeHeader.c,v 1.2 2023-08-31 22:37:07+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: storeHeader.c,v 1.3 2025-05-13 20:03:28+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -142,6 +142,9 @@ storeHeader(struct header ***Hptr, struct header_t *h)
 #endif
 /*-
  * $Log: storeHeader.c,v $
+ * Revision 1.3  2025-05-13 20:03:28+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.2  2023-08-31 22:37:07+05:30  Cprogrammer
  * return error if parseAddress is unsuccessful
  *

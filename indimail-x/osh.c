@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: osh.c,v 1.5 2025-05-13 20:01:33+05:30 Cprogrammer Exp mbhangui $
  *
  * This is main.c (osh)
  *
@@ -24,7 +24,7 @@
  */
 
 #ifndef lint
-static char    *rcsid = "@(#) $Id: osh.c,v 1.4 2023-09-05 21:47:22+05:30 Cprogrammer Exp mbhangui $";
+static char    *rcsid = "@(#) $Id: osh.c,v 1.5 2025-05-13 20:01:33+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -1179,6 +1179,9 @@ waitfor(int pid)
 }
 /*
  * $Log: osh.c,v $
+ * Revision 1.5  2025-05-13 20:01:33+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.4  2023-09-05 21:47:22+05:30  Cprogrammer
  * added return type for gethostname
  *

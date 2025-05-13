@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: getFreeFS.c,v 1.4 2025-05-13 19:59:39+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -27,7 +27,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: getFreeFS.c,v 1.3 2023-03-20 10:00:12+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: getFreeFS.c,v 1.4 2025-05-13 19:59:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static stralloc tmpbuf = {0};
@@ -194,6 +194,9 @@ getFreeFS()
 }
 /*
  * $Log: getFreeFS.c,v $
+ * Revision 1.4  2025-05-13 19:59:39+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.3  2023-03-20 10:00:12+05:30  Cprogrammer
  * use SYSONFDIR env variable if set for lastfstab
  *

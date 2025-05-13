@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: vrenameuser.c,v 1.8 2025-05-13 20:37:40+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -35,7 +35,7 @@
 #include "post_handle.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vrenameuser.c,v 1.7 2023-03-23 22:25:30+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vrenameuser.c,v 1.8 2025-05-13 20:37:40+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vrenameuser: fatal: "
@@ -171,6 +171,9 @@ main(int argc, char **argv)
 }
 /*
  * $Log: vrenameuser.c,v $
+ * Revision 1.8  2025-05-13 20:37:40+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.7  2023-03-23 22:25:30+05:30  Cprogrammer
  * set BASE PATH of original domain for the new user
  *

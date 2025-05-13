@@ -1,5 +1,5 @@
 /*
- * $Id: authindi.c,v 1.21 2024-05-28 19:13:20+05:30 Cprogrammer Exp mbhangui $
+ * $Id: authindi.c,v 1.22 2025-05-13 19:58:12+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -57,7 +57,7 @@
 #define WARN  "authindi: warn: "
 
 #ifndef lint
-static char     sccsid[] = "$Id: authindi.c,v 1.21 2024-05-28 19:13:20+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: authindi.c,v 1.22 2025-05-13 19:58:12+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static stralloc tmpbuf = {0};
@@ -684,6 +684,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: authindi.c,v $
+ * Revision 1.22  2025-05-13 19:58:12+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.21  2024-05-28 19:13:20+05:30  Cprogrammer
  * handle -1 return code for vget_limits()
  *

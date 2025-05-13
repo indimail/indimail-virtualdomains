@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: qmailmrtg.c,v 1.9 2025-05-13 20:02:39+05:30 Cprogrammer Exp mbhangui $
  *
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc.
  *
@@ -49,7 +49,7 @@
 #include <no_of_days.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: qmailmrtg.c,v 1.8 2024-05-10 11:44:24+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: qmailmrtg.c,v 1.9 2025-05-13 20:02:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL "qmailmrtg: fatal: "
@@ -881,6 +881,9 @@ main(int argc, char **argv)
 }
 /*
  * $Log: qmailmrtg.c,v $
+ * Revision 1.9  2025-05-13 20:02:39+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.8  2024-05-10 11:44:24+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

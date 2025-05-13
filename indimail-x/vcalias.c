@@ -1,12 +1,12 @@
 /*
- * $Id: $
+ * $Id: vcalias.c,v 1.7 2025-05-13 20:37:06+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vcalias.c,v 1.6 2023-03-20 10:33:27+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vcalias.c,v 1.7 2025-05-13 20:37:06+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #if defined(VALIAS)
@@ -198,6 +198,9 @@ main()
 #endif
 /*
  * $Log: vcalias.c,v $
+ * Revision 1.7  2025-05-13 20:37:06+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.6  2023-03-20 10:33:27+05:30  Cprogrammer
  * standardize getln handling
  *

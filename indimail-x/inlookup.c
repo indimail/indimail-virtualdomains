@@ -1,8 +1,8 @@
 /*
- * $Id: $
+ * $Id: inlookup.c,v 1.12 2025-05-13 20:00:32+05:30 Cprogrammer Exp mbhangui $
  */
 #ifndef	lint
-static char     sccsid[] = "$Id: inlookup.c,v 1.11 2023-03-20 10:07:28+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inlookup.c,v 1.12 2025-05-13 20:00:32+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -376,6 +376,9 @@ main()
 #endif
 /*
  * $Log: inlookup.c,v $
+ * Revision 1.12  2025-05-13 20:00:32+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.11  2023-03-20 10:07:28+05:30  Cprogrammer
  * fixed command line argument handling
  *

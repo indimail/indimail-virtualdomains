@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: vacation.c,v 1.8 2025-05-13 20:36:01+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -42,7 +42,7 @@
 #include "runcmmd.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vacation.c,v 1.7 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: vacation.c,v 1.8 2025-05-13 20:36:01+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vacation: fatal: "
@@ -381,6 +381,9 @@ main(int argc, char **argv)
 }
 /*
  * $Log: vacation.c,v $
+ * Revision 1.8  2025-05-13 20:36:01+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.7  2024-05-17 16:25:48+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

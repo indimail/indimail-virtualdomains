@@ -1,5 +1,5 @@
 /*
- * $Id: vadduser.c,v 1.17 2024-05-28 19:30:32+05:30 Cprogrammer Exp mbhangui $
+ * $Id: vadduser.c,v 1.18 2025-05-13 20:36:54+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -64,7 +64,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     rcsid[] = "$Id: vadduser.c,v 1.17 2024-05-28 19:30:32+05:30 Cprogrammer Exp mbhangui $";
+static char     rcsid[] = "$Id: vadduser.c,v 1.18 2025-05-13 20:36:54+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vadduser: fatal: "
@@ -584,6 +584,9 @@ get_options(int argc, char **argv, char **base_path, int *users_per_level,
 
 /*
  * $Log: vadduser.c,v $
+ * Revision 1.18  2025-05-13 20:36:54+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.17  2024-05-28 19:30:32+05:30  Cprogrammer
  * removed check for perms_defaultquota
  * handle -1 return code for vget_limits()

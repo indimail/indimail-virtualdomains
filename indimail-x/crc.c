@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: crc.c,v 1.7 2025-05-13 19:58:44+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -49,7 +49,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: crc.c,v 1.6 2024-07-18 09:22:59+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: crc.c,v 1.7 2025-05-13 19:58:44+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define MAXBUF 4096
@@ -546,6 +546,9 @@ main(int argc, char **argv)
 #endif /* !CRCTAB */
 /*
  * $Log: crc.c,v $
+ * Revision 1.7  2025-05-13 19:58:44+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.6  2024-07-18 09:22:59+05:30  Cprogrammer
  * removed ignoring errors
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: ismaildup.c,v 1.8 2023-10-23 18:45:17+05:30 Cprogrammer Exp mbhangui $
+ * $Id: ismaildup.c,v 1.9 2025-05-13 20:00:59+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -42,7 +42,7 @@
 #include "dblock.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ismaildup.c,v 1.8 2023-10-23 18:45:17+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ismaildup.c,v 1.9 2025-05-13 20:00:59+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static char     strnum[FMT_ULONG];
@@ -366,6 +366,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: ismaildup.c,v $
+ * Revision 1.9  2025-05-13 20:00:59+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.8  2023-10-23 18:45:17+05:30  Cprogrammer
  * refactored code
  *

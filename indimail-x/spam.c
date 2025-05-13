@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: spam.c,v 1.8 2025-05-13 20:03:10+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -39,7 +39,7 @@
 #include "lowerit.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: spam.c,v 1.7 2024-05-23 17:23:15+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: spam.c,v 1.8 2025-05-13 20:03:10+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define BADMAIL 1
@@ -593,6 +593,9 @@ insertAddr(int ht, char *email)
 }
 /*
  * $Log: spam.c,v $
+ * Revision 1.8  2025-05-13 20:03:10+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.7  2024-05-23 17:23:15+05:30  Cprogrammer
  * moved wildmat.h to libqmail
  *

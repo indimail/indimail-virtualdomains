@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: add_vacation.c,v 1.4 2025-05-13 19:57:46+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -37,7 +37,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: add_vacation.c,v 1.3 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: add_vacation.c,v 1.4 2025-05-13 19:57:46+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -235,6 +235,9 @@ add_vacation(char *email, char *fname)
 }
 /*
  * $Log: add_vacation.c,v $
+ * Revision 1.4  2025-05-13 19:57:46+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.3  2024-05-17 16:25:48+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

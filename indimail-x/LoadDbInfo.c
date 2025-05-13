@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: LoadDbInfo.c,v 1.16 2025-05-13 20:01:10+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -61,7 +61,7 @@
 #include "vset_default_domain.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: LoadDbInfo.c,v 1.15 2023-09-11 09:09:41+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: LoadDbInfo.c,v 1.16 2025-05-13 20:01:10+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static DBINFO **loadMCDInfo(int *);
@@ -977,6 +977,9 @@ localDbInfo(int *total, DBINFO ***rhosts)
 }
 /*
  * $Log: LoadDbInfo.c,v $
+ * Revision 1.16  2025-05-13 20:01:10+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.15  2023-09-11 09:09:41+05:30  Cprogrammer
  * incorrect use of localiphost instead of hostip
  *

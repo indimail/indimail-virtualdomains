@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: iopen.c,v 1.12 2025-05-13 20:00:41+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -33,7 +33,7 @@
 #include "set_mysql_options.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: iopen.c,v 1.11 2023-04-01 13:29:23+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: iopen.c,v 1.12 2025-05-13 20:00:41+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -239,6 +239,9 @@ iopen(char *dbhost)
 }
 /*
  * $Log: iopen.c,v $
+ * Revision 1.12  2025-05-13 20:00:41+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.11  2023-04-01 13:29:23+05:30  Cprogrammer
  * display mysql error for mysql_options()
  *

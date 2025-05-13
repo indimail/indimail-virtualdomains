@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: runcmmd.c,v 1.5 2025-05-13 20:02:57+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -30,7 +30,7 @@
 #include "variables.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: runcmmd.c,v 1.4 2022-12-18 19:27:45+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: runcmmd.c,v 1.5 2025-05-13 20:02:57+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -107,6 +107,9 @@ runcmmd(char *cmmd, int useP)
 }
 /*
  * $Log: runcmmd.c,v $
+ * Revision 1.5  2025-05-13 20:02:57+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.4  2022-12-18 19:27:45+05:30  Cprogrammer
  * handle SIGCONT
  *

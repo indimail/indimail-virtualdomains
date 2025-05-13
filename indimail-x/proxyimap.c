@@ -1,12 +1,12 @@
 /*
- * $Id: $
+ * $Id: proxyimap.c,v 1.6 2025-05-13 20:02:20+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: proxyimap.c,v 1.5 2023-03-20 10:16:38+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: proxyimap.c,v 1.6 2025-05-13 20:02:20+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -252,6 +252,9 @@ main()
 #endif
 /*
  * $Log: proxyimap.c,v $
+ * Revision 1.6  2025-05-13 20:02:20+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.5  2023-03-20 10:16:38+05:30  Cprogrammer
  * standardize getln handling
  *

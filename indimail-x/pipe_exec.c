@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: pipe_exec.c,v 1.4 2025-05-13 20:01:40+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -17,7 +17,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: pipe_exec.c,v 1.3 2020-09-28 13:28:20+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: pipe_exec.c,v 1.4 2025-05-13 20:01:40+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -62,6 +62,9 @@ pipe_exec(char **argv, char *tmpbuf, int len)
 }
 /*
  * $Log: pipe_exec.c,v $
+ * Revision 1.4  2025-05-13 20:01:40+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.3  2020-09-28 13:28:20+05:30  Cprogrammer
  * added pid in debug statements
  *

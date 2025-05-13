@@ -1,12 +1,12 @@
 /*
- * $Id: $
+ * $Id: vfilter_header.c,v 1.5 2025-05-13 20:37:29+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vfilter_header.c,v 1.4 2023-09-05 21:50:44+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vfilter_header.c,v 1.5 2025-05-13 20:37:29+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -145,6 +145,9 @@ headerList()
 #endif
 /*
  * $Log: vfilter_header.c,v $
+ * Revision 1.5  2025-05-13 20:37:29+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.4  2023-09-05 21:50:44+05:30  Cprogrammer
  * added headerNumber function to convert textual header name to number
  *

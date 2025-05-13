@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: updatefile.c,v 1.3 2025-05-13 20:03:42+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -22,7 +22,7 @@
 #include "update_file.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: updatefile.c,v 1.2 2019-06-07 16:10:05+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: updatefile.c,v 1.3 2025-05-13 20:03:42+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "updatefile: fatal: "
@@ -119,6 +119,9 @@ main(int argc, char **argv)
 }
 /*
  * $Log: updatefile.c,v $
+ * Revision 1.3  2025-05-13 20:03:42+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.2  2019-06-07 16:10:05+05:30  mbhangui
  * use sgetopt library for getopt()
  *

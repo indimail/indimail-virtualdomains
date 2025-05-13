@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: inquerytest.c,v 1.13 2025-05-13 20:00:38+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -47,7 +47,7 @@
 #include "print_limits.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inquerytest.c,v 1.12 2024-05-28 19:25:06+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inquerytest.c,v 1.13 2025-05-13 20:00:38+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "inquerytest: fatal: "
@@ -346,6 +346,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: inquerytest.c,v $
+ * Revision 1.13  2025-05-13 20:00:38+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.12  2024-05-28 19:25:06+05:30  Cprogrammer
  * use print_limit function from print_limit.c
  *

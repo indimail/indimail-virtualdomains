@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: autoturn_dir.c,v 1.5 2025-05-13 19:58:20+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -24,7 +24,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: autoturn_dir.c,v 1.4 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: autoturn_dir.c,v 1.5 2025-05-13 19:58:20+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -93,6 +93,9 @@ autoturn_dir(const char *domain)
 }
 /*
  * $Log: autoturn_dir.c,v $
+ * Revision 1.5  2025-05-13 19:58:20+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.4  2024-05-17 16:25:48+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

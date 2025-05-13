@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: vreorg.c,v 1.10 2025-05-13 20:37:43+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -38,7 +38,7 @@
 #include "next_big_dir.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vreorg.c,v 1.9 2023-03-20 10:39:58+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vreorg.c,v 1.10 2025-05-13 20:37:43+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vreorg: fatal: "
@@ -240,6 +240,9 @@ main(int argc, char **argv)
 }
 /*
  * $Log: vreorg.c,v $
+ * Revision 1.10  2025-05-13 20:37:43+05:30  Cprogrammer
+ * fixed gcc14 errors.
+ *
  * Revision 1.9  2023-03-20 10:39:58+05:30  Cprogrammer
  * standardize getln handling
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: ischema.c,v 1.4 2025-05-13 20:00:52+05:30 Cprogrammer Exp mbhangui $
  */
 #include <stdio.h>
 #ifdef HAVE_CONFIG_H
@@ -32,7 +32,7 @@
 #include "create_table.h"
 
 #ifndef	lint
-static char     rcsid[] = "$Id: ischema.c,v 1.3 2023-03-20 10:08:51+05:30 Cprogrammer Exp mbhangui $";
+static char     rcsid[] = "$Id: ischema.c,v 1.4 2025-05-13 20:00:52+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "ischema: fatal: "
@@ -237,6 +237,9 @@ main(int argc, char **argv)
 }
 /*
  * $Log: ischema.c,v $
+ * Revision 1.4  2025-05-13 20:00:52+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.3  2023-03-20 10:08:51+05:30  Cprogrammer
  * use SYSCONFDIR env variable for indimail.schema
  * standardize getln handling

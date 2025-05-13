@@ -1,5 +1,5 @@
 /*
- * $Id: ProcessInFifo.c,v 1.21 2024-05-28 19:45:25+05:30 Cprogrammer Exp mbhangui $
+ * $Id: ProcessInFifo.c,v 1.22 2025-05-13 20:02:17+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -78,7 +78,7 @@
 #include "inquery.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ProcessInFifo.c,v 1.21 2024-05-28 19:45:25+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ProcessInFifo.c,v 1.22 2025-05-13 20:02:17+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             user_query_count, relay_query_count, pwd_query_count, alias_query_count;
@@ -1472,6 +1472,9 @@ ProcessInFifo(int instNum)
 }
 /*
  * $Log: ProcessInFifo.c,v $
+ * Revision 1.22  2025-05-13 20:02:17+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.21  2024-05-28 19:45:25+05:30  Cprogrammer
  * Use INFIFODIR #define from inquery.h for infifo
  * use vget_limits when argument is domain instead of email

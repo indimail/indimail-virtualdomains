@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: deluser.c,v 1.4 2025-05-13 19:59:22+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -48,7 +48,7 @@
 #include "valias_delete.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deluser.c,v 1.3 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: deluser.c,v 1.4 2025-05-13 19:59:22+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -330,6 +330,9 @@ deluser(const char *user, const char *domain, int remove_db)
 }
 /*
  * $Log: deluser.c,v $
+ * Revision 1.4  2025-05-13 19:59:22+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.3  2024-05-17 16:25:48+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

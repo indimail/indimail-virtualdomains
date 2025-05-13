@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: update_local_hostid.c,v 1.4 2025-05-13 20:35:38+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -17,7 +17,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: update_local_hostid.c,v 1.3 2020-04-01 18:58:12+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: update_local_hostid.c,v 1.4 2025-05-13 20:35:38+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static stralloc filename = { 0 };
@@ -57,6 +57,9 @@ update_local_hostid(char *hostid)
 }
 /*
  * $Log: update_local_hostid.c,v $
+ * Revision 1.4  2025-05-13 20:35:38+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.3  2020-04-01 18:58:12+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *

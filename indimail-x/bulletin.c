@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: bulletin.c,v 1.7 2025-05-13 19:58:28+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -50,7 +50,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: bulletin.c,v 1.6 2023-03-20 09:50:06+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: bulletin.c,v 1.7 2025-05-13 19:58:28+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static stralloc tmpbuf = {0};
@@ -484,6 +484,9 @@ bulletin(char *emailFile, char *subscriber_list)
 #endif /*- #ifdef CLUSTERED_SITE */
 /*
  * $Log: bulletin.c,v $
+ * Revision 1.7  2025-05-13 19:58:28+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.6  2023-03-20 09:50:06+05:30  Cprogrammer
  * standardize getln handling
  *

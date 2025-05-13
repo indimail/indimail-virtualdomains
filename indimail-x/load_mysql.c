@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: load_mysql.c,v 1.14 2025-05-13 20:01:13+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -11,7 +11,7 @@
 #include <mysqld_error.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: load_mysql.c,v 1.13 2023-04-01 19:27:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: load_mysql.c,v 1.14 2025-05-13 20:01:13+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef DLOPEN_LIBMYSQLCLIENT
@@ -531,6 +531,9 @@ const char     *in_mysql_get_client_info(void)
 #endif /*- #ifdef DLOPEN_LIBMYSQLCLIENT */
 /*
  * $Log: load_mysql.c,v $
+ * Revision 1.14  2025-05-13 20:01:13+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.13  2023-04-01 19:27:39+05:30  Cprogrammer
  * refactored getlibObject function
  *

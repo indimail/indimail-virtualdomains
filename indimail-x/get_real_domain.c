@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: get_real_domain.c,v 1.7 2025-05-13 19:59:55+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -33,7 +33,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: get_real_domain.c,v 1.6 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: get_real_domain.c,v 1.7 2025-05-13 19:59:55+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -324,6 +324,9 @@ get_real_domain_cache(char cache_switch)
 #endif
 /*
  * $Log: get_real_domain.c,v $
+ * Revision 1.7  2025-05-13 19:59:55+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.6  2024-05-17 16:25:48+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: get_local_ip.c,v 1.7 2025-05-13 19:59:49+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -35,7 +35,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: get_local_ip.c,v 1.6 2023-09-11 09:08:35+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: get_local_ip.c,v 1.7 2025-05-13 19:59:49+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static stralloc hostbuf = { 0 };
@@ -145,6 +145,9 @@ get_local_ip(int family)
 }
 /*
  * $Log: get_local_ip.c,v $
+ * Revision 1.7  2025-05-13 19:59:49+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.6  2023-09-11 09:08:35+05:30  Cprogrammer
  * incorrect use of localiphost instead of hostip
  *

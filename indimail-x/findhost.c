@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: findhost.c,v 1.14 2025-05-13 19:59:36+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -22,7 +22,7 @@
 #include "load_mysql.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: findhost.c,v 1.13 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: findhost.c,v 1.14 2025-05-13 19:59:36+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -473,6 +473,9 @@ findhost(char *email, int connect_primarydb)
 #endif
 /*
  * $Log: findhost.c,v $
+ * Revision 1.14  2025-05-13 19:59:36+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.13  2024-05-17 16:25:48+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

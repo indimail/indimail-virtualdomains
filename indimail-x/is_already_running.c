@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: is_already_running.c,v 1.3 2025-05-13 20:00:48+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -28,7 +28,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: is_already_running.c,v 1.2 2023-03-20 10:08:20+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: is_already_running.c,v 1.3 2025-05-13 20:00:48+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -94,6 +94,9 @@ is_already_running(char *pgname)
 }
 /*
  * $Log: is_already_running.c,v $
+ * Revision 1.3  2025-05-13 20:00:48+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.2  2023-03-20 10:08:20+05:30  Cprogrammer
  * standardize getln handling
  *

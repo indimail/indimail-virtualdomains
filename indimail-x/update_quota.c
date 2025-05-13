@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: update_quota.c,v 1.5 2025-05-13 20:35:43+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -29,7 +29,7 @@
 #include "maildir_to_domain.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: update_quota.c,v 1.4 2020-09-21 07:55:21+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: update_quota.c,v 1.5 2025-05-13 20:35:43+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -135,6 +135,9 @@ update_quota(char *Maildir, mdir_t new_size)
 }
 /*
  * $Log: update_quota.c,v $
+ * Revision 1.5  2025-05-13 20:35:43+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.4  2020-09-21 07:55:21+05:30  Cprogrammer
  * fixed incorrect initialization of struct flock
  *

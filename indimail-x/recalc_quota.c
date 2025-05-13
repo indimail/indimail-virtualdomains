@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: recalc_quota.c,v 1.8 2025-05-13 20:02:42+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -39,7 +39,7 @@
 #include "get_assign.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: recalc_quota.c,v 1.7 2020-10-12 12:41:07+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: recalc_quota.c,v 1.8 2025-05-13 20:02:42+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -226,6 +226,9 @@ mdir_t recalc_quota(char *Maildir, int force_flag)
 }
 /*
  * $Log: recalc_quota.c,v $
+ * Revision 1.8  2025-05-13 20:02:42+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.7  2020-10-12 12:41:07+05:30  Cprogrammer
  * maildirquota problem: strnum2 variable wasn't getting set
  *

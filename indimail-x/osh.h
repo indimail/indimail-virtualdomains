@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: osh.h,v 1.4 2025-05-13 20:01:36+05:30 Cprogrammer Exp mbhangui $
  */
 #ifndef OSH_H
 #define OSH_H
@@ -169,6 +169,9 @@ void logout();
 #endif
 /*
  * $Log: osh.h,v $
+ * Revision 1.4  2025-05-13 20:01:36+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.3  2021-09-01 18:41:48+05:30  Cprogrammer
  * reverted return type of i_exit to int
  *

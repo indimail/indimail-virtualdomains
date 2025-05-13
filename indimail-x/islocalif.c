@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: islocalif.c,v 1.8 2025-05-13 20:00:56+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -61,7 +61,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: islocalif.c,v 1.7 2023-09-11 09:08:48+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: islocalif.c,v 1.8 2025-05-13 20:00:56+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -268,6 +268,9 @@ islocalif(char *hostptr)
 }
 /*
  * $Log: islocalif.c,v $
+ * Revision 1.8  2025-05-13 20:00:56+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.7  2023-09-11 09:08:48+05:30  Cprogrammer
  * incorrect use of localiphost instead of hostip
  *

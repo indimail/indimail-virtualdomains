@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: GetSMTProute.c,v 1.6 2025-05-13 19:59:58+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -28,7 +28,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: GetSMTProute.c,v 1.5 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: GetSMTProute.c,v 1.6 2025-05-13 19:59:58+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -166,6 +166,9 @@ GetSMTProute(const char *domain)
 }
 /*
  * $Log: GetSMTProute.c,v $
+ * Revision 1.6  2025-05-13 19:59:58+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.5  2024-05-17 16:25:48+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

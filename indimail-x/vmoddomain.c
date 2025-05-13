@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: vmoddomain.c,v 1.7 2025-05-13 20:37:32+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -40,7 +40,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoddomain.c,v 1.6 2024-05-28 21:20:22+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vmoddomain.c,v 1.7 2025-05-13 20:37:32+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define WARN    "vmoddomain: warning: "
@@ -436,6 +436,9 @@ set_hash_method(char *dir, uid_t uid, gid_t gid, int hash_method)
 }
 /*
  * $Log: vmoddomain.c,v $
+ * Revision 1.7  2025-05-13 20:37:32+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.6  2024-05-28 21:20:22+05:30  Cprogrammer
  * added -H option to configure hash method for a domain
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: vdel_dir_control.c,v 1.4 2025-05-13 20:37:10+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -23,7 +23,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdel_dir_control.c,v 1.3 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: vdel_dir_control.c,v 1.4 2025-05-13 20:37:10+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -94,6 +94,9 @@ vdel_dir_control(const char *domain)
 }
 /*
  * $Log: vdel_dir_control.c,v $
+ * Revision 1.4  2025-05-13 20:37:10+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.3  2024-05-17 16:25:48+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

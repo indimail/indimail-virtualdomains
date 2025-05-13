@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: count_rcpthosts.c,v 1.4 2025-05-13 19:58:39+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -22,7 +22,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: count_rcpthosts.c,v 1.3 2023-03-20 09:51:06+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: count_rcpthosts.c,v 1.4 2025-05-13 19:58:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -98,6 +98,9 @@ count_rcpthosts()
 }
 /*
  * $Log: count_rcpthosts.c,v $
+ * Revision 1.4  2025-05-13 19:58:39+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.3  2023-03-20 09:51:06+05:30  Cprogrammer
  * standardize getln handling
  *

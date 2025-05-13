@@ -1,12 +1,12 @@
 /*
- * $Id: $
+ * $Id: sql_renamedomain.c,v 1.4 2025-05-13 20:03:23+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sql_renamedomain.c,v 1.3 2023-03-23 22:15:24+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sql_renamedomain.c,v 1.4 2025-05-13 20:03:23+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_UNISTD_H
@@ -183,6 +183,9 @@ sql_renamedomain(char *OldDomain, char *NewDomain, char *domdir)
 }
 /*
  * $Log: sql_renamedomain.c,v $
+ * Revision 1.4  2025-05-13 20:03:23+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.3  2023-03-23 22:15:24+05:30  Cprogrammer
  * refactored code
  *

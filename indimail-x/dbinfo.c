@@ -1,12 +1,12 @@
 /*
- * $Id: $
+ * $Id: dbinfo.c,v 1.6 2025-05-13 19:59:09+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbinfo.c,v 1.5 2022-08-05 21:01:35+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dbinfo.c,v 1.6 2025-05-13 19:59:09+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -315,6 +315,9 @@ main()
 #endif
 /*
  * $Log: dbinfo.c,v $
+ * Revision 1.6  2025-05-13 19:59:09+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.5  2022-08-05 21:01:35+05:30  Cprogrammer
  * replaced fprintf with strerr_warn1
  *

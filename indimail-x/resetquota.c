@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: resetquota.c,v 1.4 2025-05-13 20:02:54+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -32,7 +32,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: resetquota.c,v 1.3 2023-03-20 10:17:49+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: resetquota.c,v 1.4 2025-05-13 20:02:54+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL         "resetquota: fatal: "
@@ -233,6 +233,9 @@ main(int argc, char **argv)
 }
 /*
  * $Log: resetquota.c,v $
+ * Revision 1.4  2025-05-13 20:02:54+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.3  2023-03-20 10:17:49+05:30  Cprogrammer
  * standardize getln handling
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: maildir_to_domain.c,v 1.4 2025-05-13 20:01:16+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -18,7 +18,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: maildir_to_domain.c,v 1.3 2023-03-20 10:12:40+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: maildir_to_domain.c,v 1.4 2025-05-13 20:01:16+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -75,6 +75,9 @@ maildir_to_domain(char *maildir)
 }
 /*
  * $Log: maildir_to_domain.c,v $
+ * Revision 1.4  2025-05-13 20:01:16+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.3  2023-03-20 10:12:40+05:30  Cprogrammer
  * standardize getln handling
  *

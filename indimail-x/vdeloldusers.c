@@ -1,12 +1,12 @@
 /*
- * $Id: $
+ * $Id: vdeloldusers.c,v 1.8 2025-05-13 20:37:21+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdeloldusers.c,v 1.7 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: vdeloldusers.c,v 1.8 2025-05-13 20:37:21+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef ENABLE_AUTH_LOGGING
@@ -447,6 +447,9 @@ main()
 #endif
 /*
  * $Log: vdeloldusers.c,v $
+ * Revision 1.8  2025-05-13 20:37:21+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.7  2024-05-17 16:25:48+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: user_over_quota.c,v 1.6 2025-05-13 20:35:58+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -26,7 +26,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: user_over_quota.c,v 1.5 2023-03-20 10:20:48+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: user_over_quota.c,v 1.6 2025-05-13 20:35:58+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -172,6 +172,9 @@ user_over_quota(char *Maildir, char *quota, int cur_msgsize)
 }
 /*
  * $Log: user_over_quota.c,v $
+ * Revision 1.6  2025-05-13 20:35:58+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.5  2023-03-20 10:20:48+05:30  Cprogrammer
  * standardize getln handling
  *

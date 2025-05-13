@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: check_quota.c,v 1.6 2025-05-13 19:58:34+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -25,7 +25,7 @@
 #include "count_dir.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: check_quota.c,v 1.5 2023-03-20 09:50:46+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: check_quota.c,v 1.6 2025-05-13 19:58:34+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -160,6 +160,9 @@ mdir_t check_quota(char *Maildir)
 }
 /*
  * $Log: check_quota.c,v $
+ * Revision 1.6  2025-05-13 19:58:34+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.5  2023-03-20 09:50:46+05:30  Cprogrammer
  * standardize getln handling
  *

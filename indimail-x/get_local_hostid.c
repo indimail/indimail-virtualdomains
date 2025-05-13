@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: get_local_hostid.c,v 1.5 2025-05-13 19:59:46+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -18,7 +18,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: get_local_hostid.c,v 1.4 2023-03-20 10:01:04+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: get_local_hostid.c,v 1.5 2025-05-13 19:59:46+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static stralloc filename = { 0 };
@@ -92,6 +92,9 @@ get_local_hostid()
 }
 /*
  * $Log: get_local_hostid.c,v $
+ * Revision 1.5  2025-05-13 19:59:46+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.4  2023-03-20 10:01:04+05:30  Cprogrammer
  * standardize getln handling
  *

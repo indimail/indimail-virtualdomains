@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: tcplookup.c,v 1.8 2025-05-13 20:03:34+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -41,7 +41,7 @@
 #include "inquery.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: tcplookup.c,v 1.7 2024-05-28 19:30:02+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcplookup.c,v 1.8 2025-05-13 20:03:34+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            strnum[FMT_ULONG];
@@ -367,6 +367,9 @@ tcplookup(int argc, char **argv, char **envp)
 }
 /*
  * $Log: tcplookup.c,v $
+ * Revision 1.8  2025-05-13 20:03:34+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.7  2024-05-28 19:30:02+05:30  Cprogrammer
  * Use INFIFODIR #define from inquery.h for infifo
  *

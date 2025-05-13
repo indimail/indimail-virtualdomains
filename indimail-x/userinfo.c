@@ -1,5 +1,5 @@
 /*
- * $Id: userinfo.c,v 1.14 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $
+ * $Id: userinfo.c,v 1.15 2025-05-13 20:35:53+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -62,7 +62,7 @@
 #include "userinfo.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: userinfo.c,v 1.14 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: userinfo.c,v 1.15 2025-05-13 20:35:53+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern char *strptime(const char *, const char *, struct tm *);
@@ -613,6 +613,9 @@ userinfo(char *Email, char *User, char *Domain, int DisplayName, int DisplayPass
 
 /*
  * $Log: userinfo.c,v $
+ * Revision 1.15  2025-05-13 20:35:53+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.14  2024-05-17 16:25:48+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

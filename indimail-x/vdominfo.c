@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: vdominfo.c,v 1.12 2025-05-13 20:37:25+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -43,7 +43,7 @@
 #include "get_hashmethod.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdominfo.c,v 1.11 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: vdominfo.c,v 1.12 2025-05-13 20:37:25+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define VDOMTOKENS ":\n"
@@ -661,6 +661,9 @@ main(int argc, char **argv)
 }
 /*
  * $Log: vdominfo.c,v $
+ * Revision 1.12  2025-05-13 20:37:25+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.11  2024-05-17 16:25:48+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

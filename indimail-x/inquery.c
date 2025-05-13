@@ -1,5 +1,5 @@
 /*
- * $Id: inquery.c,v 1.13 2024-05-28 19:23:45+05:30 Cprogrammer Exp mbhangui $
+ * $Id: inquery.c,v 1.14 2025-05-13 20:00:35+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -35,7 +35,7 @@
 #include "inquery.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inquery.c,v 1.13 2024-05-28 19:23:45+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inquery.c,v 1.14 2025-05-13 20:00:35+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL "inquery: fatal: "
@@ -441,6 +441,9 @@ inquery(char query_type, const char *email, const char *ip)
 }
 /*
  * $Log: inquery.c,v $
+ * Revision 1.14  2025-05-13 20:00:35+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.13  2024-05-28 19:23:45+05:30  Cprogrammer
  * Use INFIFODIR #define from inquery.h for infifo
  *

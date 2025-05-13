@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: vrenamedomain.c,v 1.8 2025-05-13 20:37:36+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -55,7 +55,7 @@
 #include "post_handle.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vrenamedomain.c,v 1.7 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: vrenamedomain.c,v 1.8 2025-05-13 20:37:36+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define WARN    "vrenamedomain: warning: "
@@ -297,6 +297,9 @@ main(int argc, char **argv)
 }
 /*
  * $Log: vrenamedomain.c,v $
+ * Revision 1.8  2025-05-13 20:37:36+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.7  2024-05-17 16:25:48+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

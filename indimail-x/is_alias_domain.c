@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: is_alias_domain.c,v 1.6 2025-05-13 20:00:45+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -27,7 +27,7 @@
 #include "get_assign.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: is_alias_domain.c,v 1.5 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: is_alias_domain.c,v 1.6 2025-05-13 20:00:45+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -111,6 +111,9 @@ is_alias_domain(const char *domain)
 }
 /*
  * $Log: is_alias_domain.c,v $
+ * Revision 1.6  2025-05-13 20:00:45+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.5  2024-05-17 16:25:48+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

@@ -1,12 +1,12 @@
 /*
- * $Id: $
+ * $Id: host_in_locals.c,v 1.4 2025-05-13 20:00:03+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: host_in_locals.c,v 1.3 2023-03-20 10:02:35+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: host_in_locals.c,v 1.4 2025-05-13 20:00:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IP_ALIAS_DOMAINS
@@ -104,6 +104,9 @@ host_in_locals(char *domain)
 #endif
 /*
  * $Log: host_in_locals.c,v $
+ * Revision 1.4  2025-05-13 20:00:03+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.3  2023-03-20 10:02:35+05:30  Cprogrammer
  * standardize getln handling
  *

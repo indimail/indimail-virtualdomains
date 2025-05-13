@@ -1,5 +1,5 @@
 /*
- * $Id: deliver_mail.c,v 1.15 2023-10-23 18:40:18+05:30 Cprogrammer Exp mbhangui $
+ * $Id: deliver_mail.c,v 1.16 2025-05-13 19:59:19+05:30 Cprogrammer Exp mbhangui $
  */
 #include <stdio.h>
 #ifdef HAVE_CONFIG_H
@@ -61,7 +61,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deliver_mail.c,v 1.15 2023-10-23 18:40:18+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: deliver_mail.c,v 1.16 2025-05-13 19:59:19+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static stralloc tmpbuf = {0};
@@ -1401,6 +1401,9 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 
 /*
  * $Log: deliver_mail.c,v $
+ * Revision 1.16  2025-05-13 19:59:19+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.15  2023-10-23 18:40:18+05:30  Cprogrammer
  * rewind descriptor 0 regardless of MAKE_SEEKABLE setting
  *

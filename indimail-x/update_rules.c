@@ -1,12 +1,12 @@
 /*
- * $Id: $
+ * $Id: update_rules.c,v 1.4 2025-05-13 20:35:47+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: update_rules.c,v 1.3 2022-10-20 11:58:19+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: update_rules.c,v 1.4 2025-05-13 20:35:47+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef POP_AUTH_OPEN_RELAY
@@ -210,6 +210,9 @@ tcprules_open(int *fd)
 #endif
 /*
  * $Log: update_rules.c,v $
+ * Revision 1.4  2025-05-13 20:35:47+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.3  2022-10-20 11:58:19+05:30  Cprogrammer
  * converted function prototype to ansic
  *

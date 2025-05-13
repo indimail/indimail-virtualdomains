@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: remove_line.c,v 1.4 2025-05-13 20:02:47+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -32,7 +32,7 @@
 #include "dblock.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: remove_line.c,v 1.3 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: remove_line.c,v 1.4 2025-05-13 20:02:47+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -175,6 +175,9 @@ remove_line_p(const char *template, const char *filename, int once_only, mode_t 
 }
 /*
  * $Log: remove_line.c,v $
+ * Revision 1.4  2025-05-13 20:02:47+05:30  Cprogrammer
+ * fixed gcc14 errors
+ *
  * Revision 1.3  2024-05-17 16:25:48+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
