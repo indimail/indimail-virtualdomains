@@ -28,7 +28,7 @@
 027 SCRAM Salt
 039 R&eacute;pond aux demandes administrative et permet la recherche dans les archives.
 053 Activer le support SQL
-054 Hôte
+054 H&#244;te
 055 Port
 056 Utilisateur
 057 Mot de passe
@@ -211,26 +211,26 @@
 234 Votre mot de passe 
 235 Annulation de de la capture des E-mails 
 236 Capture : Supprim&eacute;e 
-237 Ajouter<br>un abonné aux résumés
-238 Supprimer<br>un abonné aux résumés
-239 Liste<br>des abonnés aux résumés
-240 Adresse ajoutée en tant qu'abonné aux résumés
-241 Ajout d'un abonné aux résumés 
-242 Suppression de la liste des abonnés aux résumés 
-243 Suppression de l'abonné aux résumés
-244 Nombre d'abonnés aux résumés :
-245 Supprimer<br>cet abonné aux résumés
-246 Adresse de l'abonné aux résumés
-247 Liste des abonnés aux résumés
-248 Liste des E-mails des abonnés aux résumés
+237 Ajouter<br>un abonn&eacute; aux r&eacute;sum&eacute;s
+238 Supprimer<br>un abonn&eacute; aux r&eacute;sum&eacute;s
+239 Liste<br>des abonn&eacute;s aux r&eacute;sum&eacute;s
+240 Adresse ajout&eacute;e en tant qu'abonn&eacute; aux r&eacute;sum&eacute;s
+241 Ajout d'un abonn&eacute; aux r&eacute;sum&eacute;s 
+242 Suppression de la liste des abonn&eacute;s aux r&eacute;sum&eacute;s 
+243 Suppression de l'abonn&eacute; aux r&eacute;sum&eacute;s
+244 Nombre d'abonn&eacute;s aux r&eacute;sum&eacute;s :
+245 Supprimer<br>cet abonn&eacute; aux r&eacute;sum&eacute;s
+246 Adresse de l'abonn&eacute; aux r&eacute;sum&eacute;s
+247 Liste des abonn&eacute;s aux r&eacute;sum&eacute;s
+248 Liste des E-mails des abonn&eacute;s aux r&eacute;sum&eacute;s
 249 Quota (MO)
-250 Utilisé
+250 Utilis&eacute;
 251 (Entrez NOQUOTA pour annuler les quotas)
 252 (Laisser vide pour annuler les quotas)
 253 Limite :
-254 Utilisé :
+254 Utilis&eacute; :
 255 Nombre de comptes
-256 Préfixe
+256 Pr&eacute;fixe
 257 Guide de l'utilisateur
 258 Guide de l'administrateur
 259 Aide
@@ -244,32 +244,32 @@
 267 Seulement les mod&eacute;rateurs peuvent poster, tous les messages passent par les mod&eacute;rateurs pour approbation.
 268 Liste des options
 269 En-t&ecirc;tes sujet des mails sortants pr&eacute;fix&eacute;s avec <B>[%s]</B>.
-270 Inclure un pied de page à la fin de chaque message.
+270 Inclure un pied de page &agrave; la fin de chaque message.
 271 Installer une version r&eacute;sum&eacute; de la liste.
 272 Nommé %s-digest.
-273 Demandes de services envoyés à %s-request.
+273 Demandes de services envoy&eacute;s &agrave; %s-request.
 274 En plus de %s-subscribe, %s-unsubscribe, etc. les utilisateurs peuvent envoyer des commandes &agrave; %s-request.
 275 Administration à distance
-276 Permettre l'administration à distance par des modérateurs. 
-277 Faire une liste privée.
+276 Permettre l'administration &agrave; distance par des mod&eacute;rateurs. 
+277 Faire une liste priv&eacute;e.
 278 Seulement les admins peuvent abonner, d&eacute;sabonner, acc&eacute;der &agrave; l'index, etc...
-279 Les admins à distance peuvent :
+279 Les admins &agrave; distance peuvent :
 280 Regarder et r&eacute;cup&eacute;rer la liste des abonn&eacute;s.
 281 &Eacute;diter les fichiers du r&eacute;pertoire texte.
 282 par exemple, le pied de page, les fichiers d'aide, etc...
 283 Demandes d'abonnement
 284 Demandes d'inscription &agrave; la liste :
-285 Exige la confirmation par une réponse à un message envoyé à l'adresse d'abonnement.
-286 Exige l'approbation d'un modérateur.
+285 Exige la confirmation par une r&eacute;ponse à un message envoy&eacute; &agrave; l'adresse d'abonnement.
+286 Exige l'approbation d'un mod&eacute;rateur.
 287 Demandes de d&eacute;sabonnement &agrave; la liste :
 288 Avertissement: si vous n'avez pas besoin de la confirmation de l'exp&eacute;diteur, il sera possible que des personnes usurpent l'email pour abonner ou d&eacute;sabonner quelqu'un de cette liste sans leur autorisation.
 289 Archives des Messages
 290 Messages de liste d'archives.
-291 Indexation des archives pour l'accès web via ezmlm-cgi.
-292 La récupération d'archives est
-293 accessible à n'importe qui
-294 limitée aux abonnés
-295 limitée aux modérateurs
+291 Indexation des archives pour l'acc&eacute;s web via ezmlm-cgi.
+292 La r&eacute;cup&eacute;ration d'archives est
+293 accessible &agrave; n'importe qui
+294 limit&eacute;e aux abonn&eacute;s
+295 limit&eacute;e aux mod&eacute;rateurs
 296 Drapeaux des Mailbox
 297 on
 298 off
@@ -292,9 +292,9 @@
 315 Utilisateur supprim&eacute;. Impossible de redirig&eacute; vers '%s'.
 316 Modifier le mot de passe
 317 Suppression du compte Postmaster impossible.
-318 setgid() a échoué, incapable de continuer
-319 setuid() a échoué, incapable de continuer
-320 Mot de passe invalide: il peut être facilement deviné par le nom d'utilisateur
+318 setgid() a &eacute;chou&eacute;, incapable de continuer
+319 setuid() a &eacute;chou&eacute;, incapable de continuer
+320 Mot de passe invalide: il peut être facilement devin&eacute; par le nom d'utilisateur
 321 Unable to migrate vacation dir to autoresp dir
 322 Unable to migrate vacation.msg to autoresp.msg
 323 Unable to rename temp file to .qmail
