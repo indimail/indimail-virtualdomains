@@ -1,12 +1,12 @@
 /*
- * $Id: proxylogin.c,v 1.12 2023-07-16 13:59:07+05:30 Cprogrammer Exp mbhangui $
+ * $Id: proxylogin.c,v 1.13 2025-06-07 18:17:31+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: proxylogin.c,v 1.12 2023-07-16 13:59:07+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: proxylogin.c,v 1.13 2025-06-07 18:17:31+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -632,6 +632,9 @@ void pop3d_capability()
 
 /*
  * $Log: proxylogin.c,v $
+ * Revision 1.13  2025-06-07 18:17:31+05:30  Cprogrammer
+ * fixed gcc14 warning
+ *
  * Revision 1.12  2023-07-16 13:59:07+05:30  Cprogrammer
  * check mkpasswd for error
  *

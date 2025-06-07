@@ -9,9 +9,9 @@ crcdiff \- compare two crc lists and report the difference
 
 .SH SYNOPSYS
 .PP
-\fBcrc\fR [-dv] [-i \fIinitial_crc\fR] file ...
+\fBcrc\fR [-dv] [-i \fIinitial_crc\fR] [-t \fItag\fR] file ...
 .PP
-\fBcrcdiff\fR [-Cs] [-c \fIcritical_list\fR] \fIcrclist\fR \fIcrclist\fR
+\fBcrcdiff\fR [-Cis] [-c \fIcritical_list\fR] \fIcrclist\fR \fIcrclist\fR
 
 .SH DESCRIPTION
 For each file, \fBcrc\fR calculates and prints a 32-bit CRC in hexadecimal.
@@ -27,6 +27,8 @@ can use -i option to initialize CRC with \fIinitial_crc\fR instead of 0.
 The 32-bit CRC used is the frame check sequence in ADCCP (ANSI X3.66, also
 known as FIPS PUB 71 and FED-STD-1003, the U.S. version of CCITT's X.25
 link-level protocol).
+
+The -t option can be used to associate a tag with the filename.
 
 \fBcrcdiff\fR compares two crc lists and reports the differences. If -c
 option is used, directories/files listed in \fIcritical_list\fR will be

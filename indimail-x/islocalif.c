@@ -1,5 +1,5 @@
 /*
- * $Id: islocalif.c,v 1.8 2025-05-13 20:00:56+05:30 Cprogrammer Exp mbhangui $
+ * $Id: islocalif.c,v 1.9 2025-06-07 18:15:13+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -61,7 +61,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: islocalif.c,v 1.8 2025-05-13 20:00:56+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: islocalif.c,v 1.9 2025-06-07 18:15:13+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -149,7 +149,7 @@ islocalif(char *hostptr)
 			return (1);
 	}
 #ifdef HAVE_STRUCT_SOCKADDR_STORAGE
-	/* getaddrinfo() case.  It can handle multiple addresses. */
+	/* use getaddrinfo() to handle multiple addresses for hostptr */
 	byte_zero((char *) &hints, sizeof(hints));
 	/* set-up hints structure */
 	hints.ai_family = PF_UNSPEC;
@@ -173,11 +173,14 @@ islocalif(char *hostptr)
 #endif
 	if (s == -1) {
 #ifdef ENABLE_IPV6
+#ifdef HAVE_STRUCT_SOCKADDR_STORAGE
 		freeaddrinfo(res0);
+#endif
 #endif
 		return (-1);
 	}
 	len = 8192;
+	/*- get all local interface addresses using SIOCGIFCONF */
 	for (t = 0, buf = (char *) 0;;) {
 		if (len > t && t)
 			alloc_free(buf);
@@ -196,7 +199,9 @@ islocalif(char *hostptr)
 			close(s);
 			alloc_free(buf);
 #ifdef ENABLE_IPV6
+#ifdef HAVE_STRUCT_SOCKADDR_STORAGE
 			freeaddrinfo(res0);
+#endif
 #endif
 			return (-1);
 		}
@@ -230,9 +235,6 @@ islocalif(char *hostptr)
 		/* Skip boring cases */
 		if ((ifr->ifr_flags & IFF_UP) == 0)
 			continue;
-		/*
-		if ((ifr->ifr_flags & (IFF_BROADCAST | IFF_POINTOPOINT)) == 0)
-			continue;*/
 		for (res = res0; res; res = res->ai_next) {
 			sa = res->ai_addr;
 			salen = res->ai_addrlen;
@@ -248,7 +250,7 @@ islocalif(char *hostptr)
 					return (1);
 				}
 			}
-		}
+		} /*- for (res = res0; res; res = res->ai_next) */
 #else
 		if (!(ptr = inet_ntoa(sin->sin_addr)))
 			continue;
@@ -268,6 +270,9 @@ islocalif(char *hostptr)
 }
 /*
  * $Log: islocalif.c,v $
+ * Revision 1.9  2025-06-07 18:15:13+05:30  Cprogrammer
+ * fixed possible memory leaks
+ *
  * Revision 1.8  2025-05-13 20:00:56+05:30  Cprogrammer
  * fixed gcc14 errors
  *

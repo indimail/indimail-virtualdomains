@@ -1,5 +1,5 @@
 /*
- * $Id: crc.c,v 1.7 2025-05-13 19:58:44+05:30 Cprogrammer Exp mbhangui $
+ * $Id: crc.c,v 1.8 2025-06-07 18:16:47+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -49,7 +49,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: crc.c,v 1.7 2025-05-13 19:58:44+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: crc.c,v 1.8 2025-06-07 18:16:47+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define MAXBUF 4096
@@ -108,7 +108,7 @@ _remainder(int m)
 }
 
 int
-main()
+main(int argc, char **argv)
 {
 	int             i, j, k, l;
 
@@ -300,7 +300,7 @@ print_perm(unsigned int perm)
 }
 
 static void
-stats(const char *file, struct stat *statptr)
+stats(const char *file, struct stat *statptr, const char *tag)
 {
 
 	struct passwd  *entry;
@@ -314,11 +314,11 @@ stats(const char *file, struct stat *statptr)
 		entry = getpwuid((int) statptr->st_uid);
 		if (entry) {
 			if (!stralloc_copys(&owner, entry->pw_name))
-            	strerr_die2x(111, FATAL, "out of memory");
+				strerr_die2x(111, FATAL, "out of memory");
 		} else {
 			strnum[i = fmt_ulong(strnum, statptr->st_uid)] = 0;
 			if (!stralloc_copyb(&owner, strnum, i))
-            	strerr_die2x(111, FATAL, "out of memory");
+				strerr_die2x(111, FATAL, "out of memory");
 		}
 		prev_uid = statptr->st_uid;
 	}
@@ -326,11 +326,11 @@ stats(const char *file, struct stat *statptr)
 		group_entry = getgrgid((int) statptr->st_gid);
 		if (group_entry) {
 			if (!stralloc_copys(&group, group_entry->gr_name))
-            	strerr_die2x(111, FATAL, "out of memory");
+				strerr_die2x(111, FATAL, "out of memory");
 		} else {
 			strnum[i = fmt_ulong(strnum, statptr->st_gid)] = 0;
 			if (!stralloc_copyb(&group, strnum, i))
-            	strerr_die2x(111, FATAL, "out of memory");
+				strerr_die2x(111, FATAL, "out of memory");
 		}
 		prev_gid = statptr->st_gid;
 	}
@@ -357,7 +357,13 @@ stats(const char *file, struct stat *statptr)
 	else
 	if (substdio_puts(subfdout, (char *) file ) == -1)
 		strerr_die2sys(111, FATAL, "unable to write to stdout: ");
-	else
+	if (tag) {
+		if (substdio_put(subfdout, ",tag=", 5))
+			strerr_die2sys(111, FATAL, "unable to write to stdout: ");
+		else
+		if (substdio_puts(subfdout, tag))
+			strerr_die2sys(111, FATAL, "unable to write to stdout: ");
+	}
 	if (substdio_put(subfdout, "\n", 1) == -1)
 		strerr_die2sys(111, FATAL, "unable to write to stdout: ");
 	return;
@@ -371,7 +377,8 @@ stats(const char *file, struct stat *statptr)
  * Return 0 if successful, -1 if an error occurs.
  */
 int
-printcrc(const char *file, unsigned long *lcount, int statflag, int displayhex)
+printcrc(const char *file, unsigned long *lcount,
+		int statflag, int displayhex, const char *tag)
 {
 	int             fd;
 	int             nr;
@@ -421,7 +428,7 @@ printcrc(const char *file, unsigned long *lcount, int statflag, int displayhex)
 			if (substdio_puts(subfdout, strnum) == -1)
 				strerr_die2sys(111, FATAL, "unable to write to stdout: ");
 			if (statflag)
-				stats(file, &statbuf);
+				stats(file, &statbuf, tag);
 			else
 			if (substdio_put(subfdout, "\n", 1) == -1)
 				strerr_die2sys(111, FATAL, "unable to write to stdout: ");
@@ -438,9 +445,9 @@ printcrc(const char *file, unsigned long *lcount, int statflag, int displayhex)
 #else
 #define SYS_OPEN(FILE,FLAG,MODE) syscall(SYS_open,FILE,FLAG,MODE)
 #endif
-    if ((fd = SYS_OPEN(file, O_RDONLY, 0)) == -1) {
+	if ((fd = SYS_OPEN(file, O_RDONLY, 0)) == -1) {
 #else
-    if ((fd = open(file, O_RDONLY)) == -1) {
+	if ((fd = open(file, O_RDONLY)) == -1) {
 #endif
 		strerr_warn3(WARN, file, ": ", &strerr_sys);
 		return (-1);
@@ -486,7 +493,7 @@ printcrc(const char *file, unsigned long *lcount, int statflag, int displayhex)
 		if (substdio_puts(subfdout, strnum) == -1)
 			strerr_die2sys(111, FATAL, "unable to write to stdout: ");
 		if (statflag)
-			stats(file, &statbuf);
+			stats(file, &statbuf, tag);
 		else
 		if (substdio_put(subfdout, "\n", 1) == -1)
 			strerr_die2sys(111, FATAL, "unable to write to stdout: ");
@@ -514,15 +521,14 @@ usage(int exitval)
 int
 main(int argc, char **argv)
 {
-	int             statflag = 0, displayhex = 1;
+	int             statflag = 0, displayhex = 1, c, retval;
+	const char     *tag = NULL;
 	unsigned long   linecount;
-	int             c;
-	int             retval;
 
 	if (argc == 1)
 		usage(0);
 	/*- process all arguments */
-	while ((c = getopt(argc, argv, "vdi:")) != opteof) {
+	while ((c = getopt(argc, argv, "vdi:t:")) != opteof) {
 		switch (c)
 		{
 		case 'd':
@@ -534,18 +540,24 @@ main(int argc, char **argv)
 		case 'i':
 			scan_long(optarg, &initial_crc);
 			break;
+		case 't':
+			tag = optarg;
+			break;
 		default:
 			usage(100);
 		}
 	}
 	for (retval = 0; optind < argc; optind++)
-		retval = (printcrc(argv[optind], &linecount, statflag, displayhex) == -1 || retval ? 100 : 0);
+		retval = (printcrc(argv[optind], &linecount, statflag, displayhex, tag) == -1 || retval ? 100 : 0);
 	return retval;
 }
 #endif
 #endif /* !CRCTAB */
 /*
  * $Log: crc.c,v $
+ * Revision 1.8  2025-06-07 18:16:47+05:30  Cprogrammer
+ * added -t option to tag files/directories
+ *
  * Revision 1.7  2025-05-13 19:58:44+05:30  Cprogrammer
  * fixed gcc14 errors
  *

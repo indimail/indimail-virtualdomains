@@ -1,54 +1,3 @@
-/*
- * $Log: crcdiff.c,v $
- * Revision 1.6  2025-05-13 19:58:53+05:30  Cprogrammer
- * added -i option to ignore corrupt entries
- *
- * Revision 1.5  2024-09-05 19:01:08+05:30  Cprogrammer
- * updated usage string
- *
- * Revision 1.4  2024-07-18 09:17:52+05:30  Cprogrammer
- * added -C option to display checksum
- *
- * Revision 1.3  2024-05-02 20:54:42+05:30  Cprogrammer
- * display L1, L2 changes
- * added -c, -s options
- *
- * Revision 1.2  2023-01-22 10:35:57+05:30  Cprogrammer
- * fixed data type passed to printf
- *
- * Revision 1.1  2019-04-14 20:58:10+05:30  Cprogrammer
- * Initial revision
- *
- * This progam will compare two crc lists and report the differences.
- *
- * By Jon Zeeff (zeeff@b-tech.ann-arbor.mi.us)
- *
- * Permission is granted to use this in any manner provided that
- * 1) the copyright notice is left intact,
- * 2) you don't hold me responsible for any bugs and
- * 3) you mail me any improvements that you make.
- *
- *
- * report:
- *     corrupt  - crc changed w/o date change
- *     replaced - crc + date changed
- *     permiss  - permissions changed
- *     own/grp  - owner or group changed
- *     deleted  -
- *     added    -
- *  Print the info for the new file except for deleted.
- *
- * Use:
- *
- * find / -print | sort | xargs crc -v > crc_file
- *
- * to generate a crc list (crc.c should accompany this source).
- *
- * Assume that no files have tabs or spaces in the name.
- * A crc line is like this
- * 0x5d784e43 dr-xr-xr-x root	root	Jun 11 07:57:46 2024 /usr/bin
- *
- -*/
 
 /*- max size of line */
 
@@ -68,7 +17,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: crcdiff.c,v 1.6 2025-05-13 19:58:53+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: crcdiff.c,v 1.7 2025-06-07 18:18:22+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -106,6 +55,8 @@ check_critical_list(FILE *fp, char *fn_line)
 	}
 	return 0;
 }
+
+static char    *fn1, *fn2;
 
 int
 main(int argc, char **argv)
@@ -155,6 +106,8 @@ main(int argc, char **argv)
 
 	if ((argc - optind) != 2)
 		usage(1);
+	fn1 = argv[optind];
+	fn2 = argv[optind + 1];
 	if (!(newfp = fopen(argv[optind + 1], "r"))) {
 		perror(argv[optind + 1]);
 		return (1);
@@ -173,8 +126,10 @@ main(int argc, char **argv)
 		}
 		/*- old filename */
 		if (!(old_ptr = strrchr(old_line, ' '))) {
-			fprintf(stderr, "Error in input data\n");
-			exit(1);
+			if ((old_ptr = strrchr(old_line, '\n')))
+				*old_ptr = '\0';
+			fprintf(stderr, "%s: Error in input data1 [%s]\n", fn1, old_line);
+			continue;
 		}
 		for (count = match = 0;; count++) {
 			if (!fgets(new_line, BUF_SIZE, newfp)) {
@@ -192,8 +147,10 @@ main(int argc, char **argv)
 			}
 			/*- new filename */
 			if (!(new_ptr = strrchr(new_line, ' '))) {
-				fprintf(stderr, "Error in input data\n");
-				exit(1);
+				if ((new_ptr = strrchr(new_line, '\n')))
+					*new_ptr = '\0';
+				fprintf(stderr, "%s: Error in input data2 [%s]\n", fn2, new_line);
+				continue;
 			}
 			/*- Compare just the file names */
 			c = strcmp(old_ptr, new_ptr);
@@ -212,8 +169,12 @@ main(int argc, char **argv)
 				match = 1;
 				new_ptr = strrchr(new_line, '\t'); /*- timestamp */
 				old_ptr = strrchr(old_line, '\t'); /*- timestamp */
-				if (!new_ptr || !old_ptr) {
-					fprintf(stderr, "Error in input data\n");
+				if (!old_ptr) {
+					fprintf(stderr, "%s: Error in input data1 [%s]\n", fn1, old_line);
+					return (1);
+				}
+				if (!new_ptr) {
+					fprintf(stderr, "%s: Error in input data2 [%s]\n", fn2, new_line);
 					return (1);
 				}
 				/*- check crc change */
@@ -241,8 +202,8 @@ main(int argc, char **argv)
 				/*- check permission change */
 				crit_flag = 0;
 				if (strncmp(new_line + 11, old_line + 11, 10)) {
-					printf("permiss <  %s", old_line + (display_checksum ? 0 : 11));
-					printf("permiss >  %s", new_line + (display_checksum ? 0 : 11));
+					printf("permiss<   %s", old_line + (display_checksum ? 0 : 11));
+					printf("permiss>   %s", new_line + (display_checksum ? 0 : 11));
 					fflush(stdout);
 					/* setuid, setgid bit changed */
 					if (*(old_line + 14) == 's' || *(old_line + 17) == 's') {
@@ -264,8 +225,8 @@ main(int argc, char **argv)
 				}
 				/*- check  owner/group */
 				if (strncmp(new_line + 22, old_line + 22, new_ptr - new_line - 21)) {
-					printf("own/grp <  %s", old_line + (display_checksum ? 0 : 11));
-					printf("own/grp >  %s", new_line + (display_checksum ? 0 : 11));
+					printf("own/grp<   %s", old_line + (display_checksum ? 0 : 11));
+					printf("own/grp>   %s", new_line + (display_checksum ? 0 : 11));
 					fflush(stdout);
 					/* owner/group changes to setuid, setgid files */
 					if (*(old_line + 14) == 's' || *(old_line + 17) == 's') {
@@ -307,11 +268,13 @@ main(int argc, char **argv)
 			if (feof(newfp))
 				break;
 			perror("fgets");
-			exit (1);
+			return (1);
 		}
 		if (!(new_ptr = strrchr(new_line, ' '))) {
-			fprintf(stderr, "Error in input data\n");
-			exit(1);
+			if ((new_ptr = strrchr(new_line, '\n')))
+				*new_ptr = '\0';
+			fprintf(stderr, "%s: Error in input data2 [%s]\n", fn2, new_line);
+			continue;
 		}
 		for (count = match = 0;; count++) {
 			if (!fgets(old_line, BUF_SIZE, oldfp)) {
@@ -320,15 +283,17 @@ main(int argc, char **argv)
 					break;
 				}
 				perror("fgets");
-				exit (1);
+				return (1);
 			}
 			if (!strcmp(old_line, new_line)) {
 				match = 1;
 				break;
 			}
 			if (!(old_ptr = strrchr(old_line, ' '))) {
-				fprintf(stderr, "Error in input data\n");
-				exit(1);
+				if ((old_ptr = strrchr(old_line, '\n')))
+					*old_ptr = '\0';
+				fprintf(stderr, "%s: Error in input data1 [%s]\n", fn1, old_line);
+				continue;
 			}
 			c = strcmp(new_ptr, old_ptr);
 			if (sorted && c < 0) {
