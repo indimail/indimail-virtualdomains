@@ -84,7 +84,7 @@ AC_PROG_EGREP
 AC_CHECK_HEADERS([ctype.h fcntl.h stdlib.h string.h sys/wait.h sys/types.h sys/socket.h unistd.h time.h sys/time.h])
 saveCPPFLAGS="$CPPFLAGS"
 CPPFLAGS="${CPPFLAGS} -Dlint -I/usr/include/mysql -I/usr/local/include/mysql -I/usr/local/mysql/include"
-AC_CHECK_HEADERS([mysql.h pwd.h grp.h stdarg.h varargs.h errno.h signal.h netdb.h netinet/in.h arpa/inet.h])
+AC_CHECK_HEADERS([mysql.h pwd.h grp.h stdarg.h varargs.h getopt.h errno.h signal.h netdb.h netinet/in.h arpa/inet.h])
 AC_CHECK_TYPE([bool],AC_DEFINE(HAVE_BOOL, 1, have bool typedef),,[#include <mysql.h>])
 CPPFLAGS=$saveCPPFLAGS
 AC_CHECK_HEADERS([dirent.h limits.h sys/ioctl.h net/if.h linux/sockios.h sys/sockio.h])
