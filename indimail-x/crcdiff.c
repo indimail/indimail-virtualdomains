@@ -1,3 +1,36 @@
+/*
+ * $Id: crcdiff.c,v 1.8 2025-07-24 07:28:19+05:30 Cprogrammer Exp mbhangui $
+ *
+ * This progam will compare two crc lists and report the differences.
+ *
+ * By Jon Zeeff (zeeff@b-tech.ann-arbor.mi.us)
+ *
+ * Permission is granted to use this in any manner provided that
+ * 1) the copyright notice is left intact,
+ * 2) you don't hold me responsible for any bugs and
+ * 3) you mail me any improvements that you make.
+ *
+ *
+ * report:
+ *     corrupt  - crc changed w/o date change
+ *     replaced - crc + date changed
+ *     permiss  - permissions changed
+ *     own/grp  - owner or group changed
+ *     deleted  -
+ *     added    -
+ *  Print the info for the new file except for deleted.
+ *
+ * Use:
+ *
+ * find / -print | sort | xargs crc -v > crc_file
+ *
+ * to generate a crc list (crc.c should accompany this source).
+ *
+ * Assume that no files have tabs or spaces in the name.
+ * A crc line is like this
+ * 0x5d784e43 dr-xr-xr-x root	root	Jun 11 07:57:46 2024 /usr/bin
+ *
+ */
 
 /*- max size of line */
 
@@ -10,20 +43,27 @@
 #ifdef HAVE_STRING_H
 #include <string.h>
 #endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#ifdef HAVE_GETOPT_H
 #include <getopt.h>
+#endif
+#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
+#endif
 #ifdef HAVE_ERRNO_H
 #include <errno.h>
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: crcdiff.c,v 1.7 2025-06-07 18:18:22+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: crcdiff.c,v 1.8 2025-07-24 07:28:19+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
 usage(int exitval)
 {
-	fprintf(stderr, "crcdiff [-Cis] [-c critical_list] file1 file2)\n");
+	fprintf(stderr, "crcdiff [-Cdis] [-c critical_list] file1 file2)\n");
 	exit(exitval);
 }
 
@@ -64,12 +104,13 @@ main(int argc, char **argv)
 
 	char           *new_ptr, *old_ptr, *critical_file_list = NULL;
 	FILE           *newfp, *oldfp, *fp = NULL;
-	int             match, c, sorted = 0, crit_flag, display_checksum = 0, ignore_corrupted = 0;
+	int             match, c, sorted = 0, tmp, crit_flag, display_checksum = 0,
+					ignore_corrupted = 0, ignore_dir = 0;
 	unsigned long   add_count, del_count, corrupt_count, perm_count,
 					owner_count, mod_count, crit_l1_count, crit_l2_count, count;
 	char            new_line[BUF_SIZE], old_line[BUF_SIZE];
 
-	while ((c = getopt(argc, argv, "c:Cis")) != -1) {
+	while ((c = getopt(argc, argv, "c:Cdis")) != -1) {
 		switch (c)
 		{
 		case 'C':
@@ -87,6 +128,9 @@ main(int argc, char **argv)
 			break;
 		case 'i':
 			ignore_corrupted = 1;
+			break;
+		case 'd':
+			ignore_dir = 1;
 			break;
 		default:
 			usage(100);
@@ -178,8 +222,9 @@ main(int argc, char **argv)
 					return (1);
 				}
 				/*- check crc change */
-				if (strncmp(new_line, old_line, 10)) { /* corrupt  - crc changed w/o date change */
-					if (!strcmp(new_ptr, old_ptr)) {
+				tmp = ignore_dir && old_line[11] == 'd' && new_line[11] == 'd' ? 1 : 0;
+				if (!tmp && strncmp(new_line, old_line, 10)) {
+					if (!strcmp(new_ptr, old_ptr)) { /* corrupt  - crc changed w/o date change */
 						if (!ignore_corrupted) {
 							printf("corrupt    %s", new_line + (display_checksum ? 0 : 11));
 							if (fp && check_critical_list(fp, new_line)) {
@@ -189,7 +234,8 @@ main(int argc, char **argv)
 							corrupt_count++;
 						}
 					} else {
-						printf("replaced   %s", new_line + (display_checksum ? 0 : 11));
+						printf("replaced<  %s", old_line + (display_checksum ? 0 : 11));
+						printf("replaced>  %s", new_line + (display_checksum ? 0 : 11));
 						fflush(stdout);
 						if (fp && check_critical_list(fp, new_line)) {
 							fprintf(stderr, "WARN L2 >  %s", new_line + 11);

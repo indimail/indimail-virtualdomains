@@ -11,11 +11,11 @@ crcdiff \- compare two crc lists and report the difference
 .PP
 \fBcrc\fR [-dv] [-i \fIinitial_crc\fR] [-t \fItag\fR] file ...
 .PP
-\fBcrcdiff\fR [-Cis] [-c \fIcritical_list\fR] \fIcrclist\fR \fIcrclist\fR
+\fBcrcdiff\fR [-Cdis] [-c \fIcritical_list\fR] \fIcrclist\fR \fIcrclist\fR
 
 .SH DESCRIPTION
 For each file, \fBcrc\fR calculates and prints a 32-bit CRC in hexadecimal.
-With the -v optin it additionally prints file permissions, file owner,
+With the -v option it additionally prints file permissions, file owner,
 group and the file name. It is typically used to validate files transferred
 between different systems, and is useful in detecting subtle disk
 corruption. \fBcrc\fR uses a checksum compatible with the DOS version of
@@ -34,7 +34,9 @@ The -t option can be used to associate a tag with the filename.
 option is used, directories/files listed in \fIcritical_list\fR will be
 used to give L2 warnings for changes to such files. The -C option displays
 the checksum in the diff. If -i option is passed then the crc change
-without date change will be ignored and not reported.
+without date change will be ignored and not reported. This will also not
+report entries labelled as \fBcorrupt\fR. The -d option ignores directory
+timestamp changes and \fBreplaced\fR entries for directories are omitted.
 
 .EX
   corrupt    - crc changed without date change 
