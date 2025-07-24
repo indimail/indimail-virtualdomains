@@ -211,7 +211,7 @@ if [ -d courier-imap-%{courier_version} ] ; then
     export CFLAGS="${CFLAGS} -Wno-implicit-function-declaration"
   fi
   %configure --prefix=%{_prefix} --libexecdir=%{libexecdir} --bindir=%{_prefix}/bin \
-    --sbindir=%{_prefix}/sbin --mandir=%{mandir} --sysconfdir=%{sysconfdir} \
+    --sbindir=%{_prefix}/bin --mandir=%{mandir} --sysconfdir=%{sysconfdir} \
     --libdir=%{_libdir} --datarootdir=%{shareddir} --with-certsdir=%{sysconfdir}/certs \
     --with-mailer=%{_prefix}/bin/sendmail --disable-root-check --with-redhat \
     --without-userdb --without-authcustom --without-authchangepwdir \
@@ -326,7 +326,7 @@ done
   #%%find_lang fetchmail
 %endif
 %if %{undefined nodebug}
-  /bin/chmod -R 0755 %{buildroot}%{_prefix}/bin %{buildroot}%{_prefix}/sbin \
+  /bin/chmod -R 0755 %{buildroot}%{_prefix}/bin \
     %{buildroot}%{libexecdir}
   ln -sf %{_builddir}/%{name}-%{version}/debugsourcefiles.list %{_builddir}/debugsourcefiles.list
 %endif
@@ -388,12 +388,12 @@ done
 %attr(755,root,root)                    %{_prefix}/bin/mailbot
 %attr(755,root,root)                    %{_prefix}/bin/maildrop
 %attr(755,root,root)                    %{_prefix}/bin/reformail
-%attr(755,root,root)                    %{_prefix}/sbin/imaplogin
-%attr(755,root,root)                    %{_prefix}/sbin/pop3login
-%attr(755,root,root)                    %{_prefix}/sbin/sharedindexinstall
-%attr(755,root,root)                    %{_prefix}/sbin/sharedindexsplit
-%attr(755,root,root)                    %{_prefix}/sbin/authenumerate
-%attr(755,root,root)                    %{_prefix}/sbin/authtest
+%attr(755,root,root)                    %{_prefix}/bin/imaplogin
+%attr(755,root,root)                    %{_prefix}/bin/pop3login
+%attr(755,root,root)                    %{_prefix}/bin/sharedindexinstall
+%attr(755,root,root)                    %{_prefix}/bin/sharedindexsplit
+%attr(755,root,root)                    %{_prefix}/bin/authenumerate
+%attr(755,root,root)                    %{_prefix}/bin/authtest
 
 %if 0
 %attr(755,root,root)                    %{libexecdir}/imapmodules/authpwd
@@ -599,7 +599,7 @@ if [ $argv1 -eq 2 ] ; then # upgrade
     rundir=%{servicedir}
   fi
   # restart services
-  %{_prefix}/sbin/svctool --servicedir=%{servicedir} --refreshsvc="$svc_list"
+  %{_prefix}/bin/svctool --servicedir=%{servicedir} --refreshsvc="$svc_list"
   for i in fetchmail qmail-imapd.143 qmail-imapd-ssl.993 \
     qmail-pop3d.110 qmail-pop3d-ssl.995 fetchmail
   do
@@ -706,7 +706,7 @@ if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
   qhpsi="/usr/bin/clamdscan %s --config=${mysysconfdir}/scan.conf --fdpass --quiet --no-summary"
   extra_opt="$extra_opt --qhpsi=\"$qhpsi\""
 fi
-eval %{_prefix}/sbin/svctool --fetchmail --servicedir=%{servicedir} \
+eval %{_prefix}/bin/svctool --fetchmail --servicedir=%{servicedir} \
   --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
   --cntrldir=control --memory=%{fetchmail_mem} --fsync --syncdir \
   --dkverify=$ver_opt $extra_opt
@@ -716,16 +716,16 @@ eval %{_prefix}/sbin/svctool --fetchmail --servicedir=%{servicedir} \
 touch %{servicedir}/fetchmail/down
 
 # IMAP/POP3
-%{_prefix}/sbin/svctool --imap=143 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
+%{_prefix}/bin/svctool --imap=143 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
   --maxperip=25 --query-cache --memory=%{imap_pop3_mem} --default-domain=${default_domain} \
   --starttls --infifo=infifo
-%{_prefix}/sbin/svctool --imap=993 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
+%{_prefix}/bin/svctool --imap=993 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
   --maxperip=25 --query-cache --memory=%{imapspop3_mem} --default-domain=${default_domain} \
   --ssl --infifo=infifo
-%{_prefix}/sbin/svctool --pop3=110 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
+%{_prefix}/bin/svctool --pop3=110 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
   --maxperip=25 --query-cache --memory=%{imap_pop3_mem} --default-domain=${default_domain} \
   --starttls --infifo=infifo
-%{_prefix}/sbin/svctool --pop3=995 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
+%{_prefix}/bin/svctool --pop3=995 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
   --maxperip=25 --query-cache --memory=%{imapspop3_mem} --default-domain=${default_domain} \
   --ssl --infifo=infifo
 
@@ -773,10 +773,10 @@ do
   fi
   svc_list="$svc_list %{servicedir}/$i"
   # save variables
-  %{_prefix}/sbin/svctool --servicedir=%{servicedir} --service-name=$i \
+  %{_prefix}/bin/svctool --servicedir=%{servicedir} --service-name=$i \
     --export-variables=%{servicedir}/$i/variables/.variables  --force
 done
-%{_prefix}/sbin/svctool --servicedir=%{servicedir} --autorefresh="0 $svc_list"
+%{_prefix}/bin/svctool --servicedir=%{servicedir} --autorefresh="0 $svc_list"
 ) >> /var/log/indimail-access-setup.log 2>&1
 
 echo

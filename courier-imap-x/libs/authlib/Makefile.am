@@ -8,7 +8,7 @@ EXTRA_PROGRAMS= authshadow authpam authpwd authcustom
 
 noinst_PROGRAMS= @AUTHMODULES@
 
-sbin_PROGRAMS= authtest authenumerate
+bin_PROGRAMS= authtest authenumerate
 
 noinst_DATA=$(BUILT_SOURCES)
 

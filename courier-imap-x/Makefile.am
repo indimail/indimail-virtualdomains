@@ -13,7 +13,7 @@ SUBDIRS=libs/numlib libs/bdbobj libs/gdbmobj libs/soxwrap \
 DISTCLEANFILES=stamp-h1 config.h config.log packaging/systemd/courier-imap.sysvinit packaging/systemd/courier-imap.service \
 	packaging/suse/courier-imap.init pop3d.rc dbobj.h imapd-ssl.rc pop3d-ssl.rc imapd.rc dbobj.config $(MAILDROPHTML)
 
-#CLEANFILES=$(databin_SCRIPTS) $(man_MANS) $(sysconf_DATA) $(sbin_SCRIPTS)
+#CLEANFILES=$(databin_SCRIPTS) $(man_MANS) $(sysconf_DATA) $(bin_SCRIPTS)
 CLEANFILES=$(sysconf_DATA)
 
 doc_list=libs/maildir/README.sharedfolders.md libs/maildir/README.maildirquota.txt \

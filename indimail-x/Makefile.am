@@ -27,7 +27,6 @@ libindimail_la_CFLAGS = -fPIC
 libindimaildir=@libdir@
 
 indimailbindir=@bindir@
-indimailsbindir=@sbindir@
 indimaillibexecdir=@libexecdir@
 indimailauthlibdir=@libexecdir@/imapmodules
 
@@ -172,9 +171,7 @@ indimailbin_PROGRAMS = vadddomain vdeldomain vadduser vdeluser vuserinfo \
 	vhostid vpasswd vcfilter vsmtp vsetuserquota \
 	vacation vatrn vmoveuserdir vrenameuser vipmap vlimit \
 	vpriv crc crcdiff incrypt vgroup proxyimap proxypop3 \
-	vproxy vbulletin
-
-indimailsbin_PROGRAMS = inlookup ischema tcplookup vdelivermail clearopensmtp \
+	vproxy vbulletin inlookup ischema tcplookup vdelivermail clearopensmtp \
 	updaterules vfilter vmoddomain inquerytest vreorg vtable \
 	install_tables hostsync vserverinfo initsvc \
 	mgmtpass vchkpass vsetpass resetquota postdel \
@@ -197,7 +194,7 @@ noinst_SCRIPTS = vadddomain_handle vadduser_handle vdeldomain_handle \
 
 setuid_list = bin/printdir bin/vaddaliasdomain bin/vadddomain bin/vadduser bin/vbulletin \
 	bin/vcfilter bin/vdeldomain bin/vdeluser bin/vmoduser bin/vmoveuserdir bin/vrenamedomain \
-	bin/vrenameuser bin/vsetuserquota bin/vdominfo bin/vuserinfo sbin/vreorg
+	bin/vrenameuser bin/vsetuserquota bin/vdominfo bin/vuserinfo bin/vreorg
 
 noinst_DATA = indimail-permissions.easy indimail-permissions.paranoid \
 	indimail-permissions.secure indimail.spec indimail.changes indimail-rpmlintrc \

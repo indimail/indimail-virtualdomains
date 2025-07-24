@@ -124,10 +124,10 @@ Requires: libqmail > 1.3
 
 %if %{undefined copr_build}
 %if %build_on_obs == 0
-%if %{defined fedora_version} || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?centos_ver} > 7 || %{defined fedora} || 0%{?rhel} > 7
+%if 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?centos_ver} > 7 || 0%{?rhel} > 7
 BuildRequires: redhat-lsb-core
 %endif
-%if %{defined rhel_version}
+%if %{defined rhel_version} || %{defined fedora_version}
 BuildRequires: redhat-lsb
 %endif
 %if %{defined centos_version}
@@ -278,7 +278,7 @@ fi
 %else
   default_domain=%{defaultDomain}
 %endif
-%configure --prefix=%{_prefix} --sbindir=%{_prefix}/sbin --sysconfdir=%{sysconfdir} \
+%configure --prefix=%{_prefix} --sbindir=%{_prefix}/bin --sysconfdir=%{sysconfdir} \
   --mandir=%{_prefix}/share/man --datarootdir=%{_prefix}/share/indimail \
   --with-pkgconfigdir=%{_pkg_config_path} --libdir=%{_libdir} \
   --enable-domaindir=%{domaindir} --enable-mysqlprefix=%{mysqlPrefix} \
@@ -535,36 +535,36 @@ done
 %attr(755,root,root)                    %{_prefix}/bin/crcdiff
 %attr(755,root,root)                    %{_prefix}/bin/dbinfo
 
-%attr(755,root,root)                    %{_prefix}/sbin/resetquota
-%attr(755,root,root)                    %{_prefix}/sbin/vserverinfo
-%attr(755,root,root)                    %{_prefix}/sbin/adminclient
-%attr(755,root,root)                    %{_prefix}/sbin/chowkidar
-%attr(755,root,root)                    %{_prefix}/sbin/clearopensmtp
-%attr(755,root,root)                    %{_prefix}/sbin/hostsync
-%attr(755,root,root)                    %{_prefix}/sbin/indisrvr
-%attr(755,root,root)                    %{_prefix}/sbin/initsvc
-%attr(755,root,root)                    %{_prefix}/sbin/inlookup
-%attr(755,root,root)                    %{_prefix}/sbin/tcplookup
-%attr(755,root,root)                    %{_prefix}/sbin/inquerytest
-%attr(755,root,root)                    %{_prefix}/sbin/install_tables
-%attr(755,root,root)                    %{_prefix}/sbin/vtable
-%attr(755,root,root)                    %{_prefix}/sbin/ipchange
-%attr(755,root,root)                    %{_prefix}/sbin/ischema
-%attr(755,root,root)                    %{_prefix}/sbin/mgmtpass
-%attr(755,root,root)                    %{_prefix}/sbin/updaterules
-%attr(755,root,root)                    %{_prefix}/sbin/vchkpass
-%attr(755,root,root)                    %{_prefix}/sbin/vsetpass
-%attr(755,root,root)                    %{_prefix}/sbin/vdelivermail
-%attr(755,root,root)                    %{_prefix}/sbin/postdel
-%attr(755,root,root)                    %{_prefix}/sbin/vdeloldusers
-%attr(755,root,root)                    %{_prefix}/sbin/vpurge
-%attr(755,root,root)                    %{_prefix}/sbin/vfilter
-%attr(755,root,root)                    %{_prefix}/sbin/vfstab
-%attr(755,root,root)                    %{_prefix}/sbin/vmoddomain
-%attr(755,root,root)                    %{_prefix}/sbin/vreorg
+%attr(755,root,root)                    %{_prefix}/bin/resetquota
+%attr(755,root,root)                    %{_prefix}/bin/vserverinfo
+%attr(755,root,root)                    %{_prefix}/bin/adminclient
+%attr(755,root,root)                    %{_prefix}/bin/chowkidar
+%attr(755,root,root)                    %{_prefix}/bin/clearopensmtp
+%attr(755,root,root)                    %{_prefix}/bin/hostsync
+%attr(755,root,root)                    %{_prefix}/bin/indisrvr
+%attr(755,root,root)                    %{_prefix}/bin/initsvc
+%attr(755,root,root)                    %{_prefix}/bin/inlookup
+%attr(755,root,root)                    %{_prefix}/bin/tcplookup
+%attr(755,root,root)                    %{_prefix}/bin/inquerytest
+%attr(755,root,root)                    %{_prefix}/bin/install_tables
+%attr(755,root,root)                    %{_prefix}/bin/vtable
+%attr(755,root,root)                    %{_prefix}/bin/ipchange
+%attr(755,root,root)                    %{_prefix}/bin/ischema
+%attr(755,root,root)                    %{_prefix}/bin/mgmtpass
+%attr(755,root,root)                    %{_prefix}/bin/updaterules
+%attr(755,root,root)                    %{_prefix}/bin/vchkpass
+%attr(755,root,root)                    %{_prefix}/bin/vsetpass
+%attr(755,root,root)                    %{_prefix}/bin/vdelivermail
+%attr(755,root,root)                    %{_prefix}/bin/postdel
+%attr(755,root,root)                    %{_prefix}/bin/vdeloldusers
+%attr(755,root,root)                    %{_prefix}/bin/vpurge
+%attr(755,root,root)                    %{_prefix}/bin/vfilter
+%attr(755,root,root)                    %{_prefix}/bin/vfstab
+%attr(755,root,root)                    %{_prefix}/bin/vmoddomain
+%attr(755,root,root)                    %{_prefix}/bin/vreorg
 %attr(755,root,root)                    %{_prefix}/bin/valias
 %attr(755,root,root)                    %{_prefix}/bin/vproxy
-%attr(755,root,root)                    %{_prefix}/sbin/osh
+%attr(755,root,root)                    %{_prefix}/bin/osh
 %attr(755,root,root)                    %{_prefix}/bin/ismaildup
 
 %attr(755,root,root)                    %{libexecdir}/controlsync
@@ -898,7 +898,7 @@ done
 
 ### SCRIPTLET ###############################################################################
 %verifyscript
-%{_prefix}/sbin/svctool --check-install --servicedir=%{servicedir} \
+%{_prefix}/bin/svctool --check-install --servicedir=%{servicedir} \
   --qbase=%{qbase} --qcount=%{qcount} --qstart=1
 
 %if 0%{?suse_version} >= 1120
@@ -1090,7 +1090,7 @@ if [ $argv1 -eq 2 ] ; then # upgrade
   fi
 
   #selinux
-  %{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=iselinux | tai64n | tai64nlocal
+  %{_prefix}/bin/svctool --servicedir=%{servicedir} --config=iselinux | tai64n | tai64nlocal
 
   # refresh indimail services
   svc_list=""
@@ -1112,7 +1112,7 @@ if [ $argv1 -eq 2 ] ; then # upgrade
       svc_list="$svc_list %{servicedir}/$i"
     done
   fi
-  %{_prefix}/sbin/svctool --servicedir=%{servicedir} --refreshsvc="$svc_list" | tai64n | tai64nlocal
+  %{_prefix}/bin/svctool --servicedir=%{servicedir} --refreshsvc="$svc_list" | tai64n | tai64nlocal
 
   indlib=`ls -d %{_libdir}/libindimail.so.*.*.* 2>/dev/null`
   for port in 25 465 587
@@ -1209,16 +1209,16 @@ if [ %noproxy -eq 0 ] ; then
 %global imap_pop3_mem 52428800
 %global imapspop3_mem 52428800
 %endif
-%{_prefix}/sbin/svctool --imap=4143 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
+%{_prefix}/bin/svctool --imap=4143 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
   --maxperip=25 --query-cache --memory=%{imap_pop3_mem} \
   --proxy=143 --starttls --tlsprog=%{_prefix}/bin/sslerator --infifo=infifo | tai64n | tai64nlocal
-%{_prefix}/sbin/svctool --imap=9143 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
+%{_prefix}/bin/svctool --imap=9143 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
   --maxperip=25 --query-cache --memory=%{imapspop3_mem} \
   --proxy=143 --ssl --infifo=infifo | tai64n | tai64nlocal
-%{_prefix}/sbin/svctool --pop3=4110 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
+%{_prefix}/bin/svctool --pop3=4110 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
   --maxperip=25 --query-cache --memory=%{imap_pop3_mem} \
   --proxy=110 --starttls --tlsprog=%{_prefix}/bin/sslerator --infifo=infifo | tai64n | tai64nlocal
-%{_prefix}/sbin/svctool --pop3=9110 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
+%{_prefix}/bin/svctool --pop3=9110 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
   --maxperip=25 --query-cache --memory=%{imapspop3_mem} \
   --proxy=110 --ssl --infifo=infifo | tai64n | tai64nlocal
 
@@ -1256,7 +1256,7 @@ do
   if [ -s %{servicedir}/qmail-smtpd.$i/variables/AUTHMODULES ] ; then
     grep vchkpass %{servicedir}/qmail-smtpd.$i/variables/AUTHMODULES > /dev/null
     if [ $? -ne 0 ] ; then
-      AUTHM="`cat %{servicedir}/qmail-smtpd.$i/variables/AUTHMODULES` /usr/sbin/vchkpass"
+      AUTHM="`cat %{servicedir}/qmail-smtpd.$i/variables/AUTHMODULES` /usr/bin/vchkpass"
       echo $AUTHM > %{servicedir}/qmail-smtpd.$i/variables/AUTHMODULES
     fi
   fi
@@ -1287,16 +1287,16 @@ else
 fi
 
 # fifolog service
-%{_prefix}/sbin/svctool --fifologger=$logfifo --servicedir=%{servicedir} | tai64n | tai64nlocal
+%{_prefix}/bin/svctool --fifologger=$logfifo --servicedir=%{servicedir} | tai64n | tai64nlocal
 
 # mrtg service
 if [ -x /usr/bin/mrtg ] ; then
-  %{_prefix}/sbin/svctool --config=snmpdconf | tai64n | tai64nlocal
-  %{_prefix}/sbin/svctool --mrtg=/var/www/html/mailmrtg --servicedir=%{servicedir} | tai64n | tai64nlocal
+  %{_prefix}/bin/svctool --config=snmpdconf | tai64n | tai64nlocal
+  %{_prefix}/bin/svctool --mrtg=/var/www/html/mailmrtg --servicedir=%{servicedir} | tai64n | tai64nlocal
 fi
 
 log_it "Creating default mysql.host, tcprules, bogofilter-qfe, default domain dir"
-%{_prefix}/sbin/svctool --config=indimail --mysqlhost=localhost \
+%{_prefix}/bin/svctool --config=indimail --mysqlhost=localhost \
   --mysqluser=indimail  --mysqlpass=ssh-1.5- --mysqlsocket=%{mysqlSocket} | tai64n | tai64nlocal
 
 # MySQL
@@ -1304,14 +1304,14 @@ if [ -x %{mysqlPrefix}/libexec/mysqld -o -x %{mysqlPrefix}/sbin/mysqld -o -x %{m
   error=`ps -e|grep mysqld|grep -v grep|wc -l` # another mysqld instance running ?
   log_it "Creating Database/Service for MySQL"
   # MySQL Config Creation
-  %{_prefix}/sbin/svctool --config=mysql   --mysqlPrefix=%{mysqlPrefix} --mysqlsocket=%{mysqlSocket} \
+  %{_prefix}/bin/svctool --config=mysql   --mysqlPrefix=%{mysqlPrefix} --mysqlsocket=%{mysqlSocket} \
     --databasedir=%{indimaildir}/mysqldb | tai64n | tai64nlocal
   # MySQL Database Creation
-  %{_prefix}/sbin/svctool --config=mysqldb --mysqlPrefix=%{mysqlPrefix} \
+  %{_prefix}/bin/svctool --config=mysqldb --mysqlPrefix=%{mysqlPrefix} \
     --mysqluser=indimail --mysqlpass=ssh-1.5- --databasedir=%{indimaildir}/mysqldb \
     --base_path=%{mbase} --mysqlsocket="%{mysqlSocket}".tmp | tai64n | tai64nlocal
   # MySQL Supervise creation
-  %{_prefix}/sbin/svctool --mysql=3306 --servicedir=%{servicedir} --mysqlPrefix=%{mysqlPrefix} \
+  %{_prefix}/bin/svctool --mysql=3306 --servicedir=%{servicedir} --mysqlPrefix=%{mysqlPrefix} \
     --databasedir=%{indimaildir}/mysqldb --config=%{sysconfdir}/indimail.cnf | tai64n | tai64nlocal
   if [ ! -f %{indimaildir}/mysqldb/data/indimail/indimail.frm -a ! -f %{indimaildir}/mysqldb/data/indimail/indimail.ibd ] ; then
     error=1
@@ -1347,13 +1347,13 @@ fi
 
 # IndiMail Daemons
 #indisrvr
-%{_prefix}/sbin/svctool --indisrvr=4000 --servicedir=%{servicedir} \
+%{_prefix}/bin/svctool --indisrvr=4000 --servicedir=%{servicedir} \
   --localip=0 --maxdaemons=40 --maxperip=25 --avguserquota=2097152 \
   --certfile=%{sysconfdir}/certs/servercert.pem --ssl \
   --hardquota=52428800 --base_path=%{mbase} | tai64n | tai64nlocal
 
 #inlookup
-%{_prefix}/sbin/svctool --inlookup=infifo --servicedir=%{servicedir} --cntrldir=control \
+%{_prefix}/bin/svctool --inlookup=infifo --servicedir=%{servicedir} --cntrldir=control \
   --threads=5 --activeDays=60 --query-cache --password-cache --use-btree | tai64n | tai64nlocal
 
 #poppass
@@ -1362,10 +1362,10 @@ fi
 %else
 %global poppass_mem   52428800
 %endif
-%{_prefix}/sbin/svctool --poppass=106 --localip=0 --maxdaemons=40 --maxperip=25 \
+%{_prefix}/bin/svctool --poppass=106 --localip=0 --maxdaemons=40 --maxperip=25 \
   --memory=%{poppass_mem} \
   --certfile=%{sysconfdir}/certs/servercert.pem --ssl \
-  --setpassword=%{_prefix}/sbin/vsetpass --servicedir=%{servicedir} | tai64n | tai64nlocal
+  --setpassword=%{_prefix}/bin/vsetpass --servicedir=%{servicedir} | tai64n | tai64nlocal
 
 log_it "Creating default indimail tcp access control files"
 # rebuild cdb for poppass
@@ -1405,7 +1405,7 @@ do
   fi
   svc_list="$svc_list %{servicedir}/$i"
   # save variables
-  %{_prefix}/sbin/svctool --servicedir=%{servicedir} --service-name=$i \
+  %{_prefix}/bin/svctool --servicedir=%{servicedir} --service-name=$i \
     --export-variables=%{servicedir}/$i/variables/.variables  --force | tai64n | tai64nlocal
 done
 if [ %noproxy -eq 0 ] ; then
@@ -1416,15 +1416,15 @@ do
     continue
   fi
   svc_list="$svc_list %{servicedir}/$i"
-  %{_prefix}/sbin/svctool --servicedir=%{servicedir} --service-name=$i \
+  %{_prefix}/bin/svctool --servicedir=%{servicedir} --service-name=$i \
     --export-variables=%{servicedir}/$i/variables/.variables  --force | tai64n | tai64nlocal
 done
 fi
 
-%{_prefix}/sbin/svctool --servicedir=%{servicedir} --autorefresh="0 $svc_list" | tai64n | tai64nlocal
+%{_prefix}/bin/svctool --servicedir=%{servicedir} --autorefresh="0 $svc_list" | tai64n | tai64nlocal
 
 # selinux
-%{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=iselinux | tai64n | tai64nlocal
+%{_prefix}/bin/svctool --servicedir=%{servicedir} --config=iselinux | tai64n | tai64nlocal
 
 if [ -f %{sysconfdir}/indimail.cron -a -d %{_sysconfdir}/cron.d ] ; then
   log_it "adding cron entries"
@@ -1444,7 +1444,7 @@ elif [ -f %{_sysconfdir}/systemd/system/multi-user.target.wants/svscan.service ]
   echo "1. Execute /bin/systemctl start svscan to start services"
   count=1
 else
-  echo "1. Execute %{_prefix}/sbin/initsvc -on"
+  echo "1. Execute %{_prefix}/bin/initsvc -on"
   echo "2. Execute /sbin/init q to start services"
   count=2
 fi
@@ -1459,7 +1459,7 @@ if [ ! -f %{sysconfdir}/certs/servercert.pem ] ; then
 count=`expr $count + 1`
 echo "$count. You need to create CERTS for STARTTLS."
 echo "   Run the following command to create Certificate for TLS/SSL"
-echo "   %{_prefix}/sbin/svctool --config=cert --postmaster=postmaster@$default_domain --common_name=$default_domain"
+echo "   %{_prefix}/bin/svctool --config=cert --postmaster=postmaster@$default_domain --common_name=$default_domain"
 fi
 
 echo
@@ -1501,7 +1501,7 @@ if [ -f %{_prefix}/bin/svok ] ; then
     elif test -x %{_prefix}/sbin/initsvc
     then
       log_it "Giving IndiMail exactly 5 seconds to exit nicely"
-      %{_prefix}/sbin/initsvc -off
+      %{_prefix}/bin/initsvc -off
     fi
     sleep 5
   fi
@@ -1547,8 +1547,8 @@ do
   grep -wv "^+$i-" %{sysconfdir}/users/assign > %{sysconfdir}/users/assign.tmp
   %{__mv} %{sysconfdir}/users/assign.tmp %{sysconfdir}/users/assign
 done
-if [ -x %{_prefix}/sbin/qmail-newu ] ; then
-  %{_prefix}/sbin/qmail-newu
+if [ -x %{_prefix}/bin/qmail-newu ] ; then
+  %{_prefix}/bin/qmail-newu
 fi
 %{__rm} -rf %{indimaildir}/domains/$default_domain
 for port in 465 25 587
@@ -1656,7 +1656,7 @@ if [ -f %{libexecdir}/iupgrade.sh ] ; then
   /bin/sh %{libexecdir}/iupgrade.sh posttrans noargs %{version} $* | tai64n | tai64nlocal
 ) >> /var/log/indimail-setup.log 2>&1
 fi
-%{_prefix}/sbin/svctool --fixsharedlibs
+%{_prefix}/bin/svctool --fixsharedlibs
 
 %post -n libindimail
 if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
