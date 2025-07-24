@@ -56,7 +56,7 @@ libmaildir_la_SOURCES=autoresponse.c autoresponse.h \
 
 bin_PROGRAMS=deliverquota maildirmake maildirkw maildiracl maildirwatch
 noinst_PROGRAMS=testmaildirfilter maildirkwtest maildiraclttest testmaildirsearch maildirkwtest2
-sbin_SCRIPTS=sharedindexinstall sharedindexsplit
+bin_SCRIPTS=sharedindexinstall sharedindexsplit
 
 deliverquota_SOURCES=deliverquota.c
 deliverquota_DEPENDENCIES=libmaildir.la ../rfc822/librfc822.la \

@@ -22,8 +22,7 @@ EXTRA_DIST=testsuite testsuite.txt smaptestsuite smaptestsuite.txt \
 	imapd.cnf.gnutls pop3d.cnf.gnutls \
 	pop3testsuite pop3testsuite.txt
 
-bin_PROGRAMS=imapd pop3d
-sbin_PROGRAMS=imaplogin pop3login
+bin_PROGRAMS=imapd pop3d imaplogin pop3login
 libexec_SCRIPTS=mkimapdcert mkpop3dcert mkdhparams courierlogins
 
 sysconf_DATA = imapd.dist imapd-ssl.dist pop3d.dist pop3d-ssl.dist imapd.cnf pop3d.cnf
