@@ -1,5 +1,8 @@
 /*
  * $Log: auth_admin.c,v $
+ * Revision 1.11  2025-07-24 08:19:12+05:30  Cprogrammer
+ * conditional compilation of ssl code
+ *
  * Revision 1.10  2023-08-22 19:11:30+05:30  Cprogrammer
  * use TLS_CIPHER_LIST for TLSv1.2 and below, TLS_CIPHER_SUITE for TLSv1.3 and above
  *
@@ -59,7 +62,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: auth_admin.c,v 1.10 2023-08-22 19:11:30+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: auth_admin.c,v 1.11 2025-07-24 08:19:12+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -70,11 +73,11 @@ auth_admin(char *admin_user, char *admin_pass, char *admin_host,
 	int             sfd, port, timeoutdata, timeoutconn;
 #ifdef HAVE_SSL
 	int             i;
-#endif
-	ssize_t         len;
 	SSL            *ssl;
 	SSL_CTX        *ctx;
 	char           *ciphers;
+#endif
+	ssize_t         len;
 	char            inbuf[512];
 
 	scan_uint(admin_port, (unsigned int *) &port);
