@@ -533,7 +533,7 @@ happens transparently by using pam-multi(8) in conjunction with nssd(8)
 ##### STEP 10  ##### Install indimail-spamfilter ###########
 current working directory /home/local/src/indimail-virtualdomains
 
-% cd bogofilter-x
+% cd bogofilter-wordlist-x
 % ./default.configure
 % make -s [DESTDIR=staging_directory]
 % sudo make -s install-strip [DESTDIR=staging_directory]
