@@ -21,7 +21,8 @@ pkgconfigdir=@prefix@/lib/pkgconfig
 all: rules indimail.prerm indimail.preinst indimail.postrm indimail.postinst \
 indimail.dsc indimail-dev.postinst indimail-dev.postrm indimail-xUbuntu_18.04.dsc \
 indimail-xUbuntu_16.04.dsc indimail-xUbuntu_22.04.dsc indimail-xUbuntu_23.04.dsc \
-indimail-xUbuntu_24.04.dsc indimail-xUbuntu_25.04.dsc debian.tar.gz
+indimail-xUbuntu_24.04.dsc indimail-xUbuntu_25.04.dsc indimail-Debian_13.dsc \
+debian.tar.gz
 
 install: all
 install-strip: install
@@ -113,6 +114,9 @@ indimail-xUbuntu_24.04.dsc: indimail-xUbuntu_24.04.dsc.in Makefile \
 ../conf-version ../conf-release ../conf-email
 	$(edit) $@.in > $@;
 indimail-xUbuntu_25.04.dsc: indimail-xUbuntu_25.04.dsc.in Makefile \
+../conf-version ../conf-release ../conf-email
+	$(edit) $@.in > $@;
+indimail-Debian_13.dsc: indimail-Debian_13.dsc.in Makefile \
 ../conf-version ../conf-release ../conf-email
 	$(edit) $@.in > $@;
 
