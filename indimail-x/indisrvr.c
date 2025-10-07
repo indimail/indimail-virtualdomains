@@ -1,12 +1,12 @@
 /*
- * $Id: indisrvr.c,v 1.22 2025-05-13 20:00:25+05:30 Cprogrammer Exp mbhangui $
+ * $Id: indisrvr.c,v 1.23 2025-10-07 08:25:36+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: indisrvr.c,v 1.22 2025-05-13 20:00:25+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: indisrvr.c,v 1.23 2025-10-07 08:25:36+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -401,7 +401,7 @@ call_prg()
 		return (1);
 	}
 	ptr = line.s + match + 1; /*- command */
-	for (; *ptr && isspace(*ptr); ptr++, len1--);
+	for (; *ptr && isspace(*ptr); ptr++);
 	k = str_chr(ptr, ' ');
 	if (ptr[k]) {
 		ptr[k] = '\0';
@@ -713,6 +713,9 @@ main()
 
 /*
  * $Log: indisrvr.c,v $
+ * Revision 1.23  2025-10-07 08:25:36+05:30  Cprogrammer
+ * removed unused variable
+ *
  * Revision 1.22  2025-05-13 20:00:25+05:30  Cprogrammer
  * fixed gcc14 errors
  *
