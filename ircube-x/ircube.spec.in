@@ -241,6 +241,47 @@ install -m 0644 %{name}-rpm.info %{buildroot}%{pluginbase}/%{name}/%{name}-rpm.i
 %attr(0644,root,root)      %{pluginbase}/plugins/markasjunk2/config.inc.php.dist
 %attr(0644,root,root)      %{pluginbase}/plugins/markasjunk2/markasjunk2.js
 %attr(0644,root,root)      %{pluginbase}/plugins/markasjunk2/CHANGELOG
+%dir %attr(0755,root,root) %{pluginbase}/plugins/persistent_login
+%attr(0644,root,root)      %{pluginbase}/plugins/persistent_login/.gitignore
+%attr(0644,root,root)      %{pluginbase}/plugins/persistent_login/README.md
+%attr(0644,root,root)      %{pluginbase}/plugins/persistent_login/composer.json
+%attr(0644,root,root)      %{pluginbase}/plugins/persistent_login/config.inc.php.dist
+%dir %attr(0755,root,root) %{pluginbase}/plugins/persistent_login/docs
+%attr(0644,root,root)      %{pluginbase}/plugins/persistent_login/docs/ifpl_plugin_config_authtoken.png
+%attr(0644,root,root)      %{pluginbase}/plugins/persistent_login/docs/login_elastic.png
+%attr(0644,root,root)      %{pluginbase}/plugins/persistent_login/docs/login_larry.png
+%dir %attr(0755,root,root) %{pluginbase}/plugins/persistent_login/localization
+%attr(0644,root,root)      %{pluginbase}/plugins/persistent_login/localization/bg_BG.inc
+%attr(0644,root,root)      %{pluginbase}/plugins/persistent_login/localization/cs_CZ.inc
+%attr(0644,root,root)      %{pluginbase}/plugins/persistent_login/localization/da_DK.inc
+%attr(0644,root,root)      %{pluginbase}/plugins/persistent_login/localization/de_CH.inc
+%attr(0644,root,root)      %{pluginbase}/plugins/persistent_login/localization/de_DE.inc
+%attr(0644,root,root)      %{pluginbase}/plugins/persistent_login/localization/el_GR.inc
+%attr(0644,root,root)      %{pluginbase}/plugins/persistent_login/localization/en_GB.inc
+%attr(0644,root,root)      %{pluginbase}/plugins/persistent_login/localization/en_US.inc
+%attr(0644,root,root)      %{pluginbase}/plugins/persistent_login/localization/es_ES.inc
+%attr(0644,root,root)      %{pluginbase}/plugins/persistent_login/localization/fi_FI.inc
+%attr(0644,root,root)      %{pluginbase}/plugins/persistent_login/localization/fr_FR.inc
+%attr(0644,root,root)      %{pluginbase}/plugins/persistent_login/localization/gl_ES.inc
+%attr(0644,root,root)      %{pluginbase}/plugins/persistent_login/localization/hu_HU.inc
+%attr(0644,root,root)      %{pluginbase}/plugins/persistent_login/localization/is_IS.inc
+%attr(0644,root,root)      %{pluginbase}/plugins/persistent_login/localization/it_IT.inc
+%attr(0644,root,root)      %{pluginbase}/plugins/persistent_login/localization/ja_JP.inc
+%attr(0644,root,root)      %{pluginbase}/plugins/persistent_login/localization/nl_NL.inc
+%attr(0644,root,root)      %{pluginbase}/plugins/persistent_login/localization/pl_PL.inc
+%attr(0644,root,root)      %{pluginbase}/plugins/persistent_login/localization/pt_BR.inc
+%attr(0644,root,root)      %{pluginbase}/plugins/persistent_login/localization/ru_RU.inc
+%attr(0644,root,root)      %{pluginbase}/plugins/persistent_login/localization/sk_SK.inc
+%attr(0644,root,root)      %{pluginbase}/plugins/persistent_login/localization/sv_SE.inc
+%attr(0644,root,root)      %{pluginbase}/plugins/persistent_login/localization/zh_CN.inc
+%attr(0644,root,root)      %{pluginbase}/plugins/persistent_login/localization/zh_TW.inc
+%attr(0644,root,root)      %{pluginbase}/plugins/persistent_login/persistent_login.css
+%attr(0644,root,root)      %{pluginbase}/plugins/persistent_login/persistent_login.js
+%attr(0644,root,root)      %{pluginbase}/plugins/persistent_login/persistent_login.php
+%dir %attr(0755,root,root) %{pluginbase}/plugins/persistent_login/sql
+%attr(0644,root,root)      %{pluginbase}/plugins/persistent_login/sql/mysql.sql
+%attr(0644,root,root)      %{pluginbase}/plugins/persistent_login/sql/postgres.sql
+%attr(0644,root,root)      %{pluginbase}/plugins/persistent_login/sql/sqlite.sql
 %attr(644,root,root)       %{pluginbase}/%{name}/%{name}-release
 %attr(644,root,root)       %{pluginbase}/%{name}/%{name}-rpm.info
 

@@ -59,6 +59,7 @@ echo "    'zipdownload',"
 echo "    'sauserprefs',"
 echo "    'markasjunk2',"
 echo "    'iwebadmin',"
+echo "    'persistent_login',"
 echo ");"
 echo "\$config['skin'] = 'elastic';"
 }
