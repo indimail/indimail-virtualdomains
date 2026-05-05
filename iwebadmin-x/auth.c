@@ -1,5 +1,5 @@
 /*
- * $Id: auth.c,v 1.10 2025-05-13 20:41:03+05:30 Cprogrammer Exp mbhangui $
+ * $Id: auth.c,v 1.11 2026-05-05 21:56:38+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -49,9 +49,7 @@
 //extern char *crypt();
 
 void
-auth_system(ip_addr, pw)
-	const char     *ip_addr;
-	struct passwd  *pw;
+auth_system(const char *ip_addr, struct passwd *pw)
 {
 	time_t          time1, time2;
 	int             fd, match;
