@@ -1,8 +1,8 @@
 /*
- * $Id: inlookup.c,v 1.12 2025-05-13 20:00:32+05:30 Cprogrammer Exp mbhangui $
+ * $Id: inlookup.c,v 1.13 2026-05-05 21:34:44+05:30 Cprogrammer Exp mbhangui $
  */
 #ifndef	lint
-static char     sccsid[] = "$Id: inlookup.c,v 1.12 2025-05-13 20:00:32+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inlookup.c,v 1.13 2026-05-05 21:34:44+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -164,7 +164,7 @@ isig_int(int x)
 }
 
 static void
-isig_term()
+isig_term(int x)
 {
 	int             idx;
 
@@ -298,7 +298,7 @@ main(int argc, char **argv)
 						strnum2[fmt_ulong(strnum2, pid)] = 0;
 						strnum3[fmt_int(strnum3, WIFSTOPPED(wStat) ? WSTOPSIG(wStat) : SIGCONT)] = 0;
 						strerr_warn6("inlookup[", strnum1, "]: child [", strnum2,
-								WIFSTOPPED(wStat) ? "] stopped by singal " : "] started by signal ",
+								WIFSTOPPED(wStat) ? "] stopped by signal " : "] started by signal ",
 								strnum3, 0);
 					}
 				}
@@ -376,6 +376,9 @@ main()
 #endif
 /*
  * $Log: inlookup.c,v $
+ * Revision 1.13  2026-05-05 21:34:44+05:30  Cprogrammer
+ * fix signal function usage for Darwin
+ *
  * Revision 1.12  2025-05-13 20:00:32+05:30  Cprogrammer
  * fixed gcc14 errors
  *

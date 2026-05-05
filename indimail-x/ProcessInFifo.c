@@ -1,5 +1,5 @@
 /*
- * $Id: ProcessInFifo.c,v 1.22 2025-05-13 20:02:17+05:30 Cprogrammer Exp mbhangui $
+ * $Id: ProcessInFifo.c,v 1.23 2026-05-05 21:43:52+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -78,7 +78,7 @@
 #include "inquery.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ProcessInFifo.c,v 1.22 2025-05-13 20:02:17+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ProcessInFifo.c,v 1.23 2026-05-05 21:43:52+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             user_query_count, relay_query_count, pwd_query_count, alias_query_count;
@@ -481,7 +481,7 @@ query_type(int status)
 
 #ifdef DARWIN
 static void
-isig_usr1()
+isig_usr1(int x)
 {
 	char           *fifo_path;
 	long            total_count;
@@ -541,13 +541,13 @@ isig_usr1()
 	logfunc("ProcessInFifo", "\n");
 	(tcpserver ? errflush : flush) ("ProcessInFifo");
 	twalk(in_root, walk_entry);
-	signal(SIGUSR1, (void(*)()) isig_usr1);
+	signal(SIGUSR1, (void(*)(int)) isig_usr1);
 	errno = error_intr;
 	return;
 }
 
 static void
-isig_usr2()
+isig_usr2(int x)
 {
 	char           *fifo_path;
 
@@ -560,17 +560,17 @@ isig_usr2()
 	logfunc("ProcessInFifo", _debug ? "0\n" : "1\n");
 	(tcpserver ? errflush : flush) ("ProcessInFifo");
 	_debug = (_debug ? 0 : 1);
-	signal(SIGUSR2, (void(*)()) isig_usr2);
+	signal(SIGUSR2, (void(*)(int)) isig_usr2);
 	errno = error_intr;
 	return;
 }
 
 static void
-isig_hup()
+isig_hup(int x)
 {
 	char           *fifo_path;
 
-	signal(SIGHUP, (void(*)()) SIG_IGN);
+	signal(SIGHUP, (void(*)(int)) SIG_IGN);
 	fifo_path = getFifo_name();
 	strnum[fmt_ulong(strnum, getpid())] = 0;
 	logfunc("ProcessInFifo", strnum);
@@ -608,13 +608,13 @@ isig_hup()
 		logfunc("ProcessInFifo", " records\n");
 	}
 	(tcpserver ? errflush : flush) ("ProcessInFifo");
-	signal(SIGHUP, (void(*)()) isig_hup);
+	signal(SIGHUP, (void(*)(int)) isig_hup);
 	errno = error_intr;
 	return;
 }
 
 static void
-isig_int()
+isig_int(int x)
 {
 	char           *fifo_path;
 
@@ -626,13 +626,13 @@ isig_int()
 	logfunc("ProcessInFifo", ", Got SIGINT closing db\n");
 	(tcpserver ? errflush : flush) ("ProcessInFifo");
 	close_db();
-	signal(SIGINT, (void(*)()) isig_int);
+	signal(SIGINT, (void(*)(int)) isig_int);
 	errno = error_intr;
 	return;
 }
 
 static void
-isig_term()
+isig_term(int x)
 {
 	char           *fifo_path;
 	long            total_count;
@@ -878,11 +878,11 @@ ProcessInFifo(int instNum)
 	tcpserver = env_get("TCPREMOTEIP");
 	if (!tcpserver) {
 #ifdef DARWIN
-		signal(SIGTERM, (void(*)()) isig_term);
-		signal(SIGUSR1, (void(*)()) isig_usr1);
-		signal(SIGUSR2, (void(*)()) isig_usr2);
-		signal(SIGHUP, (void(*)()) isig_hup);
-		signal(SIGINT, (void(*)()) isig_int);
+		signal(SIGTERM, (void(*)(int)) isig_term);
+		signal(SIGUSR1, (void(*)(int)) isig_usr1);
+		signal(SIGUSR2, (void(*)(int)) isig_usr2);
+		signal(SIGHUP, (void(*)(int)) isig_hup);
+		signal(SIGINT, (void(*)(int)) isig_int);
 #else
 		signal(SIGTERM, (void(*)(int)) sig_hand);
 		signal(SIGUSR1, (void(*)(int)) sig_hand);
@@ -1472,6 +1472,9 @@ ProcessInFifo(int instNum)
 }
 /*
  * $Log: ProcessInFifo.c,v $
+ * Revision 1.23  2026-05-05 21:43:52+05:30  Cprogrammer
+ * fix signal usage for Darwin
+ *
  * Revision 1.22  2025-05-13 20:02:17+05:30  Cprogrammer
  * fixed gcc14 errors
  *
