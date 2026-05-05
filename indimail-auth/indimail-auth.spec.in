@@ -62,9 +62,9 @@ Group: System Environment/Base
 %else
 Group: Productivity/Networking/Email/Servers
 %endif
-Source1: http://downloads.sourceforge.net/indimail/nssd-%{nssd_version}.tar.gz
-Source2: http://downloads.sourceforge.net/indimail/pam-multi-%{pam_multi_version}.tar.gz
-Source3: http://downloads.sourceforge.net/indimail/%{name}-rpmlintrc
+Source1: https://downloads.sourceforge.net/indimail/nssd-%{nssd_version}.tar.gz
+Source2: https://downloads.sourceforge.net/indimail/pam-multi-%{pam_multi_version}.tar.gz
+Source3: https://downloads.sourceforge.net/indimail/%{name}-rpmlintrc
 
 URL: https://github.com/mbhangui/indimail-virtualdomains
 AutoReqProv: Yes

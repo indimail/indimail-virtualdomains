@@ -73,13 +73,13 @@ Group: Applications/Mail
 %else
 Group: Productivity/Networking/Email/Servers
 %endif
-Source1: http://downloads.sourceforge.net/indimail/courier-imap-%{courier_version}.tar.gz
-Source2: http://downloads.sourceforge.net/indimail/fetchmail-%{fetchmail_version}.tar.gz
-Source3: http://downloads.sourceforge.net/indimail/%{name}-rpmlintrc
+Source1: https://downloads.sourceforge.net/indimail/courier-imap-%{courier_version}.tar.gz
+Source2: https://downloads.sourceforge.net/indimail/fetchmail-%{fetchmail_version}.tar.gz
+Source3: https://downloads.sourceforge.net/indimail/%{name}-rpmlintrc
 %if 0%{?suse_version} >= 1120
-Source4: http://downloads.sourceforge.net/indimail/%{name}-permissions.easy
-Source5: http://downloads.sourceforge.net/indimail/%{name}-permissions.secure
-Source6: http://downloads.sourceforge.net/indimail/%{name}-permissions.paranoid
+Source4: https://downloads.sourceforge.net/indimail/%{name}-permissions.easy
+Source5: https://downloads.sourceforge.net/indimail/%{name}-permissions.secure
+Source6: https://downloads.sourceforge.net/indimail/%{name}-permissions.paranoid
 %endif
 
 URL: https://github.com/mbhangui/indimail-virtualdomains

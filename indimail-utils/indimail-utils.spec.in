@@ -59,12 +59,12 @@ Group: System Environment/Base
 Group: Productivity/Networking/Email/Servers
 %endif
 
-Source1: http://downloads.sourceforge.net/indimail/altermime-%{altermime_version}.tar.gz
-Source2: http://downloads.sourceforge.net/indimail/ripmime-%{ripmime_version}.tar.gz
-Source3: http://downloads.sourceforge.net/indimail/fortune-%{fortune_version}.tar.gz
-Source4: http://downloads.sourceforge.net/indimail/mpack-%{mpack_version}.tar.gz
-Source5: http://downloads.sourceforge.net/indimail/flash-%{flash_version}.tar.gz
-Source6: http://downloads.sourceforge.net/indimail/indimail-utils-rpmlintrc
+Source1: https://downloads.sourceforge.net/indimail/altermime-%{altermime_version}.tar.gz
+Source2: https://downloads.sourceforge.net/indimail/ripmime-%{ripmime_version}.tar.gz
+Source3: https://downloads.sourceforge.net/indimail/fortune-%{fortune_version}.tar.gz
+Source4: https://downloads.sourceforge.net/indimail/mpack-%{mpack_version}.tar.gz
+Source5: https://downloads.sourceforge.net/indimail/flash-%{flash_version}.tar.gz
+Source6: https://downloads.sourceforge.net/indimail/indimail-utils-rpmlintrc
 
 URL: https://github.com/mbhangui/indimail-virtualdomains
 AutoReqProv: Yes
