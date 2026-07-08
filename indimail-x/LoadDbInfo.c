@@ -1,5 +1,5 @@
 /*
- * $Id: LoadDbInfo.c,v 1.16 2025-05-13 20:01:10+05:30 Cprogrammer Exp mbhangui $
+ * $Id: LoadDbInfo.c,v 1.17 2026-07-07 07:47:00+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -61,7 +61,7 @@
 #include "vset_default_domain.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: LoadDbInfo.c,v 1.16 2025-05-13 20:01:10+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: LoadDbInfo.c,v 1.17 2026-07-07 07:47:00+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static DBINFO **loadMCDInfo(int *);
@@ -97,7 +97,7 @@ writemcdinfo(DBINFO **rhostsptr, time_t mtime)
 {
 	char           *sysconfdir, *mcdfile, *controldir;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
-	int             fd, idx;
+	int             fd;
 	uid_t           uid, uidtmp;
 	gid_t           gid, gidtmp;
 	struct timeval  ubuf[2] = {0};
@@ -147,7 +147,7 @@ writemcdinfo(DBINFO **rhostsptr, time_t mtime)
 	}
 	if (fchown(fd, uid, gid))
 		strerr_die3sys(111, "writemcdinfo: fchown: ", mcdFile.s, ": ");
-	for (ptr = rhostsptr, idx = 0;(*ptr);idx++, ptr++) {
+	for (ptr = rhostsptr; (*ptr); ptr++) {
 		if ((*ptr)->isLocal)
 			continue;
 		if (substdio_put(&ssout, "domain   ", 9) ||
@@ -188,7 +188,7 @@ DBINFO **
 LoadDbInfo_TXT(int *total)
 {
 	struct stat     statbuf;
-	int             num_rows, idx, tmp, err = 0, sync_file = 0, sync_mcd = 0, relative;
+	int             num_rows, tmp, err = 0, sync_file = 0, sync_mcd = 0, relative;
 	DBINFO        **ptr, **relayhosts;
 	MYSQL_RES      *res;
 	MYSQL_ROW       row;
@@ -408,7 +408,7 @@ LoadDbInfo_TXT(int *total)
 			_total = (*total += num_rows);
 		if (!(relayhosts = (DBINFO **) alloc(sizeof(DBINFO *) * (num_rows + 1))))
 			die_nomem();
-		for (ptr = relayhosts, idx = 0;(row = in_mysql_fetch_row(res));idx++, ptr++) {
+		for (ptr = relayhosts;(row = in_mysql_fetch_row(res)); ptr++) {
 			if (!((*ptr) = (DBINFO *) alloc(sizeof(DBINFO))))
 				die_nomem();
 			str_copyb((*ptr)->domain, row[0], DBINFO_BUFF);
@@ -977,6 +977,9 @@ localDbInfo(int *total, DBINFO ***rhosts)
 }
 /*
  * $Log: LoadDbInfo.c,v $
+ * Revision 1.17  2026-07-07 07:47:00+05:30  Cprogrammer
+ * removed unused variable idx
+ *
  * Revision 1.16  2025-05-13 20:01:10+05:30  Cprogrammer
  * fixed gcc14 errors
  *

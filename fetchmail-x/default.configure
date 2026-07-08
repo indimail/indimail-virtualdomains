@@ -32,7 +32,12 @@ case "$SYSTEM" in
     with_ssl="/opt/local"
     extra_args="--with-ssl=$with_ssl"
   else
-    extra_args="--with-ssl"
+	if [ -n "$OPENSSL_PREFIX" ] ; then
+      with_ssl="$OPENSSL_PREFIX"
+	  extra_args="--with-ssl=$with_ssl"
+	else
+      extra_args="--with-ssl"
+	fi
   fi
   ;;
   *)

@@ -608,7 +608,7 @@ static int SSL_verify_callback(int ok_return, X509_STORE_CTX *ctx, const int str
 	char text[EVP_MAX_MD_SIZE * 3 + 1], *tp, *te;
 	const EVP_MD *digest_tp;
 	unsigned int dsz, esz;
-	X509_NAME *subj, *issuer;
+	const X509_NAME *subj, *issuer;
 	char *tt;
 
 	x509_cert = X509_STORE_CTX_get_current_cert(ctx);
@@ -699,15 +699,27 @@ static int SSL_verify_callback(int ok_return, X509_STORE_CTX *ctx, const int str
 					for (j = 0, r = sk_GENERAL_NAME_num(gens); j < r; ++j) {
 						const GENERAL_NAME *gn = sk_GENERAL_NAME_value(gens, j);
 						if (gn->type == GEN_DNS) {
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+							int gtype;
+							ASN1_IA5STRING *ia5_str = GENERAL_NAME_get0_value(gn, &gtype);
+							char *ia5_data = ia5_str ? (char *)ASN1_STRING_get0_data(ia5_str) : NULL;
+							char *pp1 = ia5_data;
+							char *pp2 = _ssl_server_cname;
+							int ia5_len = ia5_str ? ASN1_STRING_length(ia5_str) : 0;
+#else
 							char *pp1 = (char *)gn->d.ia5->data;
 							char *pp2 = _ssl_server_cname;
+							int ia5_len = (size_t)gn->d.ia5->length;
+#endif
 							if (outlevel >= O_VERBOSE) {
-								report(stdout, GT_("Subject Alternative Name: %s\n"), (tt = sdump(pp1, (size_t)gn->d.ia5->length)));
+								report(stdout, GT_("Subject Alternative Name: %s\n"), (tt = sdump(pp1, ia5_len)));
 								xfree(tt);
 							}
-							/* Name contains embedded NUL characters, so we complain. This
-							 * is likely a certificate spoofing attack. */
-							if ((size_t)gn->d.ia5->length != strlen(pp1)) {
+							/*-
+							 * Name contains embedded NUL characters, so we complain. This
+							 * is likely a certificate spoofing attack.
+							 */
+							if (ia5_len != strlen(pp1)) {
 								report(stderr, GT_("Bad certificate: Subject Alternative Name contains NUL, aborting!\n"));
 								sk_GENERAL_NAME_free(gens);
 								return 0;

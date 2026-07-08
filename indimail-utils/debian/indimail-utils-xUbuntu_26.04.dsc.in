@@ -1,0 +1,13 @@
+Format: 1.0
+Source: indimail-utils
+Section: Misc
+Priority: extra
+Binary: indimail-utils
+Architecture: any
+Version: @version@-@release@
+Maintainer: @email@
+Homepage: https://github.com/mbhangui/indimail-virtualdomains
+Debtransform-Release: 1
+Debtransform-Tar: debian.tar.gz
+Standards-Version: 3.9.1
+Build-Depends: cdbs, debhelper (>= 9), gcc, g++, binutils, coreutils, automake, libncurses6, libncurses-dev (>= 6.4), m4, gawk

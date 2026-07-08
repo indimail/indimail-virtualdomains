@@ -32,10 +32,13 @@ jobs:
     steps:
     - name: extra_packages
       run: |
-        if [ "${OS}" = "macos-latest" ] ; then brew install automake autoconf libtool pkgconfig openssl mysql gsasl; fi
-        if [ "${OS}" = "macos-latest" ] ; then sudo mkdir -p /usr/local/include /usr/local/lib; sudo ln -sf /opt/homebrew/Cellar/mysql/9.6.0_2/include/mysql /usr/local/include/mysql; sudo ln -s /opt/homebrew/Cellar/mysql/9.6.0_2/lib/mysql /usr/local/lib/mysql; fi
-        if [ "${OS}" = "ubuntu-latest" ] ; then sudo apt-get install gcc g++ automake autoconf libtool libssl-dev libmysqlclient-dev libncurses5-dev libgsasl7-dev; fi
-        if [ "${OS}" = "ubuntu-22.04" ] ; then sudo apt-get install gcc g++ automake autoconf libtool libssl-dev libmysqlclient-dev libncurses5-dev libgsasl-dev; fi
+        if [ "${OS}" = "macos-latest" ] ; then
+          brew install automake autoconf libtool pkgconfig openssl mysql gsasl
+        fi
+        if [ "${OS}" = "ubuntu-latest" ] ; then
+          sudo apt-get install gcc g++ automake autoconf libtool libssl-dev \
+            libmysqlclient-dev libncurses5-dev libgsasl7-dev
+        fi
       env:
         OS: ${{ matrix.host }}
 
@@ -51,6 +54,46 @@ jobs:
         path: libqmail
 
     - name: install_qmail
-      run: cd libqmail;env CPPFLAGS="-I/opt/homebrew/Cellar/openssl@3/3.6.2/include" LDFLAGS="-L/opt/homebrew/Cellar/openssl@3/3.6.2/lib" ./default.configure; env CPPFLAGS="-I/opt/homebrew/Cellar/openssl@3/3.6.2/include" LDFLAGS="-L/opt/homebrew/Cellar/openssl@3/3.6.2/lib" make; sudo make install-strip
+      run: |
+        if [ "${OS}" = "macos-latest" ] ; then
+          # Dynamically fetch base paths for Homebrew dependencies
+          OPENSSL_PREFIX=$(brew --prefix openssl@3)
+
+          export CPPFLAGS="-I${OPENSSL_PREFIX}/include"
+          export LDFLAGS="-L${OPENSSL_PREFIX}/lib"
+        else
+          # Standard flags for Ubuntu environment
+          export CPPFLAGS=""
+          export LDFLAGS=""
+        fi
+        cd libqmail
+        ./default.configure
+        make
+        sudo make install-strip
+      env:
+        OS: ${{ matrix.host }}
+
     - name: build_indimail-virtualdomains
-      run: cd main/indimail-x; env CFLAGS="-I/opt/homebrew/Cellar/openssl@3/3.6.2/include" LDFLAGS="-L/opt/homebrew/Cellar/openssl@3/3.6.2/lib" ./default.configure; env CFLAGS="-I/opt/homebrew/Cellar/openssl@3/3.6.2/include" LDFLAGS="-L/opt/homebrew/Cellar/openssl@3/3.6.2/lib" make
+      run: |
+        if [ "${OS}" = "macos-latest" ] ; then
+          # Dynamically fetch base paths for Homebrew dependencies
+          OPENSSL_PREFIX=$(brew --prefix openssl@3)
+          MYSQL_PREFIX=$(brew --prefix mysql)
+          r=$(realpath ${MYSQL_PREFIX})
+
+          sudo mkdir -p /usr/local/include /usr/local/lib
+          sudo ln -sf ${r}/include/mysql /usr/local/include/mysql
+          sudo ln -sf ${r}/lib/mysql     /usr/local/lib/mysql
+          # Combine both paths cleanly into your compilation flags
+          export CPPFLAGS="-I${OPENSSL_PREFIX}/include"
+          export LDFLAGS="-L${OPENSSL_PREFIX}/lib"
+        else
+          # Standard flags for Ubuntu environment
+          export CPPFLAGS=""
+          export LDFLAGS=""
+        fi
+        cd main/indimail-x
+        ./default.configure
+        make
+      env:
+        OS: ${{ matrix.host }}

@@ -3,7 +3,7 @@ Section: misc
 Priority: extra
 Maintainer: @email@
 Standards-Version: 3.9.1
-Build-Depends: cdbs, debhelper (>= 9), gcc, g++, m4, autotools-dev, libqmail-dev, libqmail, libssl-dev, indimail-dev
+Build-Depends: cdbs, debhelper (>= 9), gcc, g++, m4, autotools-dev, libqmail-dev, libcrypt-dev, libqmail, libssl-dev, indimail-dev
 Homepage: https://github.com/mbhangui/indimail-virtualdomains
 
 Package: iwebadmin

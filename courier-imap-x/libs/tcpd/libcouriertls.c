@@ -1260,8 +1260,11 @@ SSL_CTX *tls_create_int(int isserver, const struct tls_info *info,
 void tls_destroy(SSL_CTX *ctx)
 {
 	struct tls_info *info=SSL_CTX_get_app_data(ctx);
-
+#if OPENSSL_VERSION_NUMBER >= 0x30400000L
+	SSL_CTX_flush_sessions_ex(ctx, 0); /* OpenSSL bug, 2002-08-07 */
+#else
 	SSL_CTX_flush_sessions(ctx, 0); /* OpenSSL bug, 2002-08-07 */
+#endif
 
 	SSL_CTX_free(ctx);
 
@@ -1322,11 +1325,16 @@ static int cache_add(SSL *ssl, SSL_SESSION *sess)
 	struct tls_info *info=SSL_get_app_data(ssl);
 	unsigned char buffer[BUFSIZ];
 	unsigned char *ucp;
-	time_t timeout= (time_t)SSL_SESSION_get_time(sess)
-		+ SSL_SESSION_get_timeout(sess);
+	time_t timeout;
 	unsigned int session_id_len;
 	void *session_id;
 	size_t sess_len=i2d_SSL_SESSION(sess, NULL);
+
+#if OPENSSL_VERSION_NUMBER >= 0x30400000L
+	timeout = (time_t) SSL_SESSION_get_time_ex(sess) + SSL_SESSION_get_timeout(sess);
+#else
+	timeout = (time_t) SSL_SESSION_get_time(sess) + SSL_SESSION_get_timeout(sess);
+#endif
 
 	session_id=(void *)SSL_SESSION_get_id(sess, &session_id_len);
 
@@ -1846,32 +1854,63 @@ int tls_certificate_verified(ssl_handle ssl)
 
 #define MAXDOMAINSIZE	256
 
-static time_t asn1toTime(ASN1_TIME *asn1Time)
+static time_t asn1toTime(const ASN1_TIME *asn1Time)
 {
 	struct tm tm;
-	int offset;
+	time_t offset = 0;
 
+#if OPENSSL_VERSION_NUMBER >= 0x30400000L
+	// Use accessor functions instead of direct structure access
+	int length = asn1Time? ASN1_STRING_length(asn1Time) : 0;
+	const unsigned char *data = asn1Time? ASN1_STRING_get0_data(asn1Time) : NULL;
+
+	if (data == NULL || length < 13)
+		return 0;
+#else
 	if (asn1Time == NULL || asn1Time->length < 13)
 		return 0;
+#endif
 
 	memset(&tm, 0, sizeof(tm));
 
-#define N2(n)	((asn1Time->data[n]-'0')*10 + asn1Time->data[(n)+1]-'0')
+#if OPENSSL_VERSION_NUMBER >= 0x30400000L
+	// Redefining the N2 macro to use the safe local pointer
+	#define N2(n)   ((data[n]-'0')*10 + data[(n)+1]-'0')
+	#define CPY(f,n) (tm.f=N2(n))
+#else
+	#define N2(n)	((asn1Time->data[n]-'0')*10 + asn1Time->data[(n)+1]-'0')
+	#define CPY(f,n) (tm.f=N2(n))
+#endif
 
-#define CPY(f,n) (tm.f=N2(n))
-
-	CPY(tm_year,0);
-
-	if(tm.tm_year < 50)
-		tm.tm_year += 100; /* Sux */
+	CPY(tm_year, 0);
+	if (tm.tm_year < 70)
+		tm.tm_year += 100;
 
 	CPY(tm_mon, 2);
 	--tm.tm_mon;
+
 	CPY(tm_mday, 4);
 	CPY(tm_hour, 6);
 	CPY(tm_min, 8);
 	CPY(tm_sec, 10);
 
+#if OPENSSL_VERSION_NUMBER >= 0x30400000L
+	#undef CPY
+	#undef N2
+
+	if (data[12] != 'Z')
+	{
+		if (length < 17)
+			return 0;
+
+		#define N2(n)   ((data[n]-'0')*10 + data[(n)+1]-'0')
+		offset = N2(13)*3600 + N2(15)*60;
+		#undef N2
+
+		if (data[12] == '-')
+			offset = -offset;
+	}
+#else
 	offset=0;
 
 	if (asn1Time->data[12] != 'Z')
@@ -1885,18 +1924,18 @@ static time_t asn1toTime(ASN1_TIME *asn1Time)
 			offset= -offset;
 	}
 
-#undef N2
-#undef CPY
+	#undef N2
+	#undef CPY
+#endif
 
-	return mktime(&tm)-offset;
+	return mktime(&tm) - offset; // Note: Adjust based on your local timezone logic if needed
 }
-
 
 static void dump_x509(X509 *x509,
 		      void (*dump_func)(const char *, int cnt, void *),
 		      void *dump_arg)
 {
-	X509_NAME *subj=X509_get_subject_name(x509);
+	const X509_NAME *subj=X509_get_subject_name(x509);
 	int nentries, j;
 	time_t timestamp;
 	STACK_OF(GENERAL_NAME) *subject_alt_names;
@@ -1912,9 +1951,9 @@ static void dump_x509(X509 *x509,
 	for (j=0; j<nentries; j++)
 	{
 		const char *obj_name;
-		X509_NAME_ENTRY *e;
-		ASN1_OBJECT *o;
-		ASN1_STRING *d;
+		const X509_NAME_ENTRY *e;
+		const ASN1_OBJECT *o;
+		const ASN1_STRING *d;
 
 		int dlen;
 		const unsigned char *ddata;
