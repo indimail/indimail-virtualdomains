@@ -989,8 +989,6 @@ Currently, the list of supported binary distributions for IndiMail is
 
     * SUSE
           o openSUSE_Leap_16.0
-          o openSUSE_Leap_15.5
-          o openSUSE_Leap_15.6
           o openSUSE_Tumbleweed
           o SUSE Linux Enterprise 12
           o SUSE Linux Enterprise 12 SP1
