@@ -7396,7 +7396,7 @@ $ id -a
 uid=1000(mbhangui) gid=1000(mbhangui) groups=1000(mbhangui),10(wheel),545(docker) context=unconfined\_u:unconfined\_r:unconfined\_t:s0-s0:c0.c1023
 ```
 
-Now we need to pull the docker image for IndiMail. use the **docker pull** command. The values for tag can be fedora-23, centos7, centos8, debian9, debian10, xenial, bionic, focal, fc32, Leap15.2, Tumbleweed, etc. If your favourite OS is missing, let me know. You can find the list of all images here.
+Now we need to pull the docker image for IndiMail. use the **docker pull** command. The values for tag can be fedora-44, centos8, debian11, debian12, debian13, jammy, noble, resolute, Leap16.0, Tumbleweed, etc. If your favourite OS is missing, let me know. You can find the list of all images here.
 
 `$ docker pull cprogrammer/indimail:tag`
 
@@ -7406,7 +7406,7 @@ You can now list the docker image by executing the **docker images** command.
 ```
 $ docker images
 REPOSITORY                 TAG                 IMAGE ID            CREATED             SIZE
-cprogrammer/indimail       fedora-23           a02e6014a67b        53 minutes ago      1.774 GB
+cprogrammer/indimail       fedora-44           a02e6014a67b        53 minutes ago      1.774 GB
 ```
 
 Now let us run a container with this image using the image id a02e6014a67b listed above by running the **docker run** command. The **--privileged** flag gives all capabilities to the container, and it also lifts all the limitations enforced by the device cgroup controller. In other words, the container can then do almost everything that the host can do. This flag exists to allow special use-cases, like running Docker within Docker. In our case, I want the systemctl command to work and the container run like a normal host.
@@ -7521,8 +7521,6 @@ Currently, the list of supported distributions for IndiMail is
 
     * SUSE
           o openSUSE_Leap_16.0
-          o openSUSE_Leap_15.5
-          o openSUSE_Leap_15.6
           o openSUSE_Tumbleweed
           o SUSE Linux Enterprise 12
           o SUSE Linux Enterprise 12 SP1
