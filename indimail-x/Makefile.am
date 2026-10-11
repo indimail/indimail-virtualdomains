@@ -13,7 +13,7 @@ iauthdir=@libdir@
 
 tcplookup_LTLIBRARIES = tcplookup.la
 tcplookup_la_SOURCES = mytcplookup.c
-tcplookup_la_LIBADD = libindimail.la
+tcplookup_la_LIBADD = @LIB_QMAIL@ libindimail.la
 tcplookup_la_DEPENDENCIES = libindimail.la mytcplookup.lo
 tcplookup_la_CFLAGS = -fPIC
 tcplookup_la_LDFLAGS = -L.libs -module -avoid-version -shared -rdynamic -no-undefined -nostartfiles $(LDFLAGS)
