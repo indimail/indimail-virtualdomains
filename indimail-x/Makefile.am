@@ -428,6 +428,7 @@ crc_LDADD = libindimail.la $(LIB_QMAIL)
 crc_DEPENDENCIES = libindimail.la
 
 crcdiff_SOURCES = crcdiff.c
+crcdiff_LDADD = @LIB_QMAIL@
 
 incrypt_SOURCES = incrypt.c
 incrypt_LDADD = libindimail.la @LIB_CRYPT@ $(LIB_QMAIL)

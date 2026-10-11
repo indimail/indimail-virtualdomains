@@ -11,7 +11,7 @@ crcdiff \- compare two crc lists and report the difference
 .PP
 \fBcrc\fR [-dv] [-i \fIinitial_crc\fR] [-t \fItag\fR] file ...
 .PP
-\fBcrcdiff\fR [-Cdis] [-c \fIcritical_list\fR] \fIcrclist\fR \fIcrclist\fR
+\fBcrcdiff\fR [-Cdi] [-c \fIcritical_list\fR] \fIcrclist\fR \fIcrclist\fR
 
 .SH DESCRIPTION
 For each file, \fBcrc\fR calculates and prints a 32-bit CRC in hexadecimal.
@@ -35,11 +35,11 @@ option is used, directories/files listed in \fIcritical_list\fR will be
 used to give L2 warnings for changes to such files. The -C option displays
 the checksum in the diff. If -i option is passed then the crc change
 without date change will be ignored and not reported. This will also not
-report entries labelled as \fBcorrupt\fR. The -d option ignores directory
+report entries labelled as \fBchanged\fR. The -d option ignores directory
 timestamp changes and \fBreplaced\fR entries for directories are omitted.
 
 .EX
-  corrupt    - crc changed without date change 
+  changed    - crc changed without date change 
   replaced   - crc + date changed
   permiss    - permissions changed
   own/grp    - owner or group changed
@@ -48,9 +48,10 @@ timestamp changes and \fBreplaced\fR entries for directories are omitted.
   WARNING L1 - Changes to setuid, setgid files
   WARNING L2 - Changes to file in \fIcritical_list\fR
 .EE
-
-If \fIcrclist\fR files are sorted you can use the -s option which makes
-\fBcrcdiff\fR(1) run faster.
+.PP
+\fBcrcdiff\fR reads the two crc lists into memory once and is indexed with
+hash tables. So the run time of \fBcrcdiff\fR is proportional to the size
+of the two files.
 
 To generate \fIcrclist\fR you can use
 
@@ -60,9 +61,36 @@ To generate \fIcrclist\fR you can use
 
 to generate a crc list.  Assume that no files have tabs or spaces in the name.
 
+.SH NOTE
+crcdiff(1) program use a hash join, sometimes called a hash-based lookup.
+Each program reads the second file into a hash table keyed by the
+identifying field, then streams through the first file doing one lookup per
+line. That replaces the old nested loop over every pair of lines (O(n×m))
+	with roughly O(n+m) work. The same is done in the opposite direction to
+	find added entries.
+
+.TP 4
+The hash table details:
+
+Hash function: djb2 (h = h*33 + c, starting at 5381).
+
+Collision handling: open addressing with linear probing. The table size is
+a power of two, at least twice the number of entries, so lookups use a bit
+mask rather than a modulo.
+
+Stored values: each slot holds an index into the array of lines rather than
+a copy of the line, so the table stays small.
+
+The filename, plus a second table keyed on the whole line without ,tag=….
+The first match by line number wins.
+
 .SH BUGS
 Altough extremely unlikely, files with different data may still produce the
 same crc value.
 
+.SH COPYRIGHT
+© 2024 Manvendra Bhangui
+
 .SH SEE ALSO
-sum(1), md5sum(1), sha1sum, sha224sum, sha256sum, sha284sum, sha512sum
+cksum(1), sum(1), md5sum(1), sha1sum, sha224sum, sha256sum, sha284sum,
+sha512sum
