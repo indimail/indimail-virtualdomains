@@ -6,7 +6,7 @@ DEFS=@DEFS@ -Dlint -I. -I@prefix@/include/qmail -Ieps-1.2 -I@mysql_incdir@
 
 iauth_LTLIBRARIES = iauth.la
 iauth_la_SOURCES = iauth.c
-iauth_la_LIBADD = libindimail.la
+iauth_la_LIBADD = @LIB_QMAIL@ libindimail.la
 iauth_la_DEPENDENCIES = libindimail.la
 iauth_la_LDFLAGS = -L.libs -module -avoid-version -shared -rdynamic -no-undefined -nostartfiles $(LDFLAGS)
 iauthdir=@libdir@
