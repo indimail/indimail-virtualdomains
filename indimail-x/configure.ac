@@ -89,7 +89,7 @@ AC_CHECK_TYPE([bool],AC_DEFINE(HAVE_BOOL, 1, have bool typedef),,[#include <mysq
 CPPFLAGS=$saveCPPFLAGS
 AC_CHECK_HEADERS([dirent.h limits.h sys/ioctl.h net/if.h linux/sockios.h sys/sockio.h])
 AC_CHECK_HEADERS([openssl/evp.h sys/syscall.h sys/select.h sys/un.h])
-AC_CHECK_HEADERS([crypt.h inttypes.h])
+AC_CHECK_HEADERS([crypt.h inttypes.h regex.h fnmatch.h locale.h])
 AC_CHECK_HEADERS([udb.h elf.h magic.h a.out.h malloc.h sys/utsname.h sys/ipc.h asm/ioctls.h])
 AC_CHECK_HEADERS([gsasl.h])
 AC_CHECK_HEADERS([sodium_random.h])
