@@ -1,5 +1,8 @@
 /*
  * $Log: vsetuserquota.c,v $
+ * Revision 1.8  2026-11-01 23:52:42+05:30  Cprogrammer
+ * updated data types
+ *
  * Revision 1.7  2024-05-28 19:37:57+05:30  Cprogrammer
  * handle -1 return code for vget_limits()
  * removed check for perms_defaultquota
@@ -59,7 +62,7 @@
 #include "setuserquota.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vsetuserquota.c,v 1.7 2024-05-28 19:37:57+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vsetuserquota.c,v 1.8 2026-11-01 23:52:42+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vsetuserquota: fatal: "
@@ -184,7 +187,7 @@ main(int argc, char **argv)
 #endif
 	i = setuserquota(User.s, real_domain, quota);
 	iclose();
-	subprintf(subfdout, "usage %ld bytes\n", i);
+	subprintf(subfdout, "usage %lld bytes\n", i);
 	substdio_flush(subfdout);
 	return (i < 0 ? 1 : 0);
 }

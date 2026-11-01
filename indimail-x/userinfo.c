@@ -1,5 +1,5 @@
 /*
- * $Id: userinfo.c,v 1.15 2025-05-13 20:35:53+05:30 Cprogrammer Exp mbhangui $
+ * $Id: userinfo.c,v 1.16 2026-11-01 23:52:52+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -62,7 +62,7 @@
 #include "userinfo.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: userinfo.c,v 1.15 2025-05-13 20:35:53+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: userinfo.c,v 1.16 2026-11-01 23:52:52+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern char *strptime(const char *, const char *, struct tm *);
@@ -383,7 +383,7 @@ userinfo(char *Email, char *User, char *Domain, int DisplayName, int DisplayPass
 				}
 				cur_size = check_quota(maildir.s, &mcount);
 			}
-			subprintfe(subfdout, "userinfo", "curr quota    : %ldS,%ldC\n",
+			subprintfe(subfdout, "userinfo", "curr quota    : %lldS,%lldC\n",
 					cur_size == -1 ? 0 : cur_size, mcount == -1 ? 0 : mcount);
 #else
 			if ((cur_size = recalc_quota(maildir, 2)) == -1) {
@@ -588,7 +588,7 @@ userinfo(char *Email, char *User, char *Domain, int DisplayName, int DisplayPass
 		if (delivery_time > 0) {
 			subprintfe(subfdout, "userinfo", "Delivery Time : %s",
 					asctime(localtime(&delivery_time)));
-			subprintfe(subfdout, "userinfo", "       latest : (%ld) Mails, %ld Bytes [%ld Kb]\n",
+			subprintfe(subfdout, "userinfo", "       latest : (%lld) Mails, %lld Bytes [%lld Kb]\n",
 					delivery_count, delivery_size, delivery_size/1024);
 		} else
 			subprintfe(subfdout, "userinfo", "Delivery Time : No Mails Delivered yet / Per Day Limit not configured\n");
@@ -613,6 +613,9 @@ userinfo(char *Email, char *User, char *Domain, int DisplayName, int DisplayPass
 
 /*
  * $Log: userinfo.c,v $
+ * Revision 1.16  2026-11-01 23:52:52+05:30  Cprogrammer
+ * updated data types
+ *
  * Revision 1.15  2025-05-13 20:35:53+05:30  Cprogrammer
  * fixed gcc14 errors
  *

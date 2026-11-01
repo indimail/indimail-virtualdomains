@@ -1,5 +1,5 @@
 /*
- * $Id: vdelivermail.c,v 1.16 2025-05-13 20:37:16+05:30 Cprogrammer Exp mbhangui $
+ * $Id: vdelivermail.c,v 1.17 2026-11-01 23:52:24+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -68,7 +68,7 @@
 #include "vset_default_domain.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdelivermail.c,v 1.16 2025-05-13 20:37:16+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdelivermail.c,v 1.17 2026-11-01 23:52:24+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vdelivermail: fatal: "
@@ -242,7 +242,7 @@ prepare_maildir(char *dir, uid_t uid, gid_t gid)
 void
 quota_message(char *ptr, mdir_t msgsize, mdir_t MailQuotaCount, mdir_t MailQuotaSize)
 {
-	subprintfe(subfderr, "vdelivermail", "%s has insufficient quota. %ld/%ld:%ld/%ld:%ld. indimail (#5.1.4)",
+	subprintfe(subfderr, "vdelivermail", "%s has insufficient quota. %lld/%lld:%lld/%lld:%lld. indimail (#5.1.4)",
 			ptr, msgsize, CurBytes, CurCount, MailQuotaCount, MailQuotaSize);
 	errflush("vdelivermail");
 	return;
@@ -487,7 +487,7 @@ processMail(struct passwd *pw, char *user, char *domain, mdir_t MsgSize)
 					die_nomem();
 				runcmmd(TheDir.s, 0);
 			}
-			subprintfe(subfderr, "vdelivermail", "account %s@%s locked/overquota %ld/%ld. indimail (#5.1.1)",
+			subprintfe(subfderr, "vdelivermail", "account %s@%s locked/overquota %lld/%lld. indimail (#5.1.1)",
 					user, domain, cur_size, mail_size_limit);
 			errflush("vdelivermail");
 			getEnvConfigStr(&ptr, "HOLDOVERQUOTA", "holdoverquota");
@@ -968,6 +968,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: vdelivermail.c,v $
+ * Revision 1.17  2026-11-01 23:52:24+05:30  Cprogrammer
+ * updated data types
+ *
  * Revision 1.16  2025-05-13 20:37:16+05:30  Cprogrammer
  * fixed gcc14 errors
  *

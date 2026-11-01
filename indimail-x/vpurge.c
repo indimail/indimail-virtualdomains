@@ -1,5 +1,8 @@
 /*
  * $Log: vpurge.c,v $
+ * Revision 1.3  2026-11-01 23:52:31+05:30  Cprogrammer
+ * updated data types
+ *
  * Revision 1.2  2023-01-22 10:40:03+05:30  Cprogrammer
  * replaced qprintf with subprintf
  *
@@ -12,7 +15,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vpurge.c,v 1.2 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vpurge.c,v 1.3 2026-11-01 23:52:31+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef USE_MYSQL
@@ -75,7 +78,7 @@ main(int argc, char **argv)
 		else
 		if (!err)
 			break;
-		subprintfe(subfdout, "vpurge", "%s@%s %ld %s", user.s, domain.s, quota, ctime(&timestamp));
+		subprintfe(subfdout, "vpurge", "%s@%s %lld %s", user.s, domain.s, quota, ctime(&timestamp));
 		if (!(pw = sql_getpw(user.s, domain.s))) {
 			if (userNotFound)
 				strerr_warn5("sql_getpw: ", user.s, "@", domain.s, ": No such user", 0);
@@ -99,7 +102,7 @@ main(int argc, char **argv)
 				quota = check_quota(maildir.s);
 #endif
 				if (user_over_quota(maildir.s, pw->pw_shell, free_space)) {
-					subprintfe(subfdout, "vpurge", "user %s@%s still over quota %ld\n",
+					subprintfe(subfdout, "vpurge", "user %s@%s still over quota %lld\n",
 							user.s, domain.s, quota);
 					continue;
 				}

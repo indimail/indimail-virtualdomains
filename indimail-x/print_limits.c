@@ -1,12 +1,12 @@
 /*
- * $Id: print_limits.c,v 1.1 2024-05-30 22:11:19+05:30 Cprogrammer Exp mbhangui $
+ * $Id: print_limits.c,v 1.2 2026-11-01 23:52:10+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #ifndef	lint
-static char     rcsid[] = "$Id: print_limits.c,v 1.1 2024-05-30 22:11:19+05:30 Cprogrammer Exp mbhangui $";
+static char     rcsid[] = "$Id: print_limits.c,v 1.2 2026-11-01 23:52:10+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_QMAIL
@@ -28,19 +28,19 @@ print_limits(struct vlimits *lmt)
 		if (!lmt->diskquota)
 			subprintfe(subfdout, "vlimits", "Max Domain Quota     :     unlimited\n");
 		else
-			subprintfe(subfdout, "vlimits", "Max Domain Quota     : %13lu\n", lmt->diskquota);
+			subprintfe(subfdout, "vlimits", "Max Domain Quota     : %13llu\n", lmt->diskquota);
 		if (!lmt->maxmsgcount)
 			subprintfe(subfdout, "vlimits", "Max Domain Messages  :     unlimited\n");
 		else
-			subprintfe(subfdout, "vlimits", "Max Domain Messages  : %13lu\n", lmt->maxmsgcount);
+			subprintfe(subfdout, "vlimits", "Max Domain Messages  : %13llu\n", lmt->maxmsgcount);
 		if (!lmt->defaultquota)
 			subprintfe(subfdout, "vlimits", "Default User Quota   :     unlimited\n");
 		else
-			subprintfe(subfdout, "vlimits", "Default User Quota   : %13lu\n", lmt->defaultquota);
+			subprintfe(subfdout, "vlimits", "Default User Quota   : %13llu\n", lmt->defaultquota);
 		if (!lmt->defaultmaxmsgcount)
 			subprintfe(subfdout, "vlimits", "Default User Messages:     unlimited\n");
 		else
-			subprintfe(subfdout, "vlimits", "Default User Messages: %13lu\n", lmt->defaultmaxmsgcount);
+			subprintfe(subfdout, "vlimits", "Default User Messages: %13llu\n", lmt->defaultmaxmsgcount);
 		if (lmt->maxpopaccounts == -1)
 			subprintfe(subfdout, "vlimits", "Max Pop Accounts     :     unlimited\n");
 		else
@@ -115,6 +115,9 @@ print_limits(struct vlimits *lmt)
 
 /*
  * $Log: print_limits.c,v $
+ * Revision 1.2  2026-11-01 23:52:10+05:30  Cprogrammer
+ * updated data types
+ *
  * Revision 1.1  2024-05-30 22:11:19+05:30  Cprogrammer
  * Initial revision
  *

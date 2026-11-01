@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 1.13  2026-11-01 23:52:00+05:30  Cprogrammer
+ * updated data types
+ *
  * Revision 1.12  2024-05-28 19:15:18+05:30  Cprogrammer
  * changed value of V_OVERRIDE
  *
@@ -41,23 +44,11 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 1.12 2024-05-28 19:15:18+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 1.13 2026-11-01 23:52:00+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
 #include "indimail_config.h"
-#endif
-#ifdef HAVE_INTTYPES_H
-#include <inttypes.h>
-typedef int64_t mdir_t;
-typedef uint64_t umdir_t;
-#else
-typedef long long mdir_t;
-typedef unsigned long long umdir_t;
-#define PRId64 "lld"
-#define PRIu64 "llu"
-#define SCNd64 "lld"
-#define SCNu64 "llu"
 #endif
 #ifdef REMOVE_MYSQL_H
 #undef HAVE_MYSQL_H
@@ -550,5 +541,8 @@ primary key(id)"
 #define DOMAIN_QUERY 7
 
 #define MAX_LINK_COUNT 32000 /*- max links to create for bulk emails */
+
+typedef long long mdir_t;
+typedef unsigned long long umdir_t;
 
 #endif /*- #ifdef INDIMAILH_H */
