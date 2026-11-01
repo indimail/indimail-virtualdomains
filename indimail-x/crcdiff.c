@@ -1,5 +1,5 @@
 /*-
- * $Id: crcdiff.c,v 1.9 2026-10-11 20:45:30+05:30 Cprogrammer Exp mbhangui $
+ * $Id: crcdiff.c,v 1.10 2026-11-01 23:51:49+05:30 Cprogrammer Exp mbhangui $
  *
  * crcdiff.c - fast version. Compare two crc lists and report differences.
  *
@@ -66,7 +66,7 @@
 #define WARN  "crcdiff: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: crcdiff.c,v 1.9 2026-10-11 20:45:30+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: crcdiff.c,v 1.10 2026-11-01 23:51:49+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_QMAIL
@@ -359,28 +359,11 @@ usage(void)
 int
 main(int argc, char **argv)
 {
-#ifdef CHECK_LICENSE
-#ifdef HAVE_DKIM
-	char          **lic_argv;
-#endif
-#endif
 	int             c, ignore_changed = 0, ignore_dir = 0;
 	list            l1s = { 0 }, l2s = { 0 };
 	htab            p2, k2, p1, k1;
 	size_t          i, m;
 
-#ifdef CHECK_LICENSE
-#ifdef HAVE_DKIM
-	if (!(lic_argv = makeargs("checklic -p "VIGILPREFIX"/etc/vigil.pub "VIGILPREFIX"/etc/vigil.lic")))
-		strerr_die2x(-111, FATAL, "out of memory");
-	if (check_license(4, lic_argv))
-		strerr_die2x(-100, FATAL, "invalid vigil license "VIGILPREFIX"/etc/vigil.lic: ");
-	free_makeargs(lic_argv);
-	optind = 1;
-#else
-	strerr_die1x(-100, "This program needs to be compiled with libdkim2");
-#endif
-#endif
 	while ((c = getopt(argc, argv, "c:Cdi")) != -1) {
 		switch (c)
 		{
