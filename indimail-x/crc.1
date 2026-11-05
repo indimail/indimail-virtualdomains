@@ -9,34 +9,25 @@ crcdiff \- compare two crc lists and report the difference
 
 .SH SYNOPSYS
 .PP
-\fBcrc\fR [-dv] [-i \fIinitial_crc\fR] [-t \fItag\fR] file ...
+\fBcrc\fR [-wdlv] [-i \fIinitial_crc\fR] [-t \fItag\fR] file ...
 .PP
 \fBcrcdiff\fR [-Cdi] [-c \fIcritical_list\fR] \fIcrclist\fR \fIcrclist\fR
 
 .SH DESCRIPTION
-For each file, \fBcrc\fR calculates and prints a 32-bit CRC in hexadecimal.
-With the -v option it additionally prints file permissions, file owner,
-group and the file name. It is typically used to validate files transferred
-between different systems, and is useful in detecting subtle disk
-corruption. \fBcrc\fR uses a checksum compatible with the DOS version of
-\fBcrc\fR, the 32 bit CRC used by PKZIP version 0.9. as well as the "crc"
-command in ZCOMM and Professional-YAM (high reliability communications
-programs). With the -d option, the 32-bit CRC is printed in decimal. You
-can use -i option to initialize CRC with \fIinitial_crc\fR instead of 0.
+For each file, \fBcrc\fR calculates and prints a POSIX 32-bit CRC in
+hexadecimal. With the -v option it additionally prints file permissions,
+file owner, group and the file name. It is typically used to validate files
+transferred between different systems, and is useful in detecting subtle
+disk corruption. \fBcrc\fR uses a checksum compatible with the DOS version
+of \fBcrc\fR, the 32 bit CRC used by PKZIP version 0.9. as well as the
+"crc" command in ZCOMM and Professional-YAM (high reliability
+communications programs).
 
 The 32-bit CRC used is the frame check sequence in ADCCP (ANSI X3.66, also
 known as FIPS PUB 71 and FED-STD-1003, the U.S. version of CCITT's X.25
 link-level protocol).
 
-The -t option can be used to associate a tag with the filename.
-
-\fBcrcdiff\fR compares two crc lists and reports the differences. If -c
-option is used, directories/files listed in \fIcritical_list\fR will be
-used to give L2 warnings for changes to such files. The -C option displays
-the checksum in the diff. If -i option is passed then the crc change
-without date change will be ignored and not reported. This will also not
-report entries labelled as \fBchanged\fR. The -d option ignores directory
-timestamp changes and \fBreplaced\fR entries for directories are omitted.
+\fBcrcdiff\fR compares two crc lists and reports the differences.
 
 .EX
   changed    - crc changed without date change 
@@ -50,8 +41,8 @@ timestamp changes and \fBreplaced\fR entries for directories are omitted.
 .EE
 .PP
 \fBcrcdiff\fR reads the two crc lists into memory once and is indexed with
-hash tables. So the run time of \fBcrcdiff\fR is proportional to the size
-of the two files.
+hash tables. The hash function is djb2 (h = h*33 + c, starting at 5381). So
+the run time of \fBcrcdiff\fR is proportional to the size of the two files.
 
 To generate \fIcrclist\fR you can use
 
@@ -59,18 +50,159 @@ To generate \fIcrclist\fR you can use
  find / -print | sort | xargs crc -v > crc_file
 .EE
 
-to generate a crc list.  Assume that no files have tabs or spaces in the name.
+or
+
+.EX
+ crc -Rv -f list_file -o crc_file
+.EE
+
+to generate a crc list. See the \fBEXAMPLES\fR section for more usage
+options.
+
+.SH CRC OPTIONS
+.TP
+.B \-b
+Eliminate broken links. If passed, \fBcrc\fR will skip symbolic links that
+points to non-existing files
+
+.TP
+.B \-s
+Follow symlinks. This option makes \fBcrc\fR call stat(2) after a lstat(2).
+Along with -b option, broken symlinks can be detected
+
+.TP
+.B \-d
+Display the crc in decimal format
+
+.TP
+.B \-e \fIexclude_file\fR
+Excludes files, directories, or paths matching entries listed in
+\fIexclude_file\fR. Entries can be exact matches, prefix matches
+(respecting directory boundaries), simple patterns, or regular expressions
+(if \fB-r\fR is enabled). Comment lines starting with \fB#\fR and blank
+lines in the exclusion file are ignored.
+
+.TP
+.B \-r
+Regular expression matching for exclusions. When specified alongside
+\fB-e\fR, entries in the exclusion file are treated as extended regular
+expressions (\fRregcomp\fR(3) / \fRregexec\fR(3)) instead of standard shell
+wildcards/prefix matches using \fBfnmatch\fR(3).
+
+.TP
+.B \-f \fIlist_file\fR
+Reads paths and optional per-path tags to process from an external list
+file, one per line. Blank lines and lines starting with \fB#\fR are
+ignored.
+
+.TP
+.B \-i \fIinitial_crc\fR
+Use \fIinitial_crc\fR instead of 0 to initiaze CRC.
+
+.TP
+.B \-l
+Line-by-line mode. Computes the CRC sum by evaluating each line of a text
+file individually rather than the raw binary stream of the entire file.
+Using -l option makes crc calculate crc for every line and print the sum of
+the CRC for every line. This feature will report identical crc for files
+having the same lines even if the lines are in different order within the
+file. If -w option is used along with -l, leading and trailing white
+spaces, CR and LF will be ignored when calculating the CRC.
+
+.TP
+.B \-w
+Ignore whitespace and newline differences. Triggers line-by-line processing
+(requires \fB-l\fR) and strips leading/trailing spaces, tabs, carriage
+returns (\fR\\r\fR), and newlines (\fR\\n\fR) before calculating individual
+line checksums.
+
+.TP
+.B \-o \fIoutput_file\fR
+Writes all program output to \fIoutput_file\fR instead of standard output.
+If not specified, output goes to standard output (`stdout`).
+
+.TP
+.B \-R
+Recursive descend into directories specified on the command line or in
+\fIlist_file\fR. If a directory starts with '-', then regular files are
+recursively skipped for the directory.
+
+.TP
+.B \-t \fItag\fR
+Applies the specified \fItag\fR to all paths provided directly on the
+command line. When running in verbose mode (\fB-v\fR), `,tag=\fItag\fR` is
+appended to the output line for each processed file or directory.
+
+.TP
+.B \-v
+Verbose mode. Prints file metadata (permissions, owner, group, month, day,
+time, year) and file/directory paths alongside the calculated CRC-32
+checksum (and tags, if provided).
+
+.SH CRCDIFF OPTIONS
+.TP
+.B \-c \fIcritical_list\fR
+Directories/files listed in \fIcritical_list\fR will be used to give L2
+warnings for changes to such files.
+
+.TP
+.B \-C
+The -C option displays the checksum in the diff.
+
+.TP
+.B \-i
+CRC change without date change will be ignored and not reported. This will
+also not report entries labelled as \fBchanged\fR.
+
+.TP
+.B \-d
+The -d option ignores directory timestamp changes and \fBreplaced\fR
+entries for directories are omitted.
+
+.SH EXCLUSION FILE FORMAT
+The file specified via \fB-e\fR can contain paths or patterns. Each line is
+evaluated as follows.
+.IP \(bu 2
+\fBExact Match:\fR Matches the exact path string.
+.IP \(bu 2
+\fBPrefix Match:\fR Automatically matches subdirectories and files
+contained within an excluded directory path.
+.IP \(bu 2
+\fBPattern / Regex Match:\fR Uses system pattern matching (\fRfnmatch\fR on
+Unix, \fRPathMatchSpecA\fR on Windows) or standard regex when \fB-r\fR is
+passed.
+
+.SH EXAMPLES
+.TP
+Run in verbose mode recursively with a command-line tag and redirect output:
+
+.B crc -vR -t os -o os_crc.txt /etc
+
+.TP
+Exclude specific directories/patterns defined in an exclude file:
+
+.B crc -R -e exclude.txt /var/log
+
+.TP
+Use regular expressions for advanced pattern exclusions:
+
+.B crc -Rr -e exclude_regex.txt /home/user/project
+
+.TP
+Recurse and print just directory entries
+
+.B crc -Rr -e exclude_regex.txt /usr/lib
 
 .SH NOTE
-crcdiff(1) program use a hash join, sometimes called a hash-based lookup.
-Each program reads the second file into a hash table keyed by the
-identifying field, then streams through the first file doing one lookup per
-line. That replaces the old nested loop over every pair of lines (O(n×m))
-	with roughly O(n+m) work. The same is done in the opposite direction to
-	find added entries.
+crcdiff(1), pkgdiff(1), portdiff(1) programs use a hash join, sometimes
+called a hash-based lookup. Each program reads the second file into a hash
+table keyed by the identifying field, then streams through the first file
+doing one lookup per line. That replaces the old nested loop over every
+pair of lines (O(n×m)) with roughly O(n+m) work. The same is done in the
+opposite direction to find added entries.
 
 .TP 4
-The hash table details:
+The hash table details are the same in all three:
 
 Hash function: djb2 (h = h*33 + c, starting at 5381).
 
@@ -81,16 +213,30 @@ mask rather than a modulo.
 Stored values: each slot holds an index into the array of lines rather than
 a copy of the line, so the table stays small.
 
-The filename, plus a second table keyed on the whole line without ,tag=….
-The first match by line number wins.
+.TP 4
+The key differs per program:
+
+crcdiff: the filename, plus a second table keyed on the whole line without
+,tag=…. The first match by line number wins.
+
+portdiff: the first word of the line, such as 22/tcp6.
+
+pkgdiff: the package name plus architecture, plus a table keyed on the
+whole line without install_time.
+
+.PP
+pkgdiff goes one step further. Each hash slot holds a chain of all entries
+with the same key, in file order. It first pairs identical lines, then
+pairs the leftovers one-to-one by popping from those chains. That is how
+the multi-kernel case is handled.
 
 .SH BUGS
 Altough extremely unlikely, files with different data may still produce the
 same crc value.
 
 .SH COPYRIGHT
-© 2024 Manvendra Bhangui
+© 1993 Manvendra Bhangui
 
 .SH SEE ALSO
 cksum(1), sum(1), md5sum(1), sha1sum, sha224sum, sha256sum, sha284sum,
-sha512sum
+sha512sum, pkgdiff(1), portdiff(1)
