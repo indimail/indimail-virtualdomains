@@ -1,5 +1,5 @@
 /*-
- * $Id: crcdiff.c,v 1.11 2026-11-07 08:27:00+05:30 Cprogrammer Exp mbhangui $
+ * $Id: crcdiff.c,v 1.12 2026-11-07 12:54:23+05:30 Cprogrammer Exp mbhangui $
  *
  * crcdiff.c - fast version. Compare two crc lists and report differences.
  *
@@ -33,6 +33,7 @@
  * to crcdiff.c, shall be and remain the sole and exclusive property of Manvendra Bhangui
  */
 #define _POSIX_C_SOURCE 200809L
+#define _XOPEN_SOURCE
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -47,6 +48,9 @@
 #endif
 #ifdef HAVE_ERRNO_H
 #include <errno.h>
+#endif
+#ifdef HAVE_TIME_H
+#include <time.h>
 #endif
 
 #ifdef HAVE_QMAIL
@@ -66,7 +70,7 @@
 #define WARN  "crcdiff: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: crcdiff.c,v 1.11 2026-11-07 08:27:00+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: crcdiff.c,v 1.12 2026-11-07 12:54:23+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_QMAIL
@@ -105,15 +109,23 @@ static int
 parse(entry *e, char *line, size_t len, int *errc)
 {
 	char           *p, *t;
+	struct tm       tm;
 	int             i;
 
 	(void) errc;
 	e->line = line;
 	if (len < 23 || !(t = strrchr(line, '\t')))
 		return -1;
-	e->tail = t;
+	if (t == line)
+		return -1;
+	e->tail = t; /*- starts with timestamp */
+	p = strchr(line, '\t');
+	if (p == t)
+		return -1;
 	/* skip: Mon DD HH:MM:SS YYYY  (4 blank separated fields) */
 	p = t + 1;
+ 	if (!strptime(p, "%b %d %H:%M:%S %Y", &tm))
+		return -1;
 	for (i = 0; i < 4; i++) {
 		while (*p && *p != ' ')
 			p++;
@@ -121,6 +133,8 @@ parse(entry *e, char *line, size_t len, int *errc)
 			p++;
 	}
 	if (!*p)
+		return -1;
+	if ((p - t) != 22)
 		return -1;
 	e->path = p;
 	e->plen = strlen(p);
