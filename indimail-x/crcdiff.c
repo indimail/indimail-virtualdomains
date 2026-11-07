@@ -1,5 +1,5 @@
 /*-
- * $Id: crcdiff.c,v 1.10 2026-11-01 23:51:49+05:30 Cprogrammer Exp mbhangui $
+ * $Id: crcdiff.c,v 1.11 2026-11-07 08:27:00+05:30 Cprogrammer Exp mbhangui $
  *
  * crcdiff.c - fast version. Compare two crc lists and report differences.
  *
@@ -66,7 +66,7 @@
 #define WARN  "crcdiff: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: crcdiff.c,v 1.10 2026-11-01 23:51:49+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: crcdiff.c,v 1.11 2026-11-07 08:27:00+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_QMAIL
@@ -322,15 +322,15 @@ pr(const char *what, const entry *e)
 }
 
 static int
-suid(const entry *e)
+suid(const entry *e, int len)
 {
-	return e->line[14] == 's' || e->line[17] == 's';
+	return e->line[len + 4] == 's' || e->line[len + 7] == 's';
 }
 
 static void
-l1(const entry *o, const entry *n, int *flag)
+l1(const entry *o, const entry *n, int len1, int len2, int *flag)
 {
-	if (suid(o)) {
+	if (suid(o, len1)) {
 		if (substdio_flush(subfdout) == -1)
 			strerr_die2sys(-111, FATAL, "unable to write to stdout: ");
 		strerr_warn3(WARN, "L1 < ", o->line + 11, 0);
@@ -339,7 +339,7 @@ l1(const entry *o, const entry *n, int *flag)
 			*flag = 1;
 		}
 	}
-	if (suid(n)) {
+	if (suid(n, len2)) {
 		if (substdio_flush(subfdout) == -1)
 			strerr_die2sys(-111, FATAL, "unable to write to stdout: ");
 		strerr_warn3(WARN, "L1 > ", n->line + 11, 0);
@@ -359,9 +359,10 @@ usage(void)
 int
 main(int argc, char **argv)
 {
-	int             c, ignore_changed = 0, ignore_dir = 0;
+	int             c, ignore_changed = 0, ignore_dir = 0, crc_len1, crc_len2;
 	list            l1s = { 0 }, l2s = { 0 };
 	htab            p2, k2, p1, k1;
+	char           *p;
 	size_t          i, m;
 
 	while ((c = getopt(argc, argv, "c:Cdi")) != -1) {
@@ -402,11 +403,15 @@ main(int argc, char **argv)
 		}
 		n = l2s.e + m - 1;
 		if (o->klen == n->klen && !memcmp(o->key, n->key, o->klen))
-			continue;	/*- identical */
-		if (!(ignore_dir && o->line[11] == 'd' && n->line[11] == 'd') && strncmp(n->line, o->line, 10)) {
-			if (!strcmp(n->tail, o->tail)) {
-				if (!ignore_changed) {
-					pr("changed    ", n);
+			continue; /*- identical */
+		p = strchr(o->line, ' ');
+		crc_len1 = p - o->line;
+		p = strchr(n->line, ' ');
+		crc_len2 = p - n->line;
+		if (strncmp(n->line, o->line, crc_len1 > crc_len2 ? crc_len1 : crc_len2)) { /*- crc change */
+			if (!ignore_dir && o->line[crc_len1 + 1] == 'd' && n->line[crc_len2 + 1] == 'd') {
+				if (!ignore_changed && !strcmp(n->tail, o->tail)) { /*- compare timestamp */
+					pr("changed    ", n); /*- crc change without timestamp change */
 					l2(">", n);
 					changed_count++;
 				}
@@ -417,16 +422,16 @@ main(int argc, char **argv)
 				mod_count++;
 			}
 		}
-		if (strncmp(n->line + 11, o->line + 11, 10)) {
+		if (strncmp(n->line + crc_len2 + 1, o->line + crc_len1 + 1, crc_len1 > crc_len2 ? crc_len1 : crc_len2)) {
 			pr("permiss<   ", o);
 			pr("permiss>   ", n);
-			l1(o, n, &crit_flag);
+			l1(o, n, crc_len1, crc_len2, &crit_flag);
 			perm_count++;
 		}
-		if (strncmp(n->line + 22, o->line + 22, n->olen)) {
+		if (strncmp(n->line + crc_len2 + 12, o->line + crc_len1 + 12, n->olen > o->olen ? n->olen : o->olen)) {
 			pr("own/grp<   ", o);
 			pr("own/grp>   ", n);
-			l1(o, n, &crit_flag);
+			l1(o, n, crc_len1, crc_len2, &crit_flag);
 			owner_count++;
 		}
 	} /*- for (i = 0; i < l1s.n; i++) */
