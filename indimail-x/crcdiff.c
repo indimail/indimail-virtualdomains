@@ -26,7 +26,7 @@
  * The file name is everything after the year field, so names containing
  * spaces are handled correctly.
  *
- * Created using claude
+ * Portions of this file were written with assistance from Claude (Anthropic).
  *
  * © 2024 Manvendra Bhangui
  * All intellectual property developed during the term of this agreement, including but not limited
