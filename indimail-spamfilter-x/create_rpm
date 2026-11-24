@@ -123,7 +123,7 @@ read key
 if [ " $key" = " Y" -o " $key" = " y" ] ; then
 	tmprel=`cat indimail-spamfilter-x/conf-release 2>/dev/null`
 	if [ ! " $tmprel" = " 1.$release" ] ; then
-		echo 1.$release > indimail-spamfilter-x/conf-release
+		echo $release > indimail-spamfilter-x/conf-release
 		cd indimail-spamfilter-x
 		make indimail-spamfilter.spec
 		cp indimail-spamfilter.spec /tmp

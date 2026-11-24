@@ -120,7 +120,7 @@ read key
 if [ " $key" = " Y" -o " $key" = " y" ] ; then
 	tmprel=`cat procmail-x/conf-release 2>/dev/null`
 	if [ ! " $tmprel" = " 1.$release" ] ; then
-		echo 1.$release > procmail-x/conf-release
+		echo $release > procmail-x/conf-release
 		cd procmail-x
 		make debian/Makefile
 		make procmail.spec

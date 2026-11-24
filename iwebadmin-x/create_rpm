@@ -119,7 +119,7 @@ read key
 if [ " $key" = " Y" -o " $key" = " y" ] ; then
 	tmprel=`cat iwebadmin-x/conf-release 2>/dev/null`
 	if [ ! " $tmprel" = " 1.$release" ] ; then
-		echo 1.$release > iwebadmin-x/conf-release
+		echo $release > iwebadmin-x/conf-release
 		cd iwebadmin-x
 		make iwebadmin.spec
 		cp iwebadmin.spec /tmp

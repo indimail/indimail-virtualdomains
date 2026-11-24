@@ -110,7 +110,7 @@ read key
 if [ " $key" = " Y" -o " $key" = " y" ] ; then
 	tmprel=`cat ircube-x/conf-release 2>/dev/null`
 	if [ ! " $tmprel" = " 1.$release" ] ; then
-		echo 1.$release > ircube-x/conf-release
+		echo $release > ircube-x/conf-release
 		cd ircube-x
 		make ircube.spec
 		cp ircube.spec /tmp

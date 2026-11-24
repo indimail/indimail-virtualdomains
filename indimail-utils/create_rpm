@@ -196,7 +196,7 @@ read key
 if [ " $key" = " Y" -o " $key" = " y" ] ; then
 	tmprel=`cat indimail-utils/conf-release 2>/dev/null`
 	if [ ! " $tmprel" = " 1.$release" ] ; then
-		echo 1.$release > indimail-utils/conf-release
+		echo $release > indimail-utils/conf-release
 		cd indimail-utils
 		make indimail-utils.spec
 		cp indimail-utils.spec /tmp

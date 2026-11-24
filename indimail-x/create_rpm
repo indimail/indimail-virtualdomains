@@ -160,16 +160,17 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
 	fi
 	if [ $verbose -eq 0 ] ; then
 		echo "rpmbuild -ba $clean --quiet /tmp/indimail.spec"
-		rpmbuild -ba $clean --quiet /tmp/indimail.spec
+		rpmbuild -bb $clean --quiet /tmp/indimail.spec
 	else
 		echo "rpmbuild -ba $clean /tmp/indimail.spec"
-		rpmbuild -ba $clean /tmp/indimail.spec
+		rpmbuild -bb $clean /tmp/indimail.spec
 	fi
 	if [ $? -eq 0 ] ; then
 		/bin/rm -f /tmp/indimail.spec
 		build_arch=`rpmbuild --showrc|grep "^build arch" | awk '{print $4}'`
 		for i in indimail indimail-devel libindimail
 		do
+			echo $rpmbuild/RPMS/$build_arch/$i-"$version"-"$release".$dist.$build_arch.rpm
 			rpm --addsign $rpmbuild/RPMS/$build_arch/$i-"$version"-"$release".$dist.$build_arch.rpm
 		done
 		rpm --addsign $rpmbuild/SRPMS/indimail-"$version"-"$release".$dist.src.rpm

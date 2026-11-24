@@ -177,7 +177,7 @@ read key
 if [ " $key" = " Y" -o " $key" = " y" ] ; then
 	tmprel=`cat indimail-auth/conf-release 2>/dev/null`
 	if [ -z "$temprel" -o ! " $tmprel" = " 1.$release" ] ; then
-		echo 1.$release > indimail-auth/conf-release
+		echo $release > indimail-auth/conf-release
 		cd indimail-auth
 		make -s indimail-auth.spec
 		cp indimail-auth.spec /tmp
