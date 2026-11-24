@@ -26,7 +26,6 @@
 [![indium FreeBSD CI](https://github.com/indimail/indimail-virtualdomains/actions/workflows/indium-freebsd.yml/badge.svg)](https://github.com/indimail/indimail-virtualdomains/actions/workflows/indium-freebsd.yml)
 [![ircube Ubuntu, Mac OSX CI](https://github.com/indimail/indimail-virtualdomains/actions/workflows/ircube-ubuntu-osx.yml/badge.svg)](https://github.com/indimail/indimail-virtualdomains/actions/workflows/ircube-ubuntu-osx.yml)
 [![ircube FreeBSD CI](https://github.com/indimail/indimail-virtualdomains/actions/workflows/ircube-freebsd.yml/badge.svg)](https://github.com/indimail/indimail-virtualdomains/actions/workflows/ircube-freebsd.yml)
-
 [![libqmail Ubuntu, Mac OSX](https://github.com/indimail/libqmail/actions/workflows/libqmail-c-cpp.yml/badge.svg)](https://github.com/indimail/libqmail/actions/workflows/libqmail-c-cpp.yml)
 [![libqmail FreeBSD](https://github.com/indimail/libqmail/actions/workflows/libqmail-freebsd.yml/badge.svg)](https://github.com/indimail/libqmail/actions/workflows/libqmail-freebsd.yml)
 [![libdkim2 Ubuntu, Mac OSX CI](https://github.com/indimail/indimail-mta/actions/workflows/libdkim2-c-cpp.yml/badge.svg)](https://github.com/indimail/indimail-mta/actions/workflows/libdkim2-c-cpp.yml)
