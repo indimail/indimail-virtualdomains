@@ -6,6 +6,7 @@ on:
       - '**/indium-x/**'
       - '**/prepare_obs'
       - '**/catChangeLog'
+      - '!**/create_rpm'
       - .github/workflows/indium-c-cpp.yml
       - '!**/indium-x/debian/*'
       - '!**/doc/*'

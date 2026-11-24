@@ -6,6 +6,7 @@ on:
       - '**/iwebadmin-x/**'
       - '**/prepare_obs'
       - '**/catChangeLog'
+      - '!**/create_rpm'
       - .github/workflows/iwebadmin-c-cpp.yml
       - '!**/iwebadmin-x/debian/*'
       - '!**/indimail-x/debian/*'

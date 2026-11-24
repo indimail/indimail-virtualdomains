@@ -6,6 +6,7 @@ on:
       - '**/logalert-x/**'
       - '**/prepare_obs'
       - '**/catChangeLog'
+      - '!**/create_rpm'
       - .github/workflows/logalert-c-cpp.yml
       - '!**/logalert-x/debian/*'
       - '!**/doc/*'

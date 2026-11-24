@@ -5,6 +5,7 @@ on:
     paths:
       - '**/bogofilter-wordlist-x/**'
       - '**/prepare_obs'
+      - '!**/create_rpm'
       - '**/catChangeLog'
       - .github/workflows/bogofilter-wordlist-c-cpp.yml
       - '!**/bogofilter-wordlist-x/debian/*'

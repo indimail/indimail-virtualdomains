@@ -10,6 +10,7 @@ on:
       - '**/flash-x/**'
       - '**/prepare_obs'
       - '**/catChangeLog'
+      - '!**/create_rpm'
       - .github/workflows/indimail-utils-c-cpp.yml
       - '!**/doc/*'
       - '!**.md'

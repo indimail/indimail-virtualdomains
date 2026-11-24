@@ -6,6 +6,7 @@ on:
       - '**/procmail-x/**'
       - '**/prepare_obs'
       - '**/catChangeLog'
+      - '!**/create_rpm'
       - .github/workflows/procmail-c-cpp.yml
       - '!**/procmail-x/debian/*'
       - '!**/doc/*'

@@ -6,6 +6,7 @@ on:
       - '**/indimail-x/**'
       - '**/prepare_obs'
       - '**/catChangeLog'
+      - '!**/create_rpm'
       - .github/workflows/indimail-c-cpp.yml
       - '!**/indimail-x/debian/*'
       - '!**/indimail-x/tests/*'
