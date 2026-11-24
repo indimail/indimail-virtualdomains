@@ -175,10 +175,9 @@ display(FILE * fp, STRFILE table)
 {
 	register char  *p, ch;
 	char            line[BUFSIZ];
-	int             i;
 
 	fseek(fp, (long) Seekpts[0], 0);
-	for (i = 0; fgets(line, sizeof line, fp) != NULL && !STR_ENDSTRING(line, table); i++)
+	for (; fgets(line, sizeof line, fp) != NULL && !STR_ENDSTRING(line, table);)
 	{
 		if (table.str_flags & STR_ROTATED) {
 			for (p = line; (ch = *p); ++p) {

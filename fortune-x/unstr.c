@@ -171,12 +171,11 @@ void getargs(int ac, char *av[])
     }
 }
 
-void order_unstr(tbl)
-     register STRFILE *tbl;
+void order_unstr(register STRFILE *tbl)
 {
     register int i;
     register char *sp;
-    auto off_t pos;
+    off_t pos;
     char buf[BUFSIZ];
     int printedsome;
 

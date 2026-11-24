@@ -587,8 +587,8 @@ add_dir(register FILEDESC * fp)
 {
 	register DIR   *dir;
 	register struct dirent *dirent;
-	auto FILEDESC  *tailp;
-	auto char      *name;
+	FILEDESC  *tailp = NULL;
+	char      *name = NULL;
 
 	close(fp->fd);
 	fp->fd = -1;
