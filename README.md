@@ -65,7 +65,7 @@ The steps below give instructions to build from source. If you need to deploy in
 
 You can also use docker / podman images to deploy indimail. Look at the chapter [Docker / Podman Repository](#docker--podman-repository) below on how to do that. The big advantage of using a docker / podman image is you can save your configuration with the `docker commit ..` or `podman commit` to checkpoint your entire build and deploy the exact configuration on multiple hosts.
 
-Doing a source build can be daunting for many. There are total of 18 sub-packages to be built, out of which 6 (libdkim2, libsrs2, ucspi-tcp, courier-imap, indimail-mta, indimail) are required, 6 (bogofilter, bogofilter-wordlist, fetchmail, nssd, pam-multi, iwebadmin) are recommended and remaining 6 are optional. On Linux, you can always use the pre-built binaries from the DNF / YUM / APT repositories given in the chapter [Binary Builds on OBS](#binary-builds-on-opensuse-build-service) towards the end of this document.
+Doing a source build can be daunting for many. There are total of 22 sub-packages to be built, out of which 7 (daemontools, libqmail, libsrs2, ucspi-tcp, courier-imap, indimail-mta, indimail) are required, 6 (bogofilter, bogofilter-wordlist, fetchmail, nssd, pam-multi, iwebadmin) are recommended and remaining 9 are optional. On Linux, you can always use the pre-built binaries from the DNF / YUM / APT repositories given in the chapter [Binary Builds on OBS](#binary-builds-on-opensuse-build-service) towards the end of this document.
 
 Doing a source build requires you to have all the development packages installed. Linux distributions are known to be crazy. You will have different package names for different distirbutions. e.g.
 
@@ -930,7 +930,6 @@ NOTE: binary package for FreeBSD and OSX is in my TODO list and I need help to f
 [![indimail-utils obs trigger](https://github.com/indimail/indimail-virtualdomains/actions/workflows/indimail-utils-obs.yml/badge.svg)](https://github.com/indimail/indimail-virtualdomains/actions/workflows/indimail-utils-obs.yml)
 [![iwebadmin obs trigger](https://github.com/indimail/indimail-virtualdomains/actions/workflows/iwebadmin-obs.yml/badge.svg)](https://github.com/indimail/indimail-virtualdomains/actions/workflows/iwebadmin-obs.yml)
 [![ircube obs trigger](https://github.com/indimail/indimail-virtualdomains/actions/workflows/ircube-obs.yml/badge.svg)](https://github.com/indimail/indimail-virtualdomains/actions/workflows/ircube-obs.yml)
-[![procmail obs trigger](https://github.com/indimail/indimail-virtualdomains/actions/workflows/procmail-obs.yml/badge.svg)](https://github.com/indimail/indimail-virtualdomains/actions/workflows/procmail-obs.yml)
 [![logalert obs trigger](https://github.com/indimail/indimail-virtualdomains/actions/workflows/logalert-obs.yml/badge.svg)](https://github.com/indimail/indimail-virtualdomains/actions/workflows/logalert-obs.yml)
 [![indium obs trigger](https://github.com/indimail/indimail-virtualdomains/actions/workflows/indium-obs.yml/badge.svg)](https://github.com/indimail/indimail-virtualdomains/actions/workflows/indium-obs.yml)
 
@@ -943,7 +942,6 @@ NOTE: binary package for FreeBSD and OSX is in my TODO list and I need help to f
 [![iwebadmin](https://build.opensuse.org/projects/home:mbhangui/packages/iwebadmin/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/iwebadmin)
 [![ircube](https://build.opensuse.org/projects/home:mbhangui/packages/ircube/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/ircube)
 [![logalert](https://build.opensuse.org/projects/home:mbhangui/packages/logalert/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/logalert)
-[![procmail](https://build.opensuse.org/projects/home:mbhangui/packages/procmail/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/procmail)
 [![indium](https://build.opensuse.org/projects/home:mbhangui/packages/indium/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/indium)
 
 **[Build Status on](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/monitor/) [copr](https://copr.fedorainfracloud.org/coprs/)**
